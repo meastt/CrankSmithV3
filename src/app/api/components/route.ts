@@ -21,6 +21,7 @@ export async function GET(request: Request) {
 
         return NextResponse.json(parsedComponents);
     } catch (error) {
+        console.error('Error fetching components:', error);
         return NextResponse.json({ error: 'Failed to fetch components' }, { status: 500 });
     }
 }

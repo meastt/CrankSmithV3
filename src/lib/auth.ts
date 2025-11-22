@@ -20,11 +20,12 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        session: async ({ session, user }) => {
-            if (session?.user) {
-                session.user.id = user.id;
+        session: async ({ session, token }) => {
+            if (session?.user && token?.sub) {
+                session.user.id = token.sub;
             }
             return session;
         },
     },
+    secret: process.env.NEXTAUTH_SECRET,
 };

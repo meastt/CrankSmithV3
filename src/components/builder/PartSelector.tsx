@@ -18,8 +18,22 @@ export const PartSelector: React.FC = () => {
 
     useEffect(() => {
         fetch(`/api/components?type=${activeType}`)
-            .then(res => res.json())
-            .then(data => setComponents(data));
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch');
+                return res.json();
+            })
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setComponents(data);
+                } else {
+                    console.error('Received non-array data:', data);
+                    setComponents([]);
+                }
+            })
+            .catch(err => {
+                console.error('Error loading components:', err);
+                setComponents([]);
+            });
     }, [activeType]);
 
     const isCompatible = (component: Component): boolean => {
