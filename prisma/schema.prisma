@@ -7,14 +7,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
-
-model Interface {
-  id          String @id // e.g. "INT_001"
-  name        String @unique // e.g. "BSA_Threaded_68mm"
-  category    String // e.g. "Frame Shell"
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
 }
 
 model Component {
@@ -27,10 +21,13 @@ model Component {
   updatedAt   DateTime @updatedAt
 }
 
+// Renamed from SavedBuild to Build
 model Build {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   name      String
   parts     String // JSON string of selected parts
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -55,13 +52,7 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+// Session table removed for JWT strategy
 
 model User {
   id            String       @id @default(cuid())
@@ -71,8 +62,7 @@ model User {
   image         String?
   role          String       @default("user")
   accounts      Account[]
-  sessions      Session[]
-  savedBuilds   SavedBuild[]
+  builds        Build[]      // Relation to Build
 }
 
 model VerificationToken {
@@ -81,14 +71,4 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
-}
-
-model SavedBuild {
-  id        String   @id @default(cuid())
-  name      String
-  parts     String // JSON string of selected parts
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }

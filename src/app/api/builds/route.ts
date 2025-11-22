@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
@@ -27,7 +25,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        const savedBuild = await prisma.savedBuild.create({
+        const build = await prisma.build.create({
             data: {
                 name,
                 parts: JSON.stringify(parts),
@@ -35,8 +33,9 @@ export async function POST(request: Request) {
             },
         });
 
-        return NextResponse.json(savedBuild);
+        return NextResponse.json(build);
     } catch (error) {
+        console.error('Error saving build:', error);
         return NextResponse.json({ error: 'Failed to save build' }, { status: 500 });
     }
 }
@@ -57,7 +56,7 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        const builds = await prisma.savedBuild.findMany({
+        const builds = await prisma.build.findMany({
             where: { userId: user.id },
             orderBy: { createdAt: 'desc' },
         });
@@ -70,6 +69,7 @@ export async function GET(request: Request) {
 
         return NextResponse.json(parsedBuilds);
     } catch (error) {
+        console.error('Error fetching builds:', error);
         return NextResponse.json({ error: 'Failed to fetch builds' }, { status: 500 });
     }
 }
@@ -97,8 +97,7 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        // Verify ownership before deleting
-        const build = await prisma.savedBuild.findUnique({
+        const build = await prisma.build.findUnique({
             where: { id },
         });
 
@@ -110,12 +109,13 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        await prisma.savedBuild.delete({
+        await prisma.build.delete({
             where: { id },
         });
 
         return NextResponse.json({ success: true });
     } catch (error) {
+        console.error('Error deleting build:', error);
         return NextResponse.json({ error: 'Failed to delete build' }, { status: 500 });
     }
 }
