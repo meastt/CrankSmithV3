@@ -11,6 +11,12 @@ export function Footer() {
           </div>
 
           <nav className="flex flex-wrap justify-center gap-8">
+            <Link href="/compatibility/bottom-bracket/t47-vs-bsa" className="hover:text-blue-400 transition-colors">
+              Compatibility
+            </Link>
+            <Link href="/guides" className="hover:text-blue-400 transition-colors">
+              Guides
+            </Link>
             <Link href="/terms" className="hover:text-blue-400 transition-colors">
               Terms of Service
             </Link>
