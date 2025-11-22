@@ -80,21 +80,33 @@ export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelec
                 </div>
             </div>
 
-            <button
-                onClick={() => onSelect(component)}
-                className={`mt-5 flex items-center justify-center w-full py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${isSelected
-                    ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                    : 'bg-white/10 text-white hover:bg-white/20 hover:scale-[1.02] active:scale-[0.98]'
-                    }`}
-            >
-                {isSelected ? (
-                    <>Selected</>
-                ) : (
-                    <>
-                        <Plus className="w-4 h-4 mr-2" /> Add to Build
-                    </>
-                )}
-            </button>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+                <button
+                    onClick={() => onSelect(component)}
+                    className={`flex items-center justify-center w-full py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${isSelected
+                        ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                        : 'bg-white/10 text-white hover:bg-white/20 hover:scale-[1.02] active:scale-[0.98]'
+                        }`}
+                >
+                    {isSelected ? (
+                        <>Selected</>
+                    ) : (
+                        <>
+                            <Plus className="w-4 h-4 mr-2" /> Add
+                        </>
+                    )}
+                </button>
+
+                <a
+                    href={`https://www.competitivecyclist.com/search?q=${encodeURIComponent(component.name)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-full py-2.5 rounded-lg text-sm font-semibold bg-green-600/20 text-green-400 border border-green-500/30 hover:bg-green-600/30 hover:border-green-500/50 transition-all"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    Buy Now
+                </a>
+            </div>
         </div>
     );
 };
