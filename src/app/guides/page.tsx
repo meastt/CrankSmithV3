@@ -21,6 +21,13 @@ const guides = [
         category: "Standards",
         date: "2025-11-20",
     },
+    {
+        slug: "gravel-gearing-1x-vs-2x",
+        title: "Gravel Gearing: 1x vs 2x Deep Dive",
+        excerpt: "Should you ditch the front derailleur? We analyze gear range, jumps between gears, and chain retention.",
+        category: "Gearing",
+        date: "2025-11-18",
+    },
 ];
 
 export default function GuidesIndexPage() {

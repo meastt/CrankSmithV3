@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import { Metadata } from "next";
+import { validateFrameBBCrank, validateFrameWheel, Component } from "@/lib/validation";
+import { resolveStandard, STANDARDS } from "../standards";
 
 type Props = {
     params: Promise<{ slug: string[] }>;
@@ -10,7 +12,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params;
     const [category, comparison] = slug;
 
-    // Format: t47-vs-bsa -> T47 vs BSA
     const title = comparison
         ? `${comparison.replace(/-/g, ' ').toUpperCase()} Compatibility Guide`
         : 'Bike Part Compatibility Checker';
@@ -25,19 +26,65 @@ export default async function CompatibilityPage({ params }: Props) {
     const { slug } = await params;
     const [category, comparison] = slug;
 
-    // Mock Logic for Demo (In production, this would query the DB/Logic Engine)
-    let verdict = "unknown";
+    let verdict: "yes" | "no" | "unknown" = "unknown";
     let reason = "Select a valid comparison.";
     let title = "Compatibility Checker";
+    let details: string[] = [];
 
-    if (category === "bottom-bracket" && comparison === "t47-vs-bsa") {
-        title = "Can you install a BSA Bottom Bracket in a T47 Shell?";
-        verdict = "no";
-        reason = "No. T47 uses a 47mm diameter shell, while BSA (English Threaded) uses a standard ~34mm (1.37\") diameter. They are physically incompatible without an adapter system (which is rare and typically not recommended).";
-    } else if (category === "drivetrain" && comparison === "sram-eagle-vs-road") {
-        title = "Can you use SRAM Eagle Derailleur with Road Shifters?";
-        verdict = "yes";
-        reason = "Yes, BUT only with AXS (Electronic). Mechanical Eagle derailleurs have a different cable pull ratio than Road shifters. For electronic AXS, they are cross-compatible (Mullet build).";
+    // Parse comparison slug: e.g. "t47-vs-bsa" -> host="t47", guest="bsa"
+    const parts = comparison?.split("-vs-");
+
+    if (parts?.length === 2) {
+        const [hostSlug, guestSlug] = parts;
+
+        if (category === "bottom-bracket") {
+            // Host = Frame, Guest = BB
+            const frame = resolveStandard(hostSlug, "Frame");
+            const bb = resolveStandard(guestSlug, "BottomBracket");
+
+            // Mock crank for validation (since function requires it)
+            const mockCrank: Component = { id: "mock", type: "Crank", name: "Mock", interfaces: { spindle_type: bb?.interfaces.crank_interface }, attributes: {} };
+
+            if (frame && bb) {
+                title = `Can you install a ${bb.name} in a ${frame.name}?`;
+                const result = validateFrameBBCrank(frame, bb, mockCrank);
+
+                // We only care about Frame->BB compatibility here
+                // Filter reasons to only those about frame interface
+                const relevantReasons = result.reasons.filter(r => r.includes("Frame shell"));
+
+                if (relevantReasons.length === 0) {
+                    // If the BB fits the frame, we say YES (ignoring crank for this specific query)
+                    verdict = "yes";
+                    reason = `Yes, the ${bb.name} is designed to fit the ${frame.name} standard.`;
+                } else {
+                    verdict = "no";
+                    reason = `No, these standards are incompatible.`;
+                    details = relevantReasons;
+                }
+            } else {
+                reason = `Standards not found in database: ${hostSlug} or ${guestSlug}`;
+            }
+
+        } else if (category === "wheels") {
+            // Host = Frame, Guest = Wheel
+            const frame = resolveStandard(hostSlug, "Frame");
+            const wheel = resolveStandard(guestSlug, "Wheel");
+
+            if (frame && wheel) {
+                title = `Will a ${wheel.name} fit a ${frame.name}?`;
+                const result = validateFrameWheel(frame, wheel);
+
+                if (result.compatible) {
+                    verdict = "yes";
+                    reason = `Yes, the axle standards match.`;
+                } else {
+                    verdict = "no";
+                    reason = "No, the axle standards do not match.";
+                    details = result.reasons;
+                }
+            }
+        }
     }
 
     return (
@@ -70,11 +117,16 @@ export default async function CompatibilityPage({ params }: Props) {
                             <p className="text-lg text-gray-300 leading-relaxed">
                                 {reason}
                             </p>
+                            {details.length > 0 && (
+                                <ul className="mt-4 list-disc list-inside text-red-400">
+                                    {details.map((d, i) => <li key={i}>{d}</li>)}
+                                </ul>
+                            )}
                         </div>
                     </div>
                 </div>
 
-                {/* Technical Deep Dive (Placeholder for Programmatic Content) */}
+                {/* Technical Deep Dive */}
                 <div className="prose prose-invert max-w-none mb-16">
                     <h3>Technical Analysis</h3>
                     <p>
@@ -84,7 +136,7 @@ export default async function CompatibilityPage({ params }: Props) {
                     <ul>
                         <li>Physical Dimensions (Shell Width, Diameter)</li>
                         <li>Thread Pitch / Press-Fit Tolerances</li>
-                        <li>Chainline Implications</li>
+                        <li>Axle Standards (Length, Pitch, Diameter)</li>
                     </ul>
                 </div>
 
