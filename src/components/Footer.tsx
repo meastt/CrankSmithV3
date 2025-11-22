@@ -9,7 +9,7 @@ export function Footer() {
             <span className="text-lg font-bold text-white">CrankSmith Pro</span>
             <p>© {new Date().getFullYear()} CrankSmith. All rights reserved.</p>
           </div>
-          
+
           <nav className="flex flex-wrap justify-center gap-8">
             <Link href="/terms" className="hover:text-blue-400 transition-colors">
               Terms of Service
@@ -17,11 +17,8 @@ export function Footer() {
             <Link href="/privacy" className="hover:text-blue-400 transition-colors">
               Privacy Policy
             </Link>
-            <a href="#" className="hover:text-blue-400 transition-colors">
-              Twitter
-            </a>
-            <a href="#" className="hover:text-blue-400 transition-colors">
-              GitHub
+            <a href="https://instagram.com/cranksmithapp" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">
+              Instagram
             </a>
           </nav>
         </div>

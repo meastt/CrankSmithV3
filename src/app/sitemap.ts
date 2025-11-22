@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://cranksmith.pro' // Replace with actual domain when deployed
+    const baseUrl = 'https://cranksmith.com' // Replace with actual domain when deployed
 
     return [
         {

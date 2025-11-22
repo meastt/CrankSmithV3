@@ -10,7 +10,7 @@ export const Hero = () => {
         <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
             {/* Schematic Images */}
             <div
-                className="absolute left-[-600px] top-[40%] -translate-y-1/2 w-[1600px] h-[1600px] hidden xl:block pointer-events-none select-none opacity-5 mix-blend-screen"
+                className="absolute left-[-200px] md:left-[-600px] top-[40%] -translate-y-1/2 w-[800px] md:w-[1600px] h-[800px] md:h-[1600px] pointer-events-none select-none opacity-5 mix-blend-screen"
                 style={{
                     maskImage: 'radial-gradient(50% 35% at center, black 20%, transparent 100%)',
                     WebkitMaskImage: 'radial-gradient(50% 35% at center, black 20%, transparent 100%)'
@@ -24,7 +24,7 @@ export const Hero = () => {
             </div>
 
             <div
-                className="absolute right-[-600px] top-[60%] -translate-y-1/2 w-[1600px] h-[1600px] hidden xl:block pointer-events-none select-none opacity-5 mix-blend-screen"
+                className="absolute right-[-200px] md:right-[-600px] top-[60%] -translate-y-1/2 w-[800px] md:w-[1600px] h-[800px] md:h-[1600px] pointer-events-none select-none opacity-5 mix-blend-screen"
                 style={{
                     maskImage: 'radial-gradient(50% 35% at center, black 20%, transparent 100%)',
                     WebkitMaskImage: 'radial-gradient(50% 35% at center, black 20%, transparent 100%)'
@@ -49,7 +49,7 @@ export const Hero = () => {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                             </span>
-                            CrankSmith Pro v0.1
+                            CrankSmith Pro v3.0
                         </div>
                     </motion.div>
 

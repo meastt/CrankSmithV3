@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "CrankSmith Pro",
     description: "Professional Bicycle Configurator",
-    url: "https://cranksmith.pro",
+    url: "https://cranksmith.com",
     siteName: "CrankSmith Pro",
     locale: "en_US",
     type: "website",
