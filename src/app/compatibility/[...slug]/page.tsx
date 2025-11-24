@@ -30,6 +30,8 @@ export default async function CompatibilityPage({ params }: Props) {
     let reason = "Select a valid comparison.";
     let title = "Compatibility Checker";
     let details: string[] = [];
+    let hostName = "";
+    let guestName = "";
 
     // Parse comparison slug: e.g. "t47-vs-bsa" -> host="t47", guest="bsa"
     const parts = comparison?.split("-vs-");
@@ -46,6 +48,8 @@ export default async function CompatibilityPage({ params }: Props) {
             const mockCrank: Component = { id: "mock", type: "Crank", name: "Mock", interfaces: { spindle_type: bb?.interfaces.crank_interface }, attributes: {} };
 
             if (frame && bb) {
+                hostName = frame.name;
+                guestName = bb.name;
                 title = `Can you install a ${bb.name} in a ${frame.name}?`;
                 const result = validateFrameBBCrank(frame, bb, mockCrank);
 
@@ -72,6 +76,8 @@ export default async function CompatibilityPage({ params }: Props) {
             const wheel = resolveStandard(guestSlug, "Wheel");
 
             if (frame && wheel) {
+                hostName = frame.name;
+                guestName = wheel.name;
                 title = `Will a ${wheel.name} fit a ${frame.name}?`;
                 const result = validateFrameWheel(frame, wheel);
 
@@ -87,8 +93,36 @@ export default async function CompatibilityPage({ params }: Props) {
         }
     }
 
+    // Generate FAQ Schema for SEO
+    const faqSchema = comparison ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [{
+            "@type": "Question",
+            "name": title,
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": `${reason} ${details.join(' ')}`
+            }
+        }, {
+            "@type": "Question",
+            "name": `How does CrankSmith validate ${comparison.replace(/-/g, ' ')} compatibility?`,
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "CrankSmith validates compatibility by checking interface standards, physical dimensions (shell width, diameter), thread pitch tolerances, and axle standards (length, pitch, diameter). Our logic engine simulates real-world mechanic validation rules."
+            }
+        }]
+    } : null;
+
     return (
-        <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
+        <>
+            {faqSchema && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+                />
+            )}
+            <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
             <div className="container mx-auto max-w-4xl">
                 {/* Breadcrumb */}
                 <div className="text-sm text-gray-500 mb-8 uppercase tracking-wider font-mono">
@@ -155,5 +189,6 @@ export default async function CompatibilityPage({ params }: Props) {
                 </div>
             </div>
         </div>
+        </>
     );
 }

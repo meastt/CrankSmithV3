@@ -17,22 +17,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CrankSmith Pro | Professional Bicycle Configurator",
-  description: "Build your dream bike with CrankSmith Pro. The ultimate professional bicycle configurator for enthusiasts and mechanics.",
-  keywords: ["bicycle", "configurator", "bike builder", "cycling", "mechanic", "custom bike"],
+  title: "CrankSmith | Professional Bicycle Compatibility & Builder Tool",
+  description: "Professional bike compatibility checker and builder tool. Validate part compatibility, calculate gear ratios, and engineer your dream build with precision. Free compatibility checker for road, gravel, and MTB.",
+  keywords: ["bike compatibility checker", "bicycle gear ratio calculator", "bike builder tool", "bike weight calculator", "drivetrain compatibility", "bottom bracket compatibility", "mullet drivetrain", "cycling tool", "bike part compatibility"],
   authors: [{ name: "CrankSmith Team" }],
   openGraph: {
-    title: "CrankSmith Pro",
-    description: "Professional Bicycle Configurator",
+    title: "CrankSmith | Professional Bicycle Compatibility & Builder Tool",
+    description: "Professional bike compatibility checker and builder tool. Validate part compatibility, calculate gear ratios, and engineer your dream build.",
     url: "https://cranksmith.com",
-    siteName: "CrankSmith Pro",
+    siteName: "CrankSmith",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CrankSmith Pro",
-    description: "Professional Bicycle Configurator",
+    title: "CrankSmith | Bike Compatibility & Builder Tool",
+    description: "Professional bike compatibility checker. Validate parts, calculate gear ratios, and build with confidence.",
   },
   robots: {
     index: true,
