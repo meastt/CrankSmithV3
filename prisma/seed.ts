@@ -18,26 +18,135 @@ async function main() {
 
     const components = [
         // --- FRAMES ---
+        // Specialized
         {
             id: 'specialized-tarmac-sl8',
             type: 'Frame',
             name: 'Specialized Tarmac SL8 (56cm)',
-            interfaces: JSON.stringify({ bottom_bracket_shell: 'BSA_Threaded_68mm', rear_axle: 'TA_12x142mm', seatpost_diameter: 'Specialized_Specific', brake_mount: 'Flat_Mount' }),
-            attributes: JSON.stringify({ material: 'Carbon', weight: 685, max_tire: 32 }),
+            interfaces: JSON.stringify({ bottom_bracket_shell: 'BSA_Threaded_68mm', rear_axle: 'TA_12x142mm', seatpost_diameter: 'Specialized_Specific', brake_mount: 'Flat_Mount', steerer_tube: '1_1/8' }),
+            attributes: JSON.stringify({ category: 'Road', material: 'Carbon', weight: 685, max_tire: 32 }),
         },
+        {
+            id: 'specialized-crux-dsw',
+            type: 'Frame',
+            name: 'Specialized Crux DSW (56cm)',
+            interfaces: JSON.stringify({ bottom_bracket_shell: 'BSA_Threaded_68mm', rear_axle: 'TA_12x142mm', seatpost_diameter: '27.2mm', brake_mount: 'Flat_Mount', steerer_tube: '1_1/8' }),
+            attributes: JSON.stringify({ category: 'Gravel', material: 'Alloy', weight: 1399, max_tire: 47 }),
+        },
+        {
+            id: 'specialized-crux-pro',
+            type: 'Frame',
+            name: 'Specialized Crux Pro (56cm)',
+            interfaces: JSON.stringify({ bottom_bracket_shell: 'BSA_Threaded_68mm', rear_axle: 'TA_12x142mm', seatpost_diameter: '27.2mm', brake_mount: 'Flat_Mount', steerer_tube: '1_1/8' }),
+            attributes: JSON.stringify({ category: 'Gravel', material: 'Carbon', weight: 825, max_tire: 47 }),
+        },
+        {
+            id: 'specialized-diverge-e5',
+            type: 'Frame',
+            name: 'Specialized Diverge E5 (56cm)',
+            interfaces: JSON.stringify({ bottom_bracket_shell: 'BSA_Threaded_68mm', rear_axle: 'TA_12x142mm', seatpost_diameter: '27.2mm', brake_mount: 'Flat_Mount', steerer_tube: '1_1/8' }),
+            attributes: JSON.stringify({ category: 'Gravel', material: 'Alloy', weight: 1600, max_tire: 47 }),
+        },
+        {
+            id: 'specialized-diverge-str',
+            type: 'Frame',
+            name: 'Specialized Diverge STR (56cm)',
+            interfaces: JSON.stringify({ bottom_bracket_shell: 'BSA_Threaded_68mm', rear_axle: 'TA_12x142mm', seatpost_diameter: '27.2mm', brake_mount: 'Flat_Mount', steerer_tube: '1_1/8' }),
+            attributes: JSON.stringify({ category: 'Gravel', material: 'Carbon', weight: 1100, max_tire: 47, note: 'Rear Future Shock' }),
+        },
+        {
+            id: 'specialized-chisel',
+            type: 'Frame',
+            name: 'Specialized Chisel (Large)',
+            interfaces: JSON.stringify({ bottom_bracket_shell: 'BSA_Threaded_73mm', rear_axle: 'TA_12x148mm', seatpost_diameter: '30.9mm', brake_mount: 'Post_Mount', steerer_tube: '1_1/8' }),
+            attributes: JSON.stringify({ category: 'MTB', material: 'Alloy', weight: 1350, max_tire: 60 }),
+        },
+        {
+            id: 'specialized-epic-8',
+            type: 'Frame',
+            name: 'Specialized Epic 8 (Large)',
+            interfaces: JSON.stringify({ bottom_bracket_shell: 'BSA_Threaded_73mm', rear_axle: 'TA_12x148mm', seatpost_diameter: '30.9mm', brake_mount: 'Post_Mount', steerer_tube: '1_1/8', udh: true }),
+            attributes: JSON.stringify({ category: 'MTB', material: 'Carbon', weight: 1700, max_tire: 60 }),
+        },
+
+        // Trek
+        {
+            id: 'trek-checkpoint-alr',
+            type: 'Frame',
+            name: 'Trek Checkpoint ALR (56cm)',
+            interfaces: JSON.stringify({ bottom_bracket_shell: 'T47_Internal_86mm', rear_axle: 'TA_12x142mm', seatpost_diameter: '27.2mm', brake_mount: 'Flat_Mount', steerer_tube: '1_1/8' }),
+            attributes: JSON.stringify({ category: 'Gravel', material: 'Alloy', weight: 1450, max_tire: 45 }),
+        },
+        {
+            id: 'trek-checkpoint-sl',
+            type: 'Frame',
+            name: 'Trek Checkpoint SL (56cm)',
+            interfaces: JSON.stringify({ bottom_bracket_shell: 'T47_Internal_86mm', rear_axle: 'TA_12x142mm', seatpost_diameter: '27.2mm', brake_mount: 'Flat_Mount', steerer_tube: '1_1/8' }),
+            attributes: JSON.stringify({ category: 'Gravel', material: 'Carbon', weight: 1100, max_tire: 45 }),
+        },
+        {
+            id: 'trek-madone-sl',
+            type: 'Frame',
+            name: 'Trek Madone SL (56cm)',
+            interfaces: JSON.stringify({ bottom_bracket_shell: 'T47_Internal_86mm', rear_axle: 'TA_12x142mm', seatpost_diameter: 'Trek_Specific', brake_mount: 'Flat_Mount', steerer_tube: '1_1/8' }),
+            attributes: JSON.stringify({ category: 'Road', material: 'Carbon', weight: 1050, max_tire: 32 }),
+        },
+
+        // Cervelo
         {
             id: 'cervelo-aspero-5',
             type: 'Frame',
             name: 'Cervelo Aspero-5 (56cm)',
-            interfaces: JSON.stringify({ bottom_bracket_shell: 'BBright_79mm', rear_axle: 'TA_12x142mm', seatpost_diameter: '27.2mm', brake_mount: 'Flat_Mount' }),
-            attributes: JSON.stringify({ material: 'Carbon', weight: 990, max_tire: 45 }),
+            interfaces: JSON.stringify({ bottom_bracket_shell: 'BBright_79mm', rear_axle: 'TA_12x142mm', seatpost_diameter: '27.2mm', brake_mount: 'Flat_Mount', steerer_tube: '1_1/8' }),
+            attributes: JSON.stringify({ category: 'Gravel', material: 'Carbon', weight: 990, max_tire: 45 }),
         },
+
+        // Santa Cruz
         {
             id: 'santa-cruz-stigmata',
             type: 'Frame',
             name: 'Santa Cruz Stigmata CC',
-            interfaces: JSON.stringify({ bottom_bracket_shell: 'BSA_Threaded_68mm', rear_axle: 'TA_12x142mm', seatpost_diameter: '27.2mm', brake_mount: 'Flat_Mount', udh: true }),
-            attributes: JSON.stringify({ material: 'Carbon', weight: 1050, max_tire: 50 }),
+            interfaces: JSON.stringify({ bottom_bracket_shell: 'BSA_Threaded_68mm', rear_axle: 'TA_12x142mm', seatpost_diameter: '27.2mm', brake_mount: 'Flat_Mount', udh: true, steerer_tube: '1_1/8' }),
+            attributes: JSON.stringify({ category: 'Gravel', material: 'Carbon', weight: 1050, max_tire: 50 }),
+        },
+
+        // --- HANDLEBARS ---
+        {
+            id: 'zipp-service-course-70-ergo',
+            type: 'Handlebar',
+            name: 'Zipp Service Course 70 Ergo',
+            interfaces: JSON.stringify({ clamp_diameter: '31.8mm' }),
+            attributes: JSON.stringify({ material: 'Alloy', width: '42cm', weight: 305 }),
+        },
+        {
+            id: 'zipp-sl-70-ergo',
+            type: 'Handlebar',
+            name: 'Zipp SL-70 Ergo Carbon',
+            interfaces: JSON.stringify({ clamp_diameter: '31.8mm' }),
+            attributes: JSON.stringify({ material: 'Carbon', width: '42cm', weight: 205 }),
+        },
+        {
+            id: 'enve-ses-ar',
+            type: 'Handlebar',
+            name: 'ENVE SES AR Road Handlebar',
+            interfaces: JSON.stringify({ clamp_diameter: '31.8mm' }),
+            attributes: JSON.stringify({ material: 'Carbon', width: '42cm', weight: 245 }),
+        },
+
+        // --- STEMS ---
+        {
+            id: 'zipp-service-course-stem',
+            type: 'Stem',
+            name: 'Zipp Service Course Stem',
+            interfaces: JSON.stringify({ clamp_diameter: '31.8mm', steerer_clamp: '1_1/8' }),
+            attributes: JSON.stringify({ material: 'Alloy', length: '100mm', angle: '-6', weight: 150 }),
+        },
+        {
+            id: 'enve-road-stem',
+            type: 'Stem',
+            name: 'ENVE Road Stem Carbon',
+            interfaces: JSON.stringify({ clamp_diameter: '31.8mm', steerer_clamp: '1_1/8' }),
+            attributes: JSON.stringify({ material: 'Carbon', length: '100mm', angle: '-6', weight: 125 }),
         },
 
         // --- SHIMANO ROAD (12s Di2) ---
