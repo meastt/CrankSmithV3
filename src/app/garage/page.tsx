@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+
+export const dynamic = 'force-dynamic';
 import { useBuildStore } from '@/store/buildStore';
 import { useRouter } from 'next/navigation';
 import { Trash2, Edit3, Bike, ArrowRight } from 'lucide-react';
