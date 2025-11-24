@@ -2,8 +2,14 @@ import Link from "next/link";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Technical Guides | CrankSmith Pro",
-    description: "Deep dive technical guides for bicycle mechanics and frame builders. Mullet drivetrains, T47 standards, and more.",
+    title: "Bike Build Guides & Technical Resources | CrankSmith",
+    description: "Expert technical guides for bicycle mechanics and enthusiasts. Learn about mullet drivetrains, bottom bracket standards, gear ratios, and component compatibility. Free resources for road, gravel, and MTB builds.",
+    keywords: ["bike build guide", "bicycle technical guide", "mullet drivetrain guide", "bottom bracket guide", "T47 guide", "bike compatibility guide", "cycling technical resources"],
+    openGraph: {
+        title: "Bike Build Guides | CrankSmith",
+        description: "Expert technical guides for bicycle mechanics and enthusiasts.",
+        type: "website"
+    }
 };
 
 const guides = [

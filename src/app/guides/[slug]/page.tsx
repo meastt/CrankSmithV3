@@ -6,27 +6,84 @@ type Props = {
     params: Promise<{ slug: string }>;
 };
 
+const guideData: Record<string, { title: string; description: string; date: string; category: string }> = {
+    "mullet-drivetrain-guide": {
+        title: "The Definitive Guide to Mullet Drivetrains (2025)",
+        description: "Learn how to mix Road controls with MTB gearing for the ultimate gravel setup. Complete breakdown of AXS, Di2, and mechanical solutions.",
+        date: "2025-11-22",
+        category: "Drivetrain"
+    },
+    "t47-explained": {
+        title: "T47 Bottom Brackets Explained",
+        description: "Complete guide to T47 bottom bracket standard. Learn why T47 is taking over and how to choose the right cup for your frame.",
+        date: "2025-11-20",
+        category: "Standards"
+    },
+    "gravel-gearing-1x-vs-2x": {
+        title: "Gravel Gearing: 1x vs 2x Deep Dive",
+        description: "Should you ditch the front derailleur? We analyze gear range, jumps between gears, and chain retention for gravel bikes.",
+        date: "2025-11-18",
+        category: "Gearing"
+    }
+};
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params;
-    // In a real app, fetch title from DB/CMS
-    const title = slug === "mullet-drivetrain-guide"
-        ? "The Definitive Guide to Mullet Drivetrains (2025)"
-        : "Technical Guide";
+    const guide = guideData[slug] || { title: "Technical Guide", description: "Technical guide for bicycle mechanics." };
 
     return {
-        title: `${title} | CrankSmith Pro`,
-        description: "Learn how to mix Road controls with MTB gearing for the ultimate gravel setup.",
+        title: `${guide.title} | CrankSmith`,
+        description: guide.description,
+        keywords: ["bicycle", "bike build", "cycling", guide.category.toLowerCase(), slug.replace(/-/g, ' ')],
+        openGraph: {
+            title: guide.title,
+            description: guide.description,
+            type: "article",
+            publishedTime: guide.date,
+        }
     };
 }
 
 export default async function GuidePage({ params }: Props) {
     const { slug } = await params;
+    const guide = guideData[slug];
+
+    // Generate schema for the article
+    const articleSchema = guide ? {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": guide.title,
+        "description": guide.description,
+        "datePublished": guide.date,
+        "dateModified": guide.date,
+        "author": {
+            "@type": "Organization",
+            "name": "CrankSmith Team"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "CrankSmith",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://cranksmith.com/icon-512.png"
+            }
+        },
+        "articleSection": guide.category,
+        "keywords": [guide.category.toLowerCase(), "bicycle", "bike build", slug.replace(/-/g, ' ')]
+    } : null;
 
     // Content: T47 Explained
     if (slug === "t47-explained") {
         return (
-            <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
-                <article className="container mx-auto max-w-3xl">
+            <>
+                {articleSchema && (
+                    <script
+                        type="application/ld+json"
+                        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+                    />
+                )}
+                <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
+                    <article className="container mx-auto max-w-3xl">
                     <div className="mb-12 text-center">
                         <div className="text-blue-400 text-sm font-mono mb-4 uppercase tracking-wider">Standards • 2025-11-20</div>
                         <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">T47 Bottom Brackets Explained</h1>
@@ -40,14 +97,22 @@ export default async function GuidePage({ params }: Props) {
                     </div>
                 </article>
             </div>
+            </>
         );
     }
 
     // Content: Gravel Gearing
     if (slug === "gravel-gearing-1x-vs-2x") {
         return (
-            <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
-                <article className="container mx-auto max-w-3xl">
+            <>
+                {articleSchema && (
+                    <script
+                        type="application/ld+json"
+                        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+                    />
+                )}
+                <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
+                    <article className="container mx-auto max-w-3xl">
                     <div className="mb-12 text-center">
                         <div className="text-blue-400 text-sm font-mono mb-4 uppercase tracking-wider">Gearing • 2025-11-18</div>
                         <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">Gravel Gearing: 1x vs 2x</h1>
@@ -60,14 +125,22 @@ export default async function GuidePage({ params }: Props) {
                     </div>
                 </article>
             </div>
+            </>
         );
     }
 
     // Content: Mullet Drivetrain (Existing)
     if (slug === "mullet-drivetrain-guide") {
         return (
-            <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
-                <article className="container mx-auto max-w-3xl">
+            <>
+                {articleSchema && (
+                    <script
+                        type="application/ld+json"
+                        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+                    />
+                )}
+                <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
+                    <article className="container mx-auto max-w-3xl">
                     {/* Header */}
                     <div className="mb-12 text-center">
                         <div className="text-blue-400 text-sm font-mono mb-4 uppercase tracking-wider">
@@ -134,6 +207,7 @@ export default async function GuidePage({ params }: Props) {
                     </div>
                 </article>
             </div>
+            </>
         );
     }
 
