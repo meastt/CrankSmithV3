@@ -98,7 +98,7 @@ export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelec
                 </button>
 
                 <a
-                    href={`https://www.competitivecyclist.com/search?q=${encodeURIComponent(component.name)}`}
+                    href={`https://competitivecyclist.g39l.net/GK5G32?u=${encodeURIComponent(`https://www.competitivecyclist.com/search?q=${encodeURIComponent(component.name)}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center w-full py-2.5 rounded-lg text-sm font-semibold bg-green-600/20 text-green-400 border border-green-500/30 hover:bg-green-600/30 hover:border-green-500/50 transition-all"
