@@ -480,4 +480,162 @@ Incompatible: Red.
 Images: Parts are shown on a pure white or transparent background, no lifestyle shots.
 
 This plan ensures the frontend team builds a tool that matches the complexity of the backend logic you established in the previous documents.
+
+---
+
+# SEO Action Plan
+
+## Site Analysis: What is CrankSmith?
+
+**Current Status:**
+CrankSmith Pro is a "Mechanic's Logic Engine" designed for performance cyclists to validate part compatibility, calculate gear ratios, and track weight for custom builds.
+
+**The Core Problem:**
+Tools like this are often built as Single Page Applications (SPAs) using heavy JavaScript (React, Vue, etc.). While great for users, they are often invisible to Google because there is no "text" for the crawler to read on the initial load. If your homepage is just a "Start Configuration" button behind a login or a dynamic script, you cannot rank.
+
+---
+
+## Phase 1: Technical Foundation (The "Crawlability" Fix)
+
+Most similar tools fail here. If Google can't render your calculator, you don't exist.
+
+### Create "Pre-Rendered" Landing Pages
+
+Google struggles to "use" a calculator. You need static pages that describe what the tool does.
+
+**Action:** Create a dedicated landing page for each major feature:
+- `cranksmith.com/features/bike-compatibility-checker`
+- `cranksmith.com/features/gear-ratio-calculator`
+- `cranksmith.com/features/weight-weenie-calculator`
+
+**Why:** These pages serve as the "entry point" for search traffic. You pitch the tool here, and the call-to-action (CTA) is "Launch Tool."
+
+### Programmatic SEO (The "Golden Spike")
+
+Your tool has a database of parts (Shimano, SRAM, etc.). You can use this data to automatically generate thousands of comparison pages.
+
+**Action:** Automatically generate pages for common queries like:
+- "SRAM Eagle vs Shimano XT Weight Comparison"
+- "Is [Crankset A] compatible with [Bottom Bracket B]?"
+
+These pages should simply display the data from your tool in a static HTML table with a link to "Build this bike."
+
+### Schema Markup
+
+- Use `SoftwareApplication` schema on your homepage so Google understands this is a tool, not a blog
+- Use `HowTo` schema on tutorial pages (e.g., "How to check axle compatibility")
+
+---
+
+## Phase 2: Keyword Strategy (High Intent)
+
+Target people who are currently holding a credit card and a wrench, confused about parts.
+
+### Primary Keywords (High Volume / High Competition)
+- "Bike compatibility checker"
+- "Bicycle gear ratio calculator"
+- "Custom bike builder tool"
+- "Bike weight calculator"
+
+### Long-Tail Keywords (Low Volume / High Conversion)
+
+**Specific Compatibilities:**
+- "Mullet drivetrain compatibility guide"
+- "Shimano 12 speed with SRAM cassette"
+
+**Technical Standards:**
+- "Boost 148 vs 142 spacing guide"
+- "SRAM Transmission hanger compatibility"
+
+**Niche Audiences:**
+- "Road bike build planner"
+- "Gravel bike part picker"
+
+---
+
+## Phase 3: Content Strategy (The "Mechanic's Library")
+
+Since your tool solves complex problems, your blog should explain them.
+
+### The "Impossible Build" Series
+
+Write articles about complex builds that require your tool to figure out.
+
+**Example:** "Building the Ultimate Mullet Drivetrain: Mixing Road and MTB Parts"
+
+**SEO Hook:** These articles target specific enthusiast queries that larger sites (like Bikeradar) ignore.
+
+### Glossary of Standards
+
+Cycling standards are a nightmare (T47, BB86, BB30, DUB). Create a definitive guide for each.
+
+**Title:** "What is a DUB Bottom Bracket? The Complete Guide"
+
+**Internal Link:** "Not sure if you have DUB? Use our Compatibility Checker"
+
+### Problem-Solution Hubs
+
+Create a "Hub" for major pain points.
+
+**Topic:** Axle Standards
+
+**Content:** Explain Thru-Axle vs QR, Boost vs Super Boost
+
+**Tool Integration:** Embed a mini-version of your calculator (or a screenshot of it) showing the interface detecting a mismatch
+
+---
+
+## Phase 4: Off-Page & Backlinks (Community Growth)
+
+Cyclists live in forums. You need to be there.
+
+### Forum "Support" Marketing
+
+Monitor Reddit (r/bikewrench, r/velo, r/mtb) and Pinkbike forums.
+
+Find people asking "Will this fit that?"
+
+**Do not spam.** Answer the question helpfully, then say: "I ran this through CrankSmith to double-check the chainline, here is the result [Link]"
+
+### The "LighterPack" Strategy
+
+Hiking enthusiasts use a site called LighterPack to share their gear lists. You need to be the LighterPack for bikes.
+
+**Action:** Ensure your tool allows users to generate a shareable URL for their build list.
+
+**Why:** When a user shares their "Dream Enduro Build" on a forum using a `cranksmith.com/share/xyz` link, you get a free backlink and traffic.
+
+### Tool Directories
+
+- Submit your site to "Product Hunt" and cycling-specific directories
+- Reach out to cycling tech bloggers (DC Rainmaker, Shane Miller/GPLama) specifically pitching the "Compatibility Engine" aspect, as this is their audience's biggest headache
+
+---
+
+## Immediate Action Items (Next 7 Days)
+
+### 1. Crawl Check
+Use Google Search Console to see if Google can render your JS content. If the page looks blank to Google, you must build HTML landing pages immediately.
+
+### 2. Title Tag Update
+Change your Homepage Title from "CrankSmith" to "CrankSmith | Professional Bicycle Compatibility & Builder Tool"
+
+### 3. Share Feature
+Verify that users can share a permanent link to their builds. This is your primary viral growth engine.
+
+---
+
+## Implementation Checklist
+
+- [ ] Set up Google Search Console
+- [ ] Create feature landing pages (compatibility checker, gear calculator, weight calculator)
+- [ ] Implement SoftwareApplication schema markup
+- [ ] Build programmatic comparison pages
+- [ ] Create shareable build URLs
+- [ ] Write first "Impossible Build" article
+- [ ] Create glossary pages for top 10 standards
+- [ ] Submit to Product Hunt
+- [ ] Reach out to 3 cycling tech bloggers
+- [ ] Monitor and respond to r/bikewrench weekly
+
 bump
