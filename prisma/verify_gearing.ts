@@ -119,18 +119,10 @@ async function main() {
     // 2. Gravel Adventure (Red XPLR 13s)
     await verifyGearing("Gravel XPLR (Red 13s)", {
         cassetteId: "sram-red-xplr-xg-1391-13s-10-46t",
-        crankId: "sram-red-axs-e1", // 46/33 is first option? Wait, XPLR needs 1x. 
-        // Red AXS E1 crank has 2x options listed in my JSON. 
-        // I need to be careful. XPLR cassette requires 1x.
-        // Let's use the GRX 1x crank for this test if Red 1x isn't explicitly separated or just pick a 1x-like ring if logic allows.
-        // Actually, let's use the SRAM XX1 crank (1x) to simulate a mullet or just assume the user picks a 1x ring.
-        // My script picks the FIRST option.
-        // Red AXS E1 options: ["46/33", "48/35"...] -> This is 2x.
-        // Let's use "sram-xx1-eagle-dub-sl" which is 1x ["30t"...] -> 30/10 is slow for gravel.
-        // Let's use "shimano-grx-fc-rx820-1-1x" -> ["40t", "42t"] -> 40t is good.
         crankId: "shimano-grx-fc-rx820-1-1x",
         tireId: "specialized-pathfinder-pro-2bliss-700x42c"
     });
+
 
     // 3. MTB Enduro (Eagle 10-52)
     await verifyGearing("MTB Enduro (Eagle 12s)", {

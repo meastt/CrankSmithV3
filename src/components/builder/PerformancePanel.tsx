@@ -195,6 +195,35 @@ export const PerformancePanel: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            {/* Save Build Button */}
+            <div className="p-4 border-t border-white/10 mt-auto bg-gray-900/95 backdrop-blur-xl sticky bottom-0">
+                <button
+                    onClick={async () => {
+                        const name = prompt("Name your build:");
+                        if (!name) return;
+
+                        try {
+                            const res = await fetch('/api/builds', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ name, parts }),
+                            });
+                            if (res.ok) {
+                                alert("Build saved!");
+                            } else {
+                                alert("Failed to save. Please sign in.");
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            alert("Error saving build.");
+                        }
+                    }}
+                    className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold transition-colors flex items-center justify-center"
+                >
+                    Save to Garage
+                </button>
+            </div>
         </div>
     );
 };
