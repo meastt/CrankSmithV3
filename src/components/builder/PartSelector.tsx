@@ -17,6 +17,9 @@ export const PartSelector: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [showIncompatible, setShowIncompatible] = useState(false);
     const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+    const [selectedSpeed, setSelectedSpeed] = useState<string | null>(null);
+    const [selectedWheelSize, setSelectedWheelSize] = useState<string | null>(null);
+    const [selectedHubSpacing, setSelectedHubSpacing] = useState<string | null>(null);
     const [crankConfiguration, setCrankConfiguration] = useState<'1x' | '2x' | null>(null);
     const { parts, setPart } = useBuildStore();
 
@@ -26,6 +29,9 @@ export const PartSelector: React.FC = () => {
         // Reset selections when switching types
         setSelectedBrand(null);
         setCrankConfiguration(null);
+        setSelectedSpeed(null);
+        setSelectedWheelSize(null);
+        setSelectedHubSpacing(null);
 
         fetch(`/api/components?type=${activeType}`)
             .then(res => {
@@ -148,8 +154,11 @@ export const PartSelector: React.FC = () => {
         return typeof teeth === 'string' && !teeth.includes('/');
     };
 
-    // Get unique brands for current components
+    // Get unique values for filters
     const uniqueBrands = Array.from(new Set(components.map(c => getBrand(c.name)))).sort();
+    const uniqueSpeeds = Array.from(new Set(components.filter(c => c.attributes.speeds).map(c => c.attributes.speeds?.toString()))).sort();
+    const uniqueWheelSizes = Array.from(new Set(components.filter(c => c.attributes.wheel_size).map(c => c.attributes.wheel_size))).sort();
+    const uniqueHubSpacings = Array.from(new Set(components.filter(c => c.interfaces.axle_standard).map(c => c.interfaces.axle_standard))).sort();
 
     // Filter components
     let filteredComponents = components;
@@ -172,21 +181,48 @@ export const PartSelector: React.FC = () => {
         });
     }
 
+    // 4. Filter by Speed (for cassettes, derailleurs, shifters)
+    if (selectedSpeed) {
+        filteredComponents = filteredComponents.filter(c => c.attributes.speeds?.toString() === selectedSpeed);
+    }
+
+    // 5. Filter by Wheel Size
+    if (selectedWheelSize) {
+        filteredComponents = filteredComponents.filter(c => c.attributes.wheel_size === selectedWheelSize);
+    }
+
+    // 6. Filter by Hub Spacing
+    if (selectedHubSpacing) {
+        filteredComponents = filteredComponents.filter(c => c.interfaces.axle_standard === selectedHubSpacing);
+    }
+
     // Apply compatibility filter
     if (!showIncompatible) {
         filteredComponents = filteredComponents.filter(c => isCompatible(c));
     }
 
     // Determine view state
-    const showBrandSelection = !selectedBrand && ['Frame', 'Tire', 'Crank', 'Shifter', 'Derailleur', 'Cassette'].includes(activeType);
+    const showCategorySelection = activeType === 'Frame' && !frameCategory;
+    const showSpeedSelection = ['Cassette', 'Derailleur', 'Shifter'].includes(activeType) && !selectedSpeed;
+    const showWheelSizeSelection = activeType === 'Wheel' && !selectedWheelSize;
+    const showHubSpacingSelection = activeType === 'Wheel' && selectedWheelSize && !selectedHubSpacing;
+    const showBrandSelection = !selectedBrand && ['Frame', 'Tire', 'Crank', 'Shifter', 'Derailleur', 'Cassette'].includes(activeType) && !(activeType === 'Frame' && !frameCategory) && !showSpeedSelection;
     const showCrankConfigSelection = activeType === 'Crank' && selectedBrand && !crankConfiguration;
-    const showComponentList = !showBrandSelection && !showCrankConfigSelection;
+    const showComponentList = !showCategorySelection && !showSpeedSelection && !showWheelSizeSelection && !showHubSpacingSelection && !showBrandSelection && !showCrankConfigSelection;
 
     const handleBack = () => {
         if (activeType === 'Crank' && crankConfiguration) {
             setCrankConfiguration(null);
+        } else if (activeType === 'Wheel' && selectedHubSpacing) {
+            setSelectedHubSpacing(null);
+        } else if (activeType === 'Wheel' && selectedWheelSize) {
+            setSelectedWheelSize(null);
+        } else if (selectedSpeed) {
+            setSelectedSpeed(null);
         } else if (selectedBrand) {
             setSelectedBrand(null);
+        } else if (frameCategory) {
+            setFrameCategory(null);
         }
     };
 
@@ -228,40 +264,25 @@ export const PartSelector: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Sub-filters / Back Button */}
+                    {/* Breadcrumb / Back Button */}
                     <div className="flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-200 min-h-[24px]">
-                        {activeType === 'Frame' && !selectedBrand ? (
+                        {(frameCategory || selectedSpeed || selectedWheelSize || selectedHubSpacing || selectedBrand || crankConfiguration) ? (
                             <div className="flex items-center space-x-2">
-                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mr-2">Category:</span>
                                 <button
-                                    onClick={() => setFrameCategory(null)}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${frameCategory === null
-                                        ? 'bg-white text-gray-900 border-white'
-                                        : 'bg-transparent text-gray-400 border-gray-700 hover:border-gray-500'
-                                        }`}
+                                    onClick={handleBack}
+                                    className="text-xs text-primary hover:text-primary-400 font-medium flex items-center"
                                 >
-                                    All
+                                    <span className="mr-1">←</span> Back
                                 </button>
-                                {FRAME_CATEGORIES.map(cat => (
-                                    <button
-                                        key={cat}
-                                        onClick={() => setFrameCategory(cat)}
-                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${frameCategory === cat
-                                            ? 'bg-white text-gray-900 border-white'
-                                            : 'bg-transparent text-gray-400 border-gray-700 hover:border-gray-500'
-                                            }`}
-                                    >
-                                        {cat}
-                                    </button>
-                                ))}
+                                <div className="flex items-center space-x-2 text-xs text-gray-500">
+                                    {frameCategory && <span className="px-2 py-1 bg-white/5 rounded">Category: {frameCategory}</span>}
+                                    {selectedSpeed && <span className="px-2 py-1 bg-white/5 rounded">{selectedSpeed}-speed</span>}
+                                    {selectedWheelSize && <span className="px-2 py-1 bg-white/5 rounded">{selectedWheelSize}</span>}
+                                    {selectedHubSpacing && <span className="px-2 py-1 bg-white/5 rounded">{selectedHubSpacing}</span>}
+                                    {selectedBrand && <span className="px-2 py-1 bg-white/5 rounded">{selectedBrand}</span>}
+                                    {crankConfiguration && <span className="px-2 py-1 bg-white/5 rounded">{crankConfiguration}</span>}
+                                </div>
                             </div>
-                        ) : (selectedBrand || crankConfiguration) ? (
-                            <button
-                                onClick={handleBack}
-                                className="text-xs text-primary hover:text-primary-400 font-medium flex items-center"
-                            >
-                                <span className="mr-1">←</span> Back
-                            </button>
                         ) : <div />}
                     </div>
                 </div>
@@ -289,22 +310,111 @@ export const PartSelector: React.FC = () => {
                             Retry
                         </button>
                     </div>
+                ) : showCategorySelection ? (
+                    // CATEGORY SELECTION (FRAMES)
+                    <div className="max-w-4xl mx-auto">
+                        <h2 className="text-2xl font-bold text-white mb-6 text-center">Choose Your Riding Style</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {FRAME_CATEGORIES.map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setFrameCategory(cat)}
+                                    className="group relative aspect-[4/3] flex flex-col items-center justify-center bg-gray-900 border border-white/10 rounded-2xl hover:border-primary/50 hover:bg-gray-800 transition-all duration-300 overflow-hidden shadow-xl"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <h3 className="text-3xl font-bold text-white mb-2 group-hover:scale-110 transition-transform">{cat}</h3>
+                                    <p className="text-sm text-gray-400 px-4 text-center">
+                                        {cat === 'Road' && 'Speed & Efficiency on Pavement'}
+                                        {cat === 'Gravel' && 'Versatile All-Road Adventure'}
+                                        {cat === 'MTB' && 'Off-Road Performance'}
+                                    </p>
+                                    <span className="text-xs text-gray-500 mt-3">
+                                        {components.filter(c => c.attributes.category === cat).length} Frames
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                ) : showSpeedSelection ? (
+                    // SPEED SELECTION (CASSETTES, RDs, SHIFTERS)
+                    <div className="max-w-3xl mx-auto">
+                        <h2 className="text-2xl font-bold text-white mb-6 text-center">Select Drivetrain Speed</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {uniqueSpeeds.map(speed => (
+                                <button
+                                    key={speed}
+                                    onClick={() => setSelectedSpeed(speed || '')}
+                                    className="group relative aspect-[3/2] flex flex-col items-center justify-center bg-gray-900 border border-white/10 rounded-xl hover:border-primary/50 hover:bg-gray-800 transition-all duration-300 overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <h3 className="text-4xl font-bold text-white mb-2">{speed}</h3>
+                                    <p className="text-sm text-gray-400">Speed</p>
+                                    <span className="text-xs text-gray-500 mt-2">
+                                        {components.filter(c => c.attributes.speeds?.toString() === speed).length} Options
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                ) : showWheelSizeSelection ? (
+                    // WHEEL SIZE SELECTION
+                    <div className="max-w-4xl mx-auto">
+                        <h2 className="text-2xl font-bold text-white mb-6 text-center">Select Wheel Size</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {uniqueWheelSizes.map(size => (
+                                <button
+                                    key={size}
+                                    onClick={() => setSelectedWheelSize(size || '')}
+                                    className="group relative aspect-square flex flex-col items-center justify-center bg-gray-900 border border-white/10 rounded-xl hover:border-primary/50 hover:bg-gray-800 transition-all duration-300 overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <h3 className="text-2xl font-bold text-white mb-1">{size}</h3>
+                                    <span className="text-xs text-gray-500">
+                                        {components.filter(c => c.attributes.wheel_size === size).length} Wheels
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                ) : showHubSpacingSelection ? (
+                    // HUB SPACING SELECTION
+                    <div className="max-w-4xl mx-auto">
+                        <h2 className="text-2xl font-bold text-white mb-6 text-center">Select Hub Spacing</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {uniqueHubSpacings.map(spacing => (
+                                <button
+                                    key={spacing}
+                                    onClick={() => setSelectedHubSpacing(spacing || '')}
+                                    className="group relative aspect-[3/2] flex flex-col items-center justify-center bg-gray-900 border border-white/10 rounded-xl hover:border-primary/50 hover:bg-gray-800 transition-all duration-300 overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <h3 className="text-xl font-bold text-white mb-1">{spacing}</h3>
+                                    <span className="text-xs text-gray-500">
+                                        {components.filter(c => c.interfaces.axle_standard === spacing).length} Wheels
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 ) : showBrandSelection ? (
                     // BRAND SELECTION GRID
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {uniqueBrands.map(brand => (
-                            <button
-                                key={brand}
-                                onClick={() => setSelectedBrand(brand)}
-                                className="group relative aspect-video flex flex-col items-center justify-center bg-gray-900 border border-white/10 rounded-xl hover:border-primary/50 hover:bg-gray-800 transition-all duration-300 overflow-hidden"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <h3 className="text-xl font-bold text-white group-hover:scale-110 transition-transform duration-300">{brand}</h3>
-                                <span className="text-xs text-gray-500 mt-2 group-hover:text-gray-400">
-                                    {components.filter(c => getBrand(c.name) === brand).length} Models
-                                </span>
-                            </button>
-                        ))}
+                    <div className="max-w-5xl mx-auto">
+                        <h2 className="text-2xl font-bold text-white mb-6 text-center">Choose a Brand</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {uniqueBrands.map(brand => (
+                                <button
+                                    key={brand}
+                                    onClick={() => setSelectedBrand(brand)}
+                                    className="group relative aspect-video flex flex-col items-center justify-center bg-gray-900 border border-white/10 rounded-xl hover:border-primary/50 hover:bg-gray-800 transition-all duration-300 overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <h3 className="text-xl font-bold text-white group-hover:scale-110 transition-transform duration-300">{brand}</h3>
+                                    <span className="text-xs text-gray-500 mt-2 group-hover:text-gray-400">
+                                        {filteredComponents.filter(c => getBrand(c.name) === brand).length} Models
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 ) : showCrankConfigSelection ? (
                     // CRANK CONFIGURATION SELECTION
