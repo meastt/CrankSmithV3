@@ -480,3 +480,4 @@ Incompatible: Red.
 Images: Parts are shown on a pure white or transparent background, no lifestyle shots.
 
 This plan ensures the frontend team builds a tool that matches the complexity of the backend logic you established in the previous documents.
+bump
