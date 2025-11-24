@@ -4,6 +4,7 @@ import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { Providers } from "@/components/Providers";
 import { Footer } from "@/components/Footer";
+import { Header } from "@/components/Header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,6 +54,7 @@ export default function RootLayout({
       >
         <Providers>
           <ServiceWorkerRegister />
+          <Header />
           <div className="flex-grow">
             {children}
           </div>
