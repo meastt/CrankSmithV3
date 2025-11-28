@@ -53,9 +53,9 @@ export const Hero = () => {
                     transition={{ duration: 0.6, delay: 0.1 }}
                     className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-stone-100 mb-6 tracking-tight leading-[1.1]"
                 >
-                    The Mechanic's
+                    Forge The
                     <br />
-                    <span className="text-gradient">Logic Engine</span>
+                    <span className="text-gradient">Perfect Ride.</span>
                 </motion.h1>
 
                 {/* Subtitle */}
@@ -65,7 +65,7 @@ export const Hero = () => {
                     transition={{ duration: 0.6, delay: 0.2 }}
                     className="text-base sm:text-lg md:text-xl text-stone-400 mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed px-4"
                 >
-                    Professional configuration tool for performance cyclists.
+                    Professional cyclicng gear configurator tool for performance cyclists.
                     Validate compatibility, calculate physics, and engineer your dream build.
                 </motion.p>
 
