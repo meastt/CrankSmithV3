@@ -176,8 +176,9 @@ export const PartSelector: React.FC = () => {
     // Get unique filter values
     const uniqueBrands = Array.from(new Set(components.map(c => getBrand(c.name)))).sort();
     const uniqueSpeeds = Array.from(new Set(components.filter(c => c.attributes.speeds).map(c => String(c.attributes.speeds)))).sort((a, b) => Number(b) - Number(a));
-    const uniqueWheelSizes = Array.from(new Set(components.filter(c => c.attributes.wheel_size).map(c => String(c.attributes.wheel_size)))).filter(Boolean).sort();
-    const uniqueHubSpacings = Array.from(new Set(components.filter(c => c.interfaces.axle_standard).map(c => String(c.interfaces.axle_standard)))).filter(Boolean).sort();
+    // Wheels use interfaces.diameter for size and interfaces.rear_axle for hub spacing
+    const uniqueWheelSizes = Array.from(new Set(components.filter(c => c.interfaces?.diameter || c.attributes?.wheel_size).map(c => String(c.interfaces?.diameter || c.attributes?.wheel_size)))).filter(Boolean).sort();
+    const uniqueHubSpacings = Array.from(new Set(components.filter(c => c.interfaces?.rear_axle || c.interfaces?.axle_standard).map(c => String(c.interfaces?.rear_axle || c.interfaces?.axle_standard)))).filter(Boolean).sort();
 
     // Apply filters
     let filteredComponents = components;
@@ -202,11 +203,11 @@ export const PartSelector: React.FC = () => {
     }
 
     if (selectedWheelSize) {
-        filteredComponents = filteredComponents.filter(c => String(c.attributes.wheel_size) === selectedWheelSize);
+        filteredComponents = filteredComponents.filter(c => String(c.interfaces?.diameter || c.attributes?.wheel_size) === selectedWheelSize);
     }
 
     if (selectedHubSpacing) {
-        filteredComponents = filteredComponents.filter(c => String(c.interfaces.axle_standard) === selectedHubSpacing);
+        filteredComponents = filteredComponents.filter(c => String(c.interfaces?.rear_axle || c.interfaces?.axle_standard) === selectedHubSpacing);
     }
 
     if (!showIncompatible) {
@@ -422,7 +423,7 @@ export const PartSelector: React.FC = () => {
                                     id: size,
                                     title: size,
                                     subtitle: size === '700c' ? 'Road standard' : size === '650b' ? 'Gravel/smaller' : size === '29"' ? 'MTB large' : size === '27.5"' ? 'MTB agile' : '',
-                                    count: components.filter(c => String(c.attributes.wheel_size) === size).length,
+                                    count: components.filter(c => String(c.interfaces?.diameter || c.attributes?.wheel_size) === size).length,
                                     countLabel: 'wheels'
                                 }))}
                                 onSelect={(id) => setSelectedWheelSize(id)}
@@ -436,7 +437,7 @@ export const PartSelector: React.FC = () => {
                                 items={uniqueHubSpacings.map(spacing => ({
                                     id: spacing,
                                     title: spacing,
-                                    count: components.filter(c => String(c.interfaces.axle_standard) === spacing).length,
+                                    count: components.filter(c => String(c.interfaces?.rear_axle || c.interfaces?.axle_standard) === spacing).length,
                                     countLabel: 'wheels'
                                 }))}
                                 onSelect={(id) => setSelectedHubSpacing(id)}

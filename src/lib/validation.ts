@@ -11,26 +11,64 @@ export interface ValidationResult {
     reasons: string[];
 }
 
+// Normalize axle standards for comparison
+function normalizeAxle(axle: string | undefined): string {
+    if (!axle) return '';
+    // Remove prefixes like "TA_" and normalize
+    return axle.replace(/^TA_/, '').replace(/^QR_/, '').toLowerCase().trim();
+}
+
+// Check if two axle standards are compatible
+function axlesCompatible(frameAxle: string | undefined, wheelAxle: string | undefined): boolean {
+    if (!frameAxle || !wheelAxle) return true; // If either is missing, don't fail on this check
+
+    const normalizedFrame = normalizeAxle(frameAxle);
+    const normalizedWheel = normalizeAxle(wheelAxle);
+
+    // Direct match after normalization
+    if (normalizedFrame === normalizedWheel) return true;
+
+    // Check if the core dimensions match (e.g., "12x142mm" matches "12x142")
+    const extractDimensions = (s: string) => {
+        const match = s.match(/(\d+)x(\d+)/);
+        return match ? `${match[1]}x${match[2]}` : s;
+    };
+
+    return extractDimensions(normalizedFrame) === extractDimensions(normalizedWheel);
+}
+
 export function validateFrameWheel(frame: Component, wheel: Component, tire?: Component): ValidationResult {
     const reasons: string[] = [];
     let compatible = true;
 
-    // Axle Check
-    if (frame.interfaces.rear_axle !== wheel.interfaces.axle) {
+    // Axle Check - use the normalized comparison
+    const frameAxle = frame.interfaces.rear_axle;
+    const wheelAxle = wheel.interfaces.rear_axle || wheel.interfaces.axle;
+
+    if (!axlesCompatible(frameAxle, wheelAxle)) {
         compatible = false;
-        reasons.push(`Frame axle (${frame.interfaces.rear_axle}) does not match Wheel axle (${wheel.interfaces.axle})`);
+        reasons.push(`Frame axle (${frameAxle}) does not match Wheel axle (${wheelAxle})`);
     }
 
     // Brake Type Check
-    if (frame.interfaces.brake_type && wheel.interfaces.brake_type && frame.interfaces.brake_type !== wheel.interfaces.brake_type) {
-        compatible = false;
-        reasons.push(`Frame brake type (${frame.interfaces.brake_type}) does not match Wheel brake type (${wheel.interfaces.brake_type})`);
+    const frameBrake = frame.interfaces.brake_type || frame.interfaces.brake_mount;
+    const wheelBrake = wheel.interfaces.brake_type;
+
+    if (frameBrake && wheelBrake) {
+        // Normalize brake types
+        const frameIsDisc = frameBrake.toLowerCase().includes('disc') || frameBrake.toLowerCase().includes('flat_mount') || frameBrake.toLowerCase().includes('post_mount');
+        const wheelIsDisc = wheelBrake.toLowerCase().includes('disc');
+
+        if (frameIsDisc !== wheelIsDisc) {
+            compatible = false;
+            reasons.push(`Frame brake type (${frameBrake}) does not match Wheel brake type (${wheelBrake})`);
+        }
     }
 
     // Tire Clearance Check
     if (tire) {
-        const maxTire = frame.attributes.max_tire_width_mm;
-        const tireWidth = tire.attributes.width_mm;
+        const maxTire = frame.attributes.max_tire_width_mm || frame.attributes.max_tire;
+        const tireWidth = tire.attributes.width_mm || tire.attributes.width;
         if (maxTire && tireWidth && tireWidth > maxTire) {
             compatible = false;
             reasons.push(`Tire width (${tireWidth}mm) exceeds Frame max clearance (${maxTire}mm)`);
