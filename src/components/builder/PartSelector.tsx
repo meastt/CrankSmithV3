@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { Component, validateFrameWheel, validateFrameBBCrank, validateDrivetrain } from '@/lib/validation';
+import { Component, validateComponent } from '@/lib/validation';
 import { PartCard } from './PartCard';
 import { useBuildStore } from '@/store/buildStore';
 import {
@@ -33,9 +33,6 @@ export const PartSelector: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [showIncompatible, setShowIncompatible] = useState(false);
     const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
-    const [selectedSpeed, setSelectedSpeed] = useState<string | null>(null);
-    const [selectedWheelSize, setSelectedWheelSize] = useState<string | null>(null);
-    const [selectedHubSpacing, setSelectedHubSpacing] = useState<string | null>(null);
     const [crankConfiguration, setCrankConfiguration] = useState<'1x' | '2x' | null>(null);
     const { parts, setPart } = useBuildStore();
 
@@ -45,9 +42,6 @@ export const PartSelector: React.FC = () => {
     const resetFilters = useCallback(() => {
         setSelectedBrand(null);
         setCrankConfiguration(null);
-        setSelectedSpeed(null);
-        setSelectedWheelSize(null);
-        setSelectedHubSpacing(null);
     }, []);
 
     // Fetch components when step changes
@@ -102,64 +96,28 @@ export const PartSelector: React.FC = () => {
         resetFilters();
     };
 
-    // Compatibility checking
+    // Compatibility checking using the master validation function
     const isCompatible = (component: Component): boolean => {
+        // Frame is always compatible (first step, no dependencies)
+        if (activeType === 'Frame') return true;
+
+        // If no parts selected yet, everything is compatible
         if (Object.keys(parts).length === 0) return true;
 
-        switch (activeType) {
-            case 'Wheel':
-                if (parts.Frame) {
-                    return validateFrameWheel(parts.Frame, component).compatible;
-                }
-                break;
-            case 'Tire':
-                if (parts.Frame && parts.Wheel) {
-                    return validateFrameWheel(parts.Frame, parts.Wheel, component).compatible;
-                }
-                break;
-            case 'BottomBracket':
-                if (parts.Frame) {
-                    const frameCheck = validateFrameBBCrank(parts.Frame, component, parts.Crank || component);
-                    if (!frameCheck.compatible && frameCheck.reasons.some(r => r.includes('Frame'))) return false;
-                }
-                if (parts.Crank) {
-                    const crankCheck = validateFrameBBCrank(parts.Frame || component, component, parts.Crank);
-                    if (!crankCheck.compatible && crankCheck.reasons.some(r => r.includes('Crank'))) return false;
-                }
-                break;
-            case 'Crank':
-                if (parts.BottomBracket) {
-                    const bbCheck = validateFrameBBCrank(parts.Frame || component, parts.BottomBracket, component);
-                    if (!bbCheck.compatible) return false;
-                }
-                break;
-            case 'Derailleur':
-                if (parts.Shifter) {
-                    const shiftCheck = validateDrivetrain(parts.Shifter, component, parts.Cassette || component);
-                    if (!shiftCheck.compatible && shiftCheck.reasons.some(r => r.includes('Shifter'))) return false;
-                }
-                if (parts.Cassette) {
-                    const cassCheck = validateDrivetrain(parts.Shifter || component, component, parts.Cassette);
-                    if (!cassCheck.compatible && cassCheck.reasons.some(r => r.includes('Cassette'))) return false;
-                }
-                break;
-            case 'Cassette':
-                if (parts.Derailleur) {
-                    const rdCheck = validateDrivetrain(parts.Shifter || component, parts.Derailleur, component);
-                    if (!rdCheck.compatible) return false;
-                }
-                if (parts.Wheel) {
-                    if (parts.Wheel.interfaces.freehub_body !== component.interfaces.cassette_mount) return false;
-                }
-                break;
-            case 'Shifter':
-                if (parts.Derailleur) {
-                    const rdCheck = validateDrivetrain(component, parts.Derailleur, parts.Cassette || component);
-                    if (!rdCheck.compatible) return false;
-                }
-                break;
+        // Filter out null parts for validation
+        const currentBuild: Record<string, Component> = {};
+        for (const [key, value] of Object.entries(parts)) {
+            if (value !== null) {
+                currentBuild[key] = value;
+            }
         }
-        return true;
+
+        // If no valid parts in build, everything is compatible
+        if (Object.keys(currentBuild).length === 0) return true;
+
+        // Use the master validateComponent function
+        const result = validateComponent(activeType, component, currentBuild);
+        return result.compatible;
     };
 
     // Helper functions
@@ -173,24 +131,28 @@ export const PartSelector: React.FC = () => {
         return typeof teeth === 'string' && !teeth.includes('/');
     };
 
-    // Get unique filter values
+    // Get unique filter values (only for brand/crank config - compatibility handles the rest)
     const uniqueBrands = Array.from(new Set(components.map(c => getBrand(c.name)))).sort();
-    const uniqueSpeeds = Array.from(new Set(components.filter(c => c.attributes.speeds).map(c => String(c.attributes.speeds)))).sort((a, b) => Number(b) - Number(a));
-    // Wheels use interfaces.diameter for size and interfaces.rear_axle for hub spacing
-    const uniqueWheelSizes = Array.from(new Set(components.filter(c => c.interfaces?.diameter || c.attributes?.wheel_size).map(c => String(c.interfaces?.diameter || c.attributes?.wheel_size)))).filter(Boolean).sort();
-    const uniqueHubSpacings = Array.from(new Set(components.filter(c => c.interfaces?.rear_axle || c.interfaces?.axle_standard).map(c => String(c.interfaces?.rear_axle || c.interfaces?.axle_standard)))).filter(Boolean).sort();
 
-    // Apply filters
+    // Apply filters - smart compatibility filtering first, then optional user filters
     let filteredComponents = components;
 
+    // 1. Frame category filter (user choice)
     if (activeType === 'Frame' && frameCategory) {
         filteredComponents = filteredComponents.filter(c => c.attributes.category === frameCategory);
     }
 
+    // 2. Smart compatibility filtering - auto-filters based on current build
+    if (!showIncompatible) {
+        filteredComponents = filteredComponents.filter(c => isCompatible(c));
+    }
+
+    // 3. Optional brand filter (user refinement)
     if (selectedBrand) {
         filteredComponents = filteredComponents.filter(c => getBrand(c.name) === selectedBrand);
     }
 
+    // 4. Crank configuration filter (user preference)
     if (activeType === 'Crank' && crankConfiguration) {
         filteredComponents = filteredComponents.filter(c => {
             const isSingle = is1x(c);
@@ -198,31 +160,12 @@ export const PartSelector: React.FC = () => {
         });
     }
 
-    if (selectedSpeed) {
-        filteredComponents = filteredComponents.filter(c => String(c.attributes.speeds) === selectedSpeed);
-    }
-
-    if (selectedWheelSize) {
-        filteredComponents = filteredComponents.filter(c => String(c.interfaces?.diameter || c.attributes?.wheel_size) === selectedWheelSize);
-    }
-
-    if (selectedHubSpacing) {
-        filteredComponents = filteredComponents.filter(c => String(c.interfaces?.rear_axle || c.interfaces?.axle_standard) === selectedHubSpacing);
-    }
-
-    if (!showIncompatible) {
-        filteredComponents = filteredComponents.filter(c => isCompatible(c));
-    }
-
-    // Determine what selection UI to show
+    // Determine what selection UI to show - simplified to only meaningful choices
     const showCategorySelection = activeType === 'Frame' && !frameCategory;
-    const showWheelSizeSelection = activeType === 'Wheel' && uniqueWheelSizes.length > 0 && !selectedWheelSize;
-    const showHubSpacingSelection = activeType === 'Wheel' && selectedWheelSize && uniqueHubSpacings.length > 1 && !selectedHubSpacing;
-    const showSpeedSelection = ['Cassette', 'Derailleur', 'Shifter'].includes(activeType) && uniqueSpeeds.length > 0 && !selectedSpeed;
     const showBrandSelection = !selectedBrand &&
         ['Frame', 'Tire', 'Crank'].includes(activeType) &&
         !(activeType === 'Frame' && !frameCategory) &&
-        !showSpeedSelection &&
+        filteredComponents.length > 6 && // Only show brand filter if there are many options
         uniqueBrands.length > 1;
     const showCrankConfigSelection = activeType === 'Crank' && selectedBrand && !crankConfiguration;
 
@@ -230,12 +173,6 @@ export const PartSelector: React.FC = () => {
     const handleBack = () => {
         if (activeType === 'Crank' && crankConfiguration) {
             setCrankConfiguration(null);
-        } else if (activeType === 'Wheel' && selectedHubSpacing) {
-            setSelectedHubSpacing(null);
-        } else if (activeType === 'Wheel' && selectedWheelSize) {
-            setSelectedWheelSize(null);
-        } else if (selectedSpeed) {
-            setSelectedSpeed(null);
         } else if (selectedBrand) {
             setSelectedBrand(null);
         } else if (frameCategory) {
@@ -248,9 +185,6 @@ export const PartSelector: React.FC = () => {
     // Breadcrumbs
     const breadcrumbs: string[] = [];
     if (frameCategory) breadcrumbs.push(frameCategory);
-    if (selectedWheelSize) breadcrumbs.push(selectedWheelSize);
-    if (selectedHubSpacing) breadcrumbs.push(selectedHubSpacing);
-    if (selectedSpeed) breadcrumbs.push(`${selectedSpeed}-speed`);
     if (selectedBrand) breadcrumbs.push(selectedBrand);
     if (crankConfiguration) breadcrumbs.push(crankConfiguration);
 
@@ -413,50 +347,6 @@ export const PartSelector: React.FC = () => {
                                 }))}
                                 onSelect={(id) => setFrameCategory(id)}
                                 columns={3}
-                            />
-                        ) : showWheelSizeSelection ? (
-                            <SelectionGrid
-                                key="wheelsize"
-                                title="Select Wheel Size"
-                                subtitle="Match your frame's wheel compatibility"
-                                items={uniqueWheelSizes.map(size => ({
-                                    id: size,
-                                    title: size,
-                                    subtitle: size === '700c' ? 'Road standard' : size === '650b' ? 'Gravel/smaller' : size === '29"' ? 'MTB large' : size === '27.5"' ? 'MTB agile' : '',
-                                    count: components.filter(c => String(c.interfaces?.diameter || c.attributes?.wheel_size) === size).length,
-                                    countLabel: 'wheels'
-                                }))}
-                                onSelect={(id) => setSelectedWheelSize(id)}
-                                columns={uniqueWheelSizes.length <= 2 ? 2 : 3}
-                            />
-                        ) : showHubSpacingSelection ? (
-                            <SelectionGrid
-                                key="hubspacing"
-                                title="Select Hub Spacing"
-                                subtitle="Must match your frame's dropout width"
-                                items={uniqueHubSpacings.map(spacing => ({
-                                    id: spacing,
-                                    title: spacing,
-                                    count: components.filter(c => String(c.interfaces?.rear_axle || c.interfaces?.axle_standard) === spacing).length,
-                                    countLabel: 'wheels'
-                                }))}
-                                onSelect={(id) => setSelectedHubSpacing(id)}
-                                columns={uniqueHubSpacings.length <= 2 ? 2 : 3}
-                            />
-                        ) : showSpeedSelection ? (
-                            <SelectionGrid
-                                key="speed"
-                                title="Select Speed Count"
-                                subtitle="Number of rear cogs - must match across drivetrain"
-                                items={uniqueSpeeds.map(speed => ({
-                                    id: speed,
-                                    title: `${speed}-speed`,
-                                    subtitle: Number(speed) >= 12 ? 'Modern groupset' : Number(speed) >= 11 ? 'Standard modern' : 'Legacy',
-                                    count: components.filter(c => String(c.attributes.speeds) === speed).length,
-                                    countLabel: 'options'
-                                }))}
-                                onSelect={(id) => setSelectedSpeed(id)}
-                                columns={uniqueSpeeds.length <= 2 ? 2 : 3}
                             />
                         ) : showBrandSelection ? (
                             <SelectionGrid
