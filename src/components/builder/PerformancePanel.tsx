@@ -2,14 +2,13 @@
 
 import React from 'react';
 import { useBuildStore } from '@/store/buildStore';
-import { Weight, Gauge, Mountain, Settings2 } from 'lucide-react';
+import { Scale, Gauge, Mountain, Settings2, Zap } from 'lucide-react';
 import {
     getAllGearRatios,
     getSpeedRange,
     calculateClimbingIndex,
     parseCassetteRange,
 } from '@/lib/gearCalculations';
-import { GearChart } from './GearChart';
 
 export const PerformancePanel: React.FC = () => {
     const { parts, cadence, totalWeight, unitSystem, setCadence, toggleUnits } = useBuildStore();
@@ -17,7 +16,6 @@ export const PerformancePanel: React.FC = () => {
     const crank = parts.Crank;
     const cassette = parts.Cassette;
 
-    // Extract chainrings from crank
     const chainrings =
         crank?.attributes.chainring_small && crank.attributes.chainring_small !== 0
             ? [crank.attributes.chainring_large as number, crank.attributes.chainring_small as number]
@@ -25,7 +23,6 @@ export const PerformancePanel: React.FC = () => {
                 ? [crank.attributes.chainring_large as number]
                 : [];
 
-    // Extract cassette cogs
     const cassetteCogs =
         cassette?.attributes.largest_cog && cassette.attributes.diff
             ? parseCassetteRange(
@@ -46,58 +43,62 @@ export const PerformancePanel: React.FC = () => {
         climbingIndex = calculateClimbingIndex(gears[0].ratio);
     }
 
-    // Convert units
     const weightDisplay = unitSystem === 'imperial'
-        ? (totalWeight / 453.592).toFixed(2) // grams to lbs
-        : (totalWeight / 1000).toFixed(2); // grams to kg
+        ? (totalWeight / 453.592).toFixed(2)
+        : (totalWeight / 1000).toFixed(2);
     const weightUnit = unitSystem === 'imperial' ? 'lbs' : 'kg';
 
     const convertSpeed = (kmh: number) => {
-        return unitSystem === 'imperial' ? kmh * 0.621371 : kmh; // km/h to mph
+        return unitSystem === 'imperial' ? kmh * 0.621371 : kmh;
     };
     const speedUnit = unitSystem === 'imperial' ? 'mph' : 'km/h';
 
     return (
-        <div className="w-80 bg-gray-900/95 backdrop-blur-xl border-l border-white/10 h-screen overflow-y-auto flex flex-col shadow-2xl z-20">
-            <div className="p-6 border-b border-white/10 flex justify-between items-start">
+        <div className="flex flex-col h-full">
+            {/* Header */}
+            <div className="p-5 border-b border-white/5 flex justify-between items-start">
                 <div>
-                    <h2 className="text-xl font-bold text-white tracking-tight">Performance</h2>
-                    <p className="text-xs text-gray-500 mt-1">Real-time build metrics</p>
+                    <h2 className="text-lg font-semibold text-stone-100">Performance</h2>
+                    <p className="text-xs text-stone-500 mt-0.5">Real-time build metrics</p>
                 </div>
                 <button
                     onClick={toggleUnits}
-                    className="px-2 py-1 bg-white/5 hover:bg-white/10 rounded text-[10px] font-semibold text-gray-400 hover:text-white transition-colors border border-white/5"
+                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-medium text-stone-400 hover:text-stone-200 transition-colors border border-white/5"
                 >
                     {unitSystem === 'imperial' ? 'US' : 'METRIC'}
                 </button>
             </div>
 
-            <div className="p-4 space-y-4">
-                {/* Weight */}
-                <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                    <div className="flex items-center mb-2 text-gray-400">
-                        <Weight className="w-4 h-4 mr-2" />
-                        <span className="text-xs font-bold uppercase tracking-wider">Total Weight</span>
+            {/* Metrics */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {/* Weight Card */}
+                <div className="bg-white/[0.02] rounded-xl p-4 border border-white/5">
+                    <div className="flex items-center gap-2 text-stone-500 mb-3">
+                        <Scale className="w-4 h-4" />
+                        <span className="text-xs font-semibold uppercase tracking-wider">Total Weight</span>
                     </div>
-                    <div className="text-3xl font-bold text-white tracking-tight">
+                    <div className="text-3xl font-bold text-stone-100 font-mono">
                         {totalWeight > 0 ? (
                             <>
-                                {weightDisplay} <span className="text-sm text-gray-500 font-medium">{weightUnit}</span>
+                                {weightDisplay}
+                                <span className="text-base text-stone-500 font-medium ml-1">{weightUnit}</span>
                             </>
                         ) : (
-                            <span className="text-lg text-gray-600">--</span>
+                            <span className="text-lg text-stone-600">--</span>
                         )}
                     </div>
                 </div>
 
                 {/* Cadence Slider */}
-                <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center text-gray-400">
-                            <Gauge className="w-4 h-4 mr-2" />
-                            <span className="text-xs font-bold uppercase tracking-wider">Cadence</span>
+                <div className="bg-white/[0.02] rounded-xl p-4 border border-white/5">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2 text-stone-500">
+                            <Gauge className="w-4 h-4" />
+                            <span className="text-xs font-semibold uppercase tracking-wider">Cadence</span>
                         </div>
-                        <span className="text-lg font-bold text-blue-400">{cadence} <span className="text-xs text-gray-500">RPM</span></span>
+                        <span className="text-lg font-bold text-primary font-mono">
+                            {cadence} <span className="text-xs text-stone-500 font-normal">RPM</span>
+                        </span>
                     </div>
                     <input
                         type="range"
@@ -105,124 +106,108 @@ export const PerformancePanel: React.FC = () => {
                         max="120"
                         value={cadence}
                         onChange={(e) => setCadence(Number(e.target.value))}
-                        className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all"
+                        className="w-full"
                     />
-                    <div className="flex justify-between text-[10px] text-gray-600 mt-2 font-mono">
+                    <div className="flex justify-between text-[10px] text-stone-600 mt-2 font-mono">
                         <span>60</span>
                         <span>90</span>
                         <span>120</span>
                     </div>
                 </div>
 
-                {/* Gearing Info */}
                 {hasGears ? (
                     <>
-                        <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                            <div className="flex items-center mb-3 text-gray-400">
-                                <Settings2 className="w-4 h-4 mr-2" />
-                                <span className="text-xs font-bold uppercase tracking-wider">Gearing Stats</span>
+                        {/* Gearing Stats */}
+                        <div className="bg-white/[0.02] rounded-xl p-4 border border-white/5">
+                            <div className="flex items-center gap-2 text-stone-500 mb-4">
+                                <Settings2 className="w-4 h-4" />
+                                <span className="text-xs font-semibold uppercase tracking-wider">Gearing</span>
                             </div>
 
-                            <div className="space-y-2.5">
+                            <div className="space-y-3">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-500">Lowest Gear</span>
-                                    <span className="font-mono text-sm font-medium text-gray-200 bg-white/5 px-1.5 py-0.5 rounded">
-                                        {gears[0].chainring}/{gears[0].cog} <span className="text-gray-500 text-xs">({gears[0].ratio.toFixed(2)})</span>
+                                    <span className="text-xs text-stone-500">Lowest Gear</span>
+                                    <span className="font-mono text-sm font-medium text-stone-200 bg-white/5 px-2 py-1 rounded-lg">
+                                        {gears[0].chainring}/{gears[0].cog}
+                                        <span className="text-stone-500 text-xs ml-1">({gears[0].ratio.toFixed(2)})</span>
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-500">Highest Gear</span>
-                                    <span className="font-mono text-sm font-medium text-gray-200 bg-white/5 px-1.5 py-0.5 rounded">
-                                        {gears[gears.length - 1].chainring}/{gears[gears.length - 1].cog} <span className="text-gray-500 text-xs">({gears[gears.length - 1].ratio.toFixed(2)})</span>
+                                    <span className="text-xs text-stone-500">Highest Gear</span>
+                                    <span className="font-mono text-sm font-medium text-stone-200 bg-white/5 px-2 py-1 rounded-lg">
+                                        {gears[gears.length - 1].chainring}/{gears[gears.length - 1].cog}
+                                        <span className="text-stone-500 text-xs ml-1">({gears[gears.length - 1].ratio.toFixed(2)})</span>
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center pt-2 border-t border-white/5">
-                                    <span className="text-xs text-gray-500">Total Gears</span>
-                                    <span className="text-sm font-bold text-white">{gears.length}</span>
+                                    <span className="text-xs text-stone-500">Total Gears</span>
+                                    <span className="text-base font-bold text-stone-100">{gears.length}</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Speed Range */}
                         {speedRange && (
-                            <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Speed @ {cadence} RPM</div>
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-baseline">
-                                        <span className="text-xs text-gray-500">Min Speed</span>
-                                        <span className="text-lg font-bold text-white">{convertSpeed(speedRange.min).toFixed(1)} <span className="text-xs text-gray-500 font-normal">{speedUnit}</span></span>
+                            <div className="bg-white/[0.02] rounded-xl p-4 border border-white/5">
+                                <div className="flex items-center gap-2 text-stone-500 mb-4">
+                                    <Zap className="w-4 h-4" />
+                                    <span className="text-xs font-semibold uppercase tracking-wider">
+                                        Speed @ {cadence} RPM
+                                    </span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-xs text-stone-500 mb-1">Min</p>
+                                        <p className="text-xl font-bold text-stone-100 font-mono">
+                                            {convertSpeed(speedRange.min).toFixed(1)}
+                                            <span className="text-xs text-stone-500 font-normal ml-1">{speedUnit}</span>
+                                        </p>
                                     </div>
-                                    <div className="flex justify-between items-baseline">
-                                        <span className="text-xs text-gray-500">Max Speed</span>
-                                        <span className="text-lg font-bold text-white">{convertSpeed(speedRange.max).toFixed(1)} <span className="text-xs text-gray-500 font-normal">{speedUnit}</span></span>
+                                    <div>
+                                        <p className="text-xs text-stone-500 mb-1">Max</p>
+                                        <p className="text-xl font-bold text-stone-100 font-mono">
+                                            {convertSpeed(speedRange.max).toFixed(1)}
+                                            <span className="text-xs text-stone-500 font-normal ml-1">{speedUnit}</span>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         )}
 
                         {/* Climbing Index */}
-                        <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                            <div className="flex items-center mb-2 text-gray-400">
-                                <Mountain className="w-4 h-4 mr-2" />
-                                <span className="text-xs font-bold uppercase tracking-wider">Climbing Ease</span>
+                        <div className="bg-white/[0.02] rounded-xl p-4 border border-white/5">
+                            <div className="flex items-center gap-2 text-stone-500 mb-3">
+                                <Mountain className="w-4 h-4" />
+                                <span className="text-xs font-semibold uppercase tracking-wider">Climbing Ease</span>
                             </div>
-                            <div className="text-3xl font-bold text-emerald-400 mb-3">
-                                {(climbingIndex * 100).toFixed(1)}
+                            <div className="flex items-end gap-3 mb-3">
+                                <span className="text-3xl font-bold text-emerald-400 font-mono">
+                                    {(climbingIndex * 100).toFixed(0)}
+                                </span>
+                                <span className="text-sm text-stone-500 mb-1">/ 100</span>
                             </div>
-                            <div className="space-y-1.5">
-                                <div className="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                            <div className="relative">
+                                <div className="w-full bg-stone-800 rounded-full h-2 overflow-hidden">
                                     <div
-                                        className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                                        style={{ width: `${Math.min((climbingIndex * 100) / 1.5, 100)}%` }}
-                                    ></div>
+                                        className="bg-gradient-to-r from-red-500 via-amber-500 to-emerald-500 h-full rounded-full transition-all duration-500"
+                                        style={{ width: `${Math.min((climbingIndex * 100) / 1.2, 100)}%` }}
+                                    />
                                 </div>
-                                <div className="flex justify-between text-[10px] text-gray-500 pt-1">
+                                <div className="flex justify-between text-[10px] text-stone-600 mt-1">
                                     <span>Hard</span>
                                     <span>Easy</span>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Gear Chart */}
-                        <div className="pt-2">
-                            <GearChart chainrings={chainrings} cassetteCogs={cassetteCogs} />
-                        </div>
                     </>
                 ) : (
-                    <div className="bg-white/5 border border-white/5 border-dashed p-6 rounded-xl text-center">
-                        <Settings2 className="w-8 h-8 mx-auto text-gray-600 mb-2" />
-                        <p className="text-sm text-gray-400">Select a crank and cassette to see performance metrics</p>
+                    <div className="bg-white/[0.02] border border-dashed border-white/10 rounded-xl p-8 text-center">
+                        <Settings2 className="w-10 h-10 mx-auto text-stone-700 mb-3" />
+                        <p className="text-sm text-stone-500">
+                            Select a crank and cassette to see performance metrics
+                        </p>
                     </div>
                 )}
-            </div>
-
-            {/* Save Build Button */}
-            <div className="p-4 border-t border-white/10 mt-auto bg-gray-900/95 backdrop-blur-xl sticky bottom-0">
-                <button
-                    onClick={async () => {
-                        const name = prompt("Name your build:");
-                        if (!name) return;
-
-                        try {
-                            const res = await fetch('/api/builds', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ name, parts }),
-                            });
-                            if (res.ok) {
-                                alert("Build saved!");
-                            } else {
-                                alert("Failed to save. Please sign in.");
-                            }
-                        } catch (e) {
-                            console.error(e);
-                            alert("Error saving build.");
-                        }
-                    }}
-                    className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold transition-colors flex items-center justify-center"
-                >
-                    Save to Garage
-                </button>
             </div>
         </div>
     );

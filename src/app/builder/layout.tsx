@@ -1,7 +1,6 @@
 import React from 'react';
-import { BuildSummary } from '@/components/builder/BuildSummary';
-import { PerformancePanel } from '@/components/builder/PerformancePanel';
 import { BuilderMobileNav } from '@/components/builder/BuilderMobileNav';
+import { BuilderSidebar } from '@/components/builder/BuilderSidebar';
 
 export default function BuilderLayout({
     children,
@@ -9,22 +8,20 @@ export default function BuilderLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="flex flex-col lg:flex-row h-screen overflow-hidden bg-gray-950">
-            {/* Mobile Navigation & Modals */}
-            <BuilderMobileNav />
+        <div className="flex flex-col lg:flex-row min-h-[calc(100svh-4rem)] bg-stone-950">
+            {/* Desktop Left Sidebar - Build Summary */}
+            <BuilderSidebar side="left" />
 
-            {/* Desktop Sidebar */}
-            <div className="hidden lg:block h-full">
-                <BuildSummary />
-            </div>
-
-            <main className="flex-1 overflow-y-auto relative z-0 scroll-smooth">
+            {/* Main Content */}
+            <main className="flex-1 min-w-0 overflow-hidden">
                 {children}
             </main>
 
-            <div className="hidden lg:block">
-                <PerformancePanel />
-            </div>
+            {/* Desktop Right Sidebar - Performance */}
+            <BuilderSidebar side="right" />
+
+            {/* Mobile Bottom Navigation */}
+            <BuilderMobileNav />
         </div>
     );
 }

@@ -2,46 +2,51 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Layers, Scale, AlertTriangle } from 'lucide-react';
+import { Layers, Scale, AlertTriangle, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 const features = [
     {
-        icon: <Layers className="w-8 h-8 text-blue-400" />,
+        icon: Layers,
         title: "The Axle Gate",
-        description: "We don't just match names. We match interfaces. Boost 148 vs 142, Thru-Axle vs QR. If the hub spacing doesn't align, the build fails."
+        description: "We match interfaces, not names. Boost 148 vs 142, Thru-Axle vs QR—if the hub spacing doesn't align, the build fails.",
+        color: "text-primary"
     },
     {
-        icon: <Scale className="w-8 h-8 text-cyan-400" />,
+        icon: Scale,
         title: "Weight Weenie Logic",
-        description: "Every bolt counts. Our database tracks gram-level weight for every component, giving you a live running total as you swap parts."
+        description: "Every bolt counts. Our database tracks gram-level weight for every component, giving you a live running total.",
+        color: "text-emerald-400"
     },
     {
-        icon: <AlertTriangle className="w-8 h-8 text-amber-400" />,
+        icon: AlertTriangle,
         title: "Capacity Guardrails",
-        description: "Exceeding your derailleur's tooth capacity? Mixing electronic and mechanical? The engine flags it immediately with detailed conflict reports."
+        description: "Exceeding derailleur capacity? Mixing electronic and mechanical? The engine flags it with detailed conflict reports.",
+        color: "text-amber-400"
     }
 ];
 
 export const Features = () => {
     return (
-        <div className="relative py-24 overflow-hidden">
-            {/* Background Hub Accent */}
-            <div
-                className="absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1400px] h-[1000px] hidden xl:block pointer-events-none select-none opacity-5 mix-blend-screen"
-                style={{
-                    maskImage: 'radial-gradient(50% 50% at center, black 20%, transparent 100%)',
-                    WebkitMaskImage: 'radial-gradient(50% 50% at center, black 20%, transparent 100%)'
-                }}
-            >
-                <img
-                    src="/images/schematic-hub.jpg"
-                    alt="Hub Mechanism Schematic"
-                    className="w-full h-full object-contain"
-                />
-            </div>
+        <section className="relative py-16 md:py-24 px-4">
+            <div className="max-w-6xl mx-auto">
+                {/* Section header */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center mb-12 md:mb-16"
+                >
+                    <h2 className="text-2xl md:text-3xl font-bold text-stone-100 mb-4">
+                        Built Different
+                    </h2>
+                    <p className="text-stone-500 max-w-xl mx-auto">
+                        Not another generic bike builder. CrankSmith understands the intricate compatibility rules that make or break a build.
+                    </p>
+                </motion.div>
 
-            <div className="container mx-auto px-4 relative z-10">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                {/* Feature cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                     {features.map((feature, index) => (
                         <motion.div
                             key={index}
@@ -49,19 +54,41 @@ export const Features = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="bg-white/5 p-8 rounded-2xl border border-white/5 hover:border-white/10 transition-colors"
+                            className="group relative bg-white/[0.02] backdrop-blur-sm border border-white/5 rounded-2xl p-6 md:p-8 hover:bg-white/[0.04] hover:border-white/10 transition-all duration-300"
                         >
-                            <div className="bg-white/5 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                                {feature.icon}
+                            {/* Icon */}
+                            <div className={`w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-5 ${feature.color} group-hover:scale-110 transition-transform duration-300`}>
+                                <feature.icon className="w-5 h-5" />
                             </div>
-                            <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
-                            <p className="text-gray-400 leading-relaxed">
+
+                            {/* Content */}
+                            <h3 className="text-lg md:text-xl font-semibold text-stone-100 mb-3">
+                                {feature.title}
+                            </h3>
+                            <p className="text-stone-400 text-sm md:text-base leading-relaxed">
                                 {feature.description}
                             </p>
                         </motion.div>
                     ))}
                 </div>
+
+                {/* CTA */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.3 }}
+                    className="text-center mt-12 md:mt-16"
+                >
+                    <Link
+                        href="/builder"
+                        className="group inline-flex items-center gap-2 text-primary hover:text-primary-light font-medium transition-colors"
+                    >
+                        Try the builder
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                </motion.div>
             </div>
-        </div>
+        </section>
     );
 };

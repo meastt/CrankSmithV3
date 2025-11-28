@@ -4,13 +4,15 @@ import React, { useState } from 'react';
 import { useBuildStore } from '@/store/buildStore';
 import { BuildSummary } from './BuildSummary';
 import { PerformancePanel } from './PerformancePanel';
-import { Layers, Activity, Save, X } from 'lucide-react';
+import { Layers, Activity, Save, X, Scale } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const BuilderMobileNav: React.FC = () => {
     const { parts } = useBuildStore();
     const [activeModal, setActiveModal] = useState<'summary' | 'performance' | null>(null);
 
     const totalWeight = Object.values(parts).reduce((sum, part) => sum + (part?.attributes?.weight_g || 0), 0);
+    const partsCount = Object.values(parts).filter(Boolean).length;
 
     const handleSave = async () => {
         const name = window.prompt('Name your build:');
@@ -41,73 +43,111 @@ export const BuilderMobileNav: React.FC = () => {
 
     return (
         <>
-            {/* Sticky Footer */}
-            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-xl border-t border-white/10 p-4 pb-safe">
-                <div className="flex justify-between items-center">
-                    <div>
-                        <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Total Weight</p>
-                        <p className="text-xl font-bold text-white font-mono">{totalWeight}g</p>
+            {/* Bottom Navigation Bar - Mobile Only */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-stone-950/95 backdrop-blur-xl border-t border-white/5 pb-safe">
+                <div className="flex items-center justify-between px-4 py-3">
+                    {/* Weight Display */}
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                            <Scale className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">
+                                {partsCount} parts
+                            </p>
+                            <p className="text-lg font-bold text-stone-100 font-mono leading-tight">
+                                {totalWeight.toLocaleString()}g
+                            </p>
+                        </div>
                     </div>
-                    <div className="flex space-x-2">
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2">
                         <button
                             onClick={() => setActiveModal('summary')}
-                            className={`p-2 rounded-lg transition-colors ${activeModal === 'summary' ? 'bg-primary text-white' : 'bg-white/10 text-gray-300 hover:bg-white/20'}`}
-                            title="View Build"
+                            className={`p-3 rounded-xl transition-all ${
+                                activeModal === 'summary'
+                                    ? 'bg-primary text-white'
+                                    : 'bg-white/5 text-stone-400 hover:bg-white/10'
+                            }`}
+                            aria-label="View Build"
                         >
                             <Layers className="w-5 h-5" />
                         </button>
                         <button
                             onClick={() => setActiveModal('performance')}
-                            className={`p-2 rounded-lg transition-colors ${activeModal === 'performance' ? 'bg-primary text-white' : 'bg-white/10 text-gray-300 hover:bg-white/20'}`}
-                            title="Performance Stats"
+                            className={`p-3 rounded-xl transition-all ${
+                                activeModal === 'performance'
+                                    ? 'bg-primary text-white'
+                                    : 'bg-white/5 text-stone-400 hover:bg-white/10'
+                            }`}
+                            aria-label="Performance Stats"
                         >
                             <Activity className="w-5 h-5" />
                         </button>
                         <button
                             onClick={handleSave}
-                            className="bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg shadow-primary/20 flex items-center"
+                            className="btn-primary px-4 py-3 rounded-xl text-white font-medium text-sm flex items-center gap-2"
                         >
-                            <Save className="w-4 h-4 mr-2" />
+                            <Save className="w-4 h-4" />
                             Save
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* Modals */}
-            {activeModal && (
-                <div className="lg:hidden fixed inset-0 z-[60] bg-gray-950/95 backdrop-blur-md flex flex-col animate-in slide-in-from-bottom-full duration-300">
-                    <div className="flex justify-between items-center p-4 border-b border-white/10 bg-gray-900">
-                        <h2 className="text-lg font-bold text-white">
-                            {activeModal === 'summary' ? 'Build Summary' : 'Performance Analysis'}
-                        </h2>
-                        <button
+            {/* Full-screen Modals */}
+            <AnimatePresence>
+                {activeModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="lg:hidden fixed inset-0 z-[60]"
+                    >
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-stone-950/95 backdrop-blur-xl"
                             onClick={() => setActiveModal(null)}
-                            className="p-2 text-gray-400 hover:text-white bg-white/5 rounded-full"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
-                    </div>
+                        />
 
-                    <div className="flex-1 overflow-y-auto">
-                        {activeModal === 'summary' ? (
-                            // We render BuildSummary but we need to ensure it fits nicely.
-                            // Since BuildSummary has its own container styles (w-80, h-screen), we might need to override them
-                            // or wrap it in a way that forces it to behave.
-                            // Actually, BuildSummary is designed as a sidebar. 
-                            // We might need to adjust BuildSummary to accept a 'mobile' prop or just rely on CSS overrides.
-                            // For now, let's try rendering it and see if we can strip the width constraint via a wrapper or if we need to refactor BuildSummary.
-                            <div className="h-full [&>div]:w-full [&>div]:h-full [&>div]:shadow-none [&>div]:border-none">
-                                <BuildSummary />
+                        {/* Modal Content */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            transition={{ duration: 0.3 }}
+                            className="relative h-full flex flex-col"
+                        >
+                            {/* Modal Header */}
+                            <div className="flex items-center justify-between px-4 py-4 border-b border-white/5 bg-stone-950">
+                                <h2 className="text-lg font-semibold text-stone-100">
+                                    {activeModal === 'summary' ? 'Build Summary' : 'Performance'}
+                                </h2>
+                                <button
+                                    onClick={() => setActiveModal(null)}
+                                    className="p-2 text-stone-400 hover:text-stone-100 bg-white/5 hover:bg-white/10 rounded-xl transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
                             </div>
-                        ) : (
-                            <div className="p-4">
-                                <PerformancePanel />
+
+                            {/* Modal Body */}
+                            <div className="flex-1 overflow-y-auto pb-20">
+                                {activeModal === 'summary' ? (
+                                    <BuildSummary />
+                                ) : (
+                                    <PerformancePanel />
+                                )}
                             </div>
-                        )}
-                    </div>
-                </div>
-            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </>
     );
 };
