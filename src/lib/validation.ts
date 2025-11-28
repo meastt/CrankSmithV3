@@ -139,13 +139,14 @@ export function validateFrameWheel(frame: Component, wheel: Component, tire?: Co
 }
 
 // ============================================================================
-// VALIDATION: WHEEL → TIRE (Diameter Match)
+// VALIDATION: WHEEL → TIRE (Diameter + Width Compatibility)
 // ============================================================================
 
-export function validateWheelTire(wheel: Component, tire: Component): ValidationResult {
+export function validateWheelTire(wheel: Component, tire: Component, frame?: Component): ValidationResult {
     const reasons: string[] = [];
     let compatible = true;
 
+    // 1. Diameter Check
     // Wheel uses: diameter (e.g., "700c", "29")
     // Tire uses: diameter (e.g., "700c", "29")
     const wheelDiameter = getInterface(wheel, 'diameter');
@@ -159,6 +160,70 @@ export function validateWheelTire(wheel: Component, tire: Component): Validation
         if (normWheel !== normTire) {
             compatible = false;
             reasons.push(`Wheel diameter (${wheelDiameter}) doesn't match tire (${tireDiameter})`);
+        }
+    }
+
+    // 2. Tire Width vs Wheel Inner Width Check
+    // Modern wide rims have changed the old rules. Using practical limits:
+    // - Minimum: tire can be slightly narrower than inner width for aero road setups
+    // - Maximum: tire should not exceed ~2.5x inner width for stability
+    const wheelInnerWidth = getAttribute(wheel, 'internal_width', 'inner_width');
+    const tireWidth = getInterface(tire, 'width') || getAttribute(tire, 'width');
+
+    if (wheelInnerWidth && tireWidth) {
+        const innerW = Number(wheelInnerWidth);
+        const tireW = Number(tireWidth);
+
+        // Practical limits based on modern rim/tire pairings:
+        // - 19mm inner width: 23-50mm tires (road)
+        // - 21mm inner width: 25-55mm tires (all-road)
+        // - 25mm inner width: 28-65mm tires (gravel)
+        // - 30mm inner width: 35-75mm tires (MTB)
+        const minTireWidth = Math.max(innerW - 4, innerW * 0.9); // Allow slightly narrower
+        const maxTireWidth = innerW * 2.6; // Upper bound
+
+        if (tireW < minTireWidth) {
+            compatible = false;
+            reasons.push(`Tire too narrow (${tireW}mm) for wheel inner width (${innerW}mm)`);
+        } else if (tireW > maxTireWidth) {
+            compatible = false;
+            reasons.push(`Tire too wide (${tireW}mm) for wheel inner width (${innerW}mm)`);
+        }
+    }
+
+    // 3. Frame Tire Clearance Check (if frame provided)
+    if (frame) {
+        const maxTire = getAttribute(frame, 'max_tire', 'max_tire_width_mm', 'max_tire_width');
+        const tireW = getInterface(tire, 'width') || getAttribute(tire, 'width');
+
+        if (maxTire && tireW) {
+            const maxT = Number(maxTire);
+            const tW = Number(tireW);
+
+            // Too wide for frame
+            if (tW > maxT) {
+                compatible = false;
+                reasons.push(`Tire width (${tW}mm) exceeds frame clearance (${maxT}mm)`);
+            }
+
+            // Too narrow for frame's intended use (don't show 25mm tires for a 57mm clearance frame)
+            // Scale the minimum based on frame clearance:
+            // - 35-45mm frames (wide road/light gravel): min ~25mm
+            // - 45-55mm frames (gravel): min ~32mm
+            // - 55mm+ frames (serious gravel/MTB): min ~35mm
+            let minPracticalTire = 20; // Default for road frames
+            if (maxT >= 55) {
+                minPracticalTire = 35; // Serious gravel/MTB - no skinny road tires
+            } else if (maxT >= 45) {
+                minPracticalTire = 32; // Gravel frames
+            } else if (maxT >= 35) {
+                minPracticalTire = 25; // All-road frames
+            }
+
+            if (tW < minPracticalTire) {
+                compatible = false;
+                reasons.push(`Tire too narrow (${tW}mm) for this frame type (max ${maxT}mm clearance)`);
+            }
         }
     }
 
@@ -366,11 +431,20 @@ export function validateComponent(
             break;
 
         case 'Tire':
-            if (currentBuild.Frame) {
-                addResult(validateFrameWheel(currentBuild.Frame, currentBuild.Wheel || component, component));
-            }
+            // Validate tire against wheel (diameter + width compatibility)
+            // and frame (max tire clearance)
             if (currentBuild.Wheel) {
-                addResult(validateWheelTire(currentBuild.Wheel, component));
+                addResult(validateWheelTire(currentBuild.Wheel, component, currentBuild.Frame));
+            } else if (currentBuild.Frame) {
+                // No wheel yet, just check frame clearance
+                const maxTire = getAttribute(currentBuild.Frame, 'max_tire', 'max_tire_width_mm', 'max_tire_width');
+                const tireWidth = getInterface(component, 'width') || getAttribute(component, 'width');
+                if (maxTire && tireWidth && Number(tireWidth) > Number(maxTire)) {
+                    addResult({
+                        compatible: false,
+                        reasons: [`Tire width (${tireWidth}mm) exceeds frame clearance (${maxTire}mm)`]
+                    });
+                }
             }
             break;
 

@@ -18,14 +18,85 @@ export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelec
         const str = String(value);
         if (key.includes('weight')) return `${str}g`;
         if (key.includes('tooth') || key.includes('capacity') || key.includes('diff') || key.includes('cog')) return `${str}t`;
+        if (key.includes('width') && !key.includes('internal')) return `${str}mm`;
         return str;
     };
 
-    // Get the most important specs (max 4)
-    const importantKeys = ['weight_g', 'speeds', 'teeth', 'chainring_large', 'wheel_size', 'width', 'length'];
-    const specs = Object.entries(component.attributes)
-        .filter(([key]) => importantKeys.includes(key))
-        .slice(0, 4);
+    // Get type-specific important specs
+    const getTypeSpecs = (): Array<{ label: string; value: string }> => {
+        const result: Array<{ label: string; value: string }> = [];
+        const attrs = component.attributes;
+        const ifaces = component.interfaces;
+
+        switch (component.type) {
+            case 'Frame':
+                if (attrs.category) result.push({ label: 'Category', value: String(attrs.category) });
+                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
+                if (ifaces.rear_axle) result.push({ label: 'Rear Axle', value: String(ifaces.rear_axle).replace('TA_', '') });
+                if (attrs.max_tire) result.push({ label: 'Max Tire', value: `${attrs.max_tire}mm` });
+                break;
+
+            case 'Wheel':
+                if (ifaces.diameter) result.push({ label: 'Size', value: String(ifaces.diameter) });
+                if (attrs.internal_width) result.push({ label: 'Inner Width', value: `${attrs.internal_width}mm` });
+                if (ifaces.rear_axle) result.push({ label: 'Rear Axle', value: String(ifaces.rear_axle) });
+                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
+                break;
+
+            case 'Tire':
+                if (ifaces.diameter) result.push({ label: 'Size', value: String(ifaces.diameter) });
+                if (attrs.width) result.push({ label: 'Width', value: `${attrs.width}mm` });
+                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
+                if (attrs.tpi) result.push({ label: 'TPI', value: String(attrs.tpi) });
+                break;
+
+            case 'Cassette':
+                if (attrs.speeds) result.push({ label: 'Speed', value: `${attrs.speeds}s` });
+                if (attrs.range) result.push({ label: 'Range', value: String(attrs.range) });
+                if (ifaces.freehub_mount) result.push({ label: 'Freehub', value: String(ifaces.freehub_mount).replace(/_/g, ' ') });
+                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
+                break;
+
+            case 'Derailleur':
+                if (attrs.speeds) result.push({ label: 'Speed', value: `${attrs.speeds}s` });
+                if (attrs.max_cog) result.push({ label: 'Max Cog', value: `${attrs.max_cog}t` });
+                if (attrs.capacity) result.push({ label: 'Capacity', value: `${attrs.capacity}t` });
+                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
+                break;
+
+            case 'Shifter':
+                if (attrs.speeds) result.push({ label: 'Speed', value: `${attrs.speeds}s` });
+                if (ifaces.protocol) result.push({ label: 'Protocol', value: String(ifaces.protocol).replace(/_/g, ' ') });
+                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
+                break;
+
+            case 'Crank':
+                if (attrs.teeth) result.push({ label: 'Chainring', value: String(attrs.teeth) });
+                if (attrs.crank_length) result.push({ label: 'Length', value: `${attrs.crank_length}mm` });
+                if (ifaces.spindle) result.push({ label: 'Spindle', value: String(ifaces.spindle).replace(/_/g, ' ') });
+                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
+                break;
+
+            case 'BottomBracket':
+                if (ifaces.frame_interface || ifaces.frame_shell) result.push({ label: 'Shell', value: String(ifaces.frame_interface || ifaces.frame_shell).replace(/_/g, ' ') });
+                if (ifaces.crank_interface || ifaces.crank_spindle) result.push({ label: 'Spindle', value: String(ifaces.crank_interface || ifaces.crank_spindle).replace(/_/g, ' ') });
+                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
+                break;
+
+            default:
+                // Fallback: show weight and first few attributes
+                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
+                Object.entries(attrs).slice(0, 3).forEach(([key, value]) => {
+                    if (key !== 'weight' && value) {
+                        result.push({ label: formatKey(key), value: formatValue(key, value) });
+                    }
+                });
+        }
+
+        return result.slice(0, 4);
+    };
+
+    const specs = getTypeSpecs();
 
     return (
         <div
@@ -70,13 +141,13 @@ export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelec
                 {/* Specs Grid */}
                 {specs.length > 0 && (
                     <div className="grid grid-cols-2 gap-2 mb-3">
-                        {specs.map(([key, value]) => (
-                            <div key={key} className="bg-white/[0.03] rounded-lg p-2.5 border border-white/5">
+                        {specs.map((spec) => (
+                            <div key={spec.label} className="bg-white/[0.03] rounded-lg p-2.5 border border-white/5">
                                 <p className="text-[10px] text-stone-500 uppercase tracking-wider mb-0.5">
-                                    {formatKey(key)}
+                                    {spec.label}
                                 </p>
                                 <p className="text-sm font-medium text-stone-200 font-mono">
-                                    {formatValue(key, value)}
+                                    {spec.value}
                                 </p>
                             </div>
                         ))}
