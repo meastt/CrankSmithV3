@@ -51,6 +51,37 @@ function axlesCompatible(axle1: string | undefined, axle2: string | undefined): 
 }
 
 /**
+ * Check if two BB shell standards are compatible
+ * Handles variations like "BSA_Threaded" vs "BSA_Threaded_68mm"
+ */
+function bbShellsCompatible(shell1: string | undefined, shell2: string | undefined): boolean {
+    if (!shell1 || !shell2) return true; // If either is missing, don't fail
+
+    // Normalize: lowercase, remove underscores/spaces/hyphens
+    const normalize = (s: string) => s.toLowerCase().replace(/[\s_-]/g, '');
+
+    const norm1 = normalize(shell1);
+    const norm2 = normalize(shell2);
+
+    if (norm1 === norm2) return true;
+
+    // Check if one contains the other (e.g., "bsathreaded68mm" contains "bsathreaded")
+    if (norm1.includes(norm2) || norm2.includes(norm1)) return true;
+
+    // Extract the base standard (before any size suffix)
+    // "BSA_Threaded_68mm" -> "bsathreaded", "PF30" -> "pf30"
+    const extractBase = (s: string) => {
+        // Remove size suffixes like "68mm", "86.5mm", "73mm"
+        return s.replace(/\d+\.?\d*mm$/i, '').trim();
+    };
+
+    const base1 = extractBase(norm1);
+    const base2 = extractBase(norm2);
+
+    return base1 === base2 || base1.includes(base2) || base2.includes(base1);
+}
+
+/**
  * Check if frame uses disc brakes based on brake_mount or brake_type
  */
 function isDiscBrake(brakeValue: string | undefined): boolean {
@@ -273,12 +304,12 @@ export function validateFrameBBCrank(frame: Component, bb: Component, crank: Com
     let compatible = true;
 
     // 1. Frame → BB Shell Check
-    // Frame uses: bottom_bracket_shell (e.g., "BSA_Threaded_68mm")
-    // BB uses: frame_interface OR frame_shell
+    // Frame uses: bottom_bracket_shell (e.g., "BSA_Threaded_68mm" or "BSA_Threaded")
+    // BB uses: frame_interface OR frame_shell (e.g., "BSA_Threaded_68mm")
     const frameShell = getInterface(frame, 'bottom_bracket_shell', 'bb_shell');
     const bbFrameInterface = getInterface(bb, 'frame_interface', 'frame_shell');
 
-    if (frameShell && bbFrameInterface && frameShell !== bbFrameInterface) {
+    if (frameShell && bbFrameInterface && !bbShellsCompatible(frameShell, bbFrameInterface)) {
         compatible = false;
         reasons.push(`Frame BB shell (${frameShell}) incompatible with bottom bracket (${bbFrameInterface})`);
     }
