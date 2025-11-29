@@ -82,6 +82,36 @@ function bbShellsCompatible(shell1: string | undefined, shell2: string | undefin
 }
 
 /**
+ * Check if two wheel sizes are equivalent
+ * 700c ≈ 29", 650b ≈ 27.5"
+ */
+function wheelSizesEquivalent(size1: string, size2: string): boolean {
+    // Normalize both
+    const norm1 = size1.toLowerCase().replace(/[^0-9a-z.]/g, '');
+    const norm2 = size2.toLowerCase().replace(/[^0-9a-z.]/g, '');
+
+    if (norm1 === norm2) return true;
+
+    // 700c and 29" are roughly equivalent (both ~622mm BSD)
+    const is700c = (s: string) => s === '700c' || s === '700';
+    const is29 = (s: string) => s === '29' || s === '29in';
+
+    if ((is700c(norm1) && is29(norm2)) || (is29(norm1) && is700c(norm2))) {
+        return true;
+    }
+
+    // 650b and 27.5" are equivalent (both ~584mm BSD)
+    const is650b = (s: string) => s === '650b' || s === '650';
+    const is275 = (s: string) => s === '275' || s === '27.5' || s === '275in' || s === '27.5in';
+
+    if ((is650b(norm1) && is275(norm2)) || (is275(norm1) && is650b(norm2))) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
  * Check if frame uses disc brakes based on brake_mount or brake_type
  */
 function isDiscBrake(brakeValue: string | undefined): boolean {
@@ -128,7 +158,53 @@ export function validateFrameWheel(frame: Component, wheel: Component, tire?: Co
     const reasons: string[] = [];
     let compatible = true;
 
-    // 1. Axle Standard Check
+    // 1. Wheel Size Check
+    // Frame may have wheel_size, or we infer from category
+    const frameWheelSize = getInterface(frame, 'wheel_size', 'wheel_diameter') ||
+                           getAttribute(frame, 'wheel_size', 'wheel_diameter');
+    const wheelDiameter = getInterface(wheel, 'diameter');
+
+    if (wheelDiameter) {
+        const wheelSizeNorm = String(wheelDiameter).toLowerCase().replace(/[^0-9a-z]/g, '');
+
+        if (frameWheelSize) {
+            // Frame explicitly specifies wheel size
+            const frameSizeNorm = String(frameWheelSize).toLowerCase().replace(/[^0-9a-z]/g, '');
+            if (frameSizeNorm !== wheelSizeNorm && !wheelSizesEquivalent(frameSizeNorm, wheelSizeNorm)) {
+                compatible = false;
+                reasons.push(`Frame wheel size (${frameWheelSize}) doesn't match wheel (${wheelDiameter})`);
+            }
+        } else {
+            // Infer wheel size from frame category
+            const category = getAttribute(frame, 'category');
+            const frameAxle = getInterface(frame, 'rear_axle');
+            const isBoost = frameAxle && String(frameAxle).toLowerCase().includes('boost');
+
+            if (category === 'Road') {
+                // Road frames are 700c only
+                if (wheelSizeNorm !== '700c') {
+                    compatible = false;
+                    reasons.push(`Road frame requires 700c wheels, not ${wheelDiameter}`);
+                }
+            } else if (category === 'Gravel') {
+                // Most gravel frames are 700c, some accept 650b
+                // For now, default to 700c unless frame explicitly says otherwise
+                if (wheelSizeNorm !== '700c' && wheelSizeNorm !== '650b') {
+                    compatible = false;
+                    reasons.push(`Gravel frame requires 700c or 650b wheels, not ${wheelDiameter}`);
+                }
+                // TODO: Some gravel frames are 700c-only - would need data to distinguish
+            } else if (category === 'MTB') {
+                // MTB frames use 29" or 27.5" (not 700c/650b naming)
+                if (!['29', '29in', '275', '275in', '27.5', '27.5in'].includes(wheelSizeNorm)) {
+                    compatible = false;
+                    reasons.push(`MTB frame requires 29" or 27.5" wheels, not ${wheelDiameter}`);
+                }
+            }
+        }
+    }
+
+    // 2. Axle Standard Check
     // Frame uses: rear_axle (e.g., "TA_12x142mm")
     // Wheel uses: rear_axle (e.g., "12x142mm")
     const frameAxle = getInterface(frame, 'rear_axle');
@@ -139,7 +215,7 @@ export function validateFrameWheel(frame: Component, wheel: Component, tire?: Co
         reasons.push(`Frame rear axle (${frameAxle}) incompatible with wheel (${wheelAxle})`);
     }
 
-    // 2. Brake Type Check
+    // 3. Brake Type Check
     // Frame uses: brake_mount (e.g., "Flat_Mount") or brake_type
     // Wheel uses: brake_type (e.g., "Disc")
     const frameBrake = getInterface(frame, 'brake_mount', 'brake_type');
