@@ -1,25 +1,16 @@
 'use client';
 
 import React, { Suspense } from 'react';
-import { DrivetrainLab } from '@/components/tools/DrivetrainLab';
+import dynamic from 'next/dynamic';
+import { DrivetrainLabSkeleton } from '@/components/tools/DrivetrainLabSkeleton';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
-function DrivetrainLabLoader() {
-    return (
-        <div className="w-full max-w-6xl mx-auto animate-pulse">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-                <div className="lg:col-span-4 space-y-4">
-                    <div className="bg-stone-900/50 border border-white/5 rounded-xl h-64" />
-                    <div className="bg-stone-900/50 border border-white/5 rounded-xl h-64" />
-                </div>
-                <div className="lg:col-span-8">
-                    <div className="bg-stone-900/50 border border-white/5 rounded-xl h-80" />
-                </div>
-            </div>
-        </div>
-    );
-}
+// Dynamically import DrivetrainLab to reduce initial bundle (includes recharts)
+const DrivetrainLab = dynamic(() => import('@/components/tools/DrivetrainLab').then(mod => ({ default: mod.DrivetrainLab })), {
+    ssr: false,
+    loading: () => <DrivetrainLabSkeleton />
+});
 
 export default function PerformancePage() {
     return (
@@ -48,9 +39,7 @@ export default function PerformancePage() {
                     </p>
                 </div>
 
-                <Suspense fallback={<DrivetrainLabLoader />}>
-                    <DrivetrainLab />
-                </Suspense>
+                <DrivetrainLab />
             </main>
         </div>
     );

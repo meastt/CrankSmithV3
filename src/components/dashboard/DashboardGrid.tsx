@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Activity, Scale, Wrench, Gauge, ArrowRight } from 'lucide-react';
+import { haptic } from '@/lib/haptics';
 
 const tools = [
     {
@@ -98,7 +99,12 @@ export const DashboardGrid = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {tools.map((tool) => (
-                        <Link key={tool.id} href={tool.href} className="block group relative">
+                        <Link
+                            key={tool.id}
+                            href={tool.href}
+                            className="block group relative"
+                            onClick={() => haptic('light')}
+                        >
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}

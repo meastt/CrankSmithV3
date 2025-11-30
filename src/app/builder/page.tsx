@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import { PartSelector } from '@/components/builder/PartSelector';
+import { BuilderSkeleton } from '@/components/builder/BuilderSkeleton';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -13,18 +14,10 @@ export const metadata: Metadata = {
     }
 };
 
-function BuilderLoading() {
-    return (
-        <div className="h-full flex items-center justify-center">
-            <div className="animate-pulse text-stone-400">Loading builder...</div>
-        </div>
-    );
-}
-
 export default function BuilderPage() {
     return (
         <div className="h-full flex flex-col overflow-hidden">
-            <Suspense fallback={<BuilderLoading />}>
+            <Suspense fallback={<BuilderSkeleton />}>
                 <PartSelector />
             </Suspense>
         </div>

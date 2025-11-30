@@ -105,76 +105,331 @@ The primary view is **Setup A vs Setup B**. Everything flows from comparison.
 
 **Purpose:** Gamify the gram obsession. A digital workshop scale that answers: "How much lighter?" and "Is it worth the money?"
 
+**Design Philosophy:** Clean, focused, terrifying. Make the cost-per-gram the hero. Feel like a digital scale display.
+
+---
+
 ### Core Experience: Baseline vs Target
 
-Users start with a **baseline build** (import from builder or manual entry) and simulate upgrades.
+Users start with a **baseline build** (import from builder or manual entry) and simulate upgrades in real-time.
 
-### The Sacred Metric: Cost Per Gram Saved
-Every swap displays: **$X per gram** — the ultimate reality check.
+---
 
-Example: "Ultegra → Dura-Ace cassette: 45g saved, $180 = **$4.00/gram**"
+### The 5 Core Features (In Priority Order):
 
-### Features:
+#### 1. Baseline Build Entry ✅ MVP Phase 1
+**Two entry methods:**
+- [ ] **Import from saved build** — One-click from Builder/Garage
+- [ ] **Manual entry** — Quick component picker with search
 
-#### Build Weight Analyzer
-- [ ] Import saved build from bike builder
-- [ ] Manual entry for existing bikes
-- [ ] Category breakdown: Frame, Fork, Wheels, Cockpit, Drivetrain, Finishing Kit
-- [ ] Pie chart + bar chart visualizations
-- [ ] **"Heaviest Component" callout** with upgrade suggestions
+**Display after entry:**
+- [ ] Big, bold total weight (digital scale aesthetic: neon green on dark)
+- [ ] Category breakdown with percentages:
+  - Frame & Fork
+  - Wheels & Tires ⚡ (rotating weight indicator)
+  - Drivetrain ⚡
+  - Cockpit
+  - Finishing Kit
+  - Accessories
+- [ ] Simple visual: Pie chart OR horizontal bars (not both - keep it clean)
 
-#### Upgrade Simulator
-- [ ] Drag-and-drop part swaps
-- [ ] Live weight delta display
-- [ ] Cumulative savings tracker across multiple swaps
-- [ ] Running "shopping cart" total cost
-- [ ] **Priority ranking** — Best $/gram upgrades sorted
+#### 2. Cost Per Gram Saved — THE STAR FEATURE ✅ MVP Phase 1
+**The Sacred Metric:** Every upgrade shows **$X per gram saved**
 
-#### "Quick Wins" Calculator
-- [ ] Auto-suggest easiest ways to drop 100g within budget
-- [ ] Examples: "Swap to TPU tubes: -120g for $60" / "Titanium bolts kit: -35g for $45"
-- [ ] Filter by budget: $50 / $100 / $250 / $500
+**Color-coded $/gram ratings:**
+- 🟢 Under $1/gram — "Unicorn deal"
+- 🟡 $1-5/gram — "Reasonable"
+- 🟠 $5-10/gram — "Getting expensive"
+- 🔴 $10+/gram — "Madness territory"
 
-#### Rotating Weight Focus
-- [ ] **Separate section** for wheels, tires, tubes, cassette, rotors
-- [ ] Educational callout: "Rotating weight matters ~2x for acceleration"
-- [ ] Rotating weight savings highlighted differently
+**Upgrade Simulator Interface:**
+- [ ] Split view: Current Build (left) vs. Upgrade Options (right)
+- [ ] Click any component → See lighter alternatives sorted by $/gram
+- [ ] Each option shows:
+  - Component name
+  - Weight saved (e.g., "-400g")
+  - Cost added (e.g., "+$1,800")
+  - $/gram metric with color code
+  - [Add to Target Build] button
+- [ ] Rotating weight components marked with ⚡ icon
 
-#### Goal Tracking
-- [ ] Set target build weight
-- [ ] Progress bar: Current → Goal
-- [ ] "X grams to go" counter
-- [ ] UCI legal checker (6.8kg minimum) with warning
+#### 3. Live Running Totals (The Terror Display) ✅ MVP Phase 1
+**Sticky panel (always visible at top or bottom):**
 
-#### Weight Categories & Badges
-- [ ] Compare to pro team builds
-- [ ] Weight class badges: Featherweight (<6.8kg), Climbing Machine (<7.5kg), etc.
-- [ ] "Lighter than a Pinarello Dogma" achievements
+Shows real-time updates as upgrades are added:
+- [ ] **Baseline weight → Target weight**
+- [ ] **Weight saved** (green, celebrates the wins)
+- [ ] **Cost added** (RED, big and scary — "likely terrifying them")
+- [ ] **Average $/gram** across all upgrades (color-coded)
+- [ ] Action buttons: [Reset] [Save Target Build] [See Quick Wins]
 
-#### The Real Cost Display
-- [ ] **Total Build Cost Estimator** — Updates live as parts swap
-- [ ] "Your dream build costs $X" reality check
+**Example:**
+```
+BASELINE: 7,450g  →  TARGET: 6,800g
+Weight Saved: -650g 💪
+Cost Added: +$3,150 😱
+$/gram avg: $4.85/gram 🟡
+```
 
-### Data Integrity (Critical):
+Numbers animate smoothly when changed. Haptic feedback on mobile.
 
-#### Verified Weights
-- [ ] Manufacturer-stated weights with "claimed" label
-- [ ] **Community-verified weights** with photo proof
-- [ ] Discrepancy alerts: "Claimed: 180g / Community Average: 195g"
+#### 4. Rotating Weight Focus ⚡ ✅ MVP Phase 2
+**Separate highlighted section for high-impact components:**
 
-#### Community Submissions
-- [ ] "Submit Real Weight" with photo upload (part on scale)
+- [ ] Special callout panel for: Wheels, Tires, Tubes, Cassette, Rotors
+- [ ] Educational tooltip: "Rotating weight matters ~2x for acceleration and climbing"
+- [ ] Show total rotating weight as % of bike
+- [ ] Show "effective weight penalty" calculation
+- [ ] When rotating weight upgraded, show special message:
+  - "✅ Upgraded wheels: -400g → Real impact: ~800g equivalent! ⚡"
+- [ ] Suggest focusing rotating weight upgrades first
+
+**Visual treatment:**
+- ⚡ icon next to all rotating components
+- Highlighted/different background color
+- "Start here" nudge for first-time users
+
+#### 5. "Quick Wins" Calculator 🎯 ✅ MVP Phase 2
+**One-click button: [🎯 Show Me Quick Wins]**
+
+Opens a panel showing:
+- [ ] **Easiest/cheapest ways to drop 100g** based on current build
+- [ ] Algorithm scans for:
+  - Components that are "heavy for category"
+  - Low-cost, high-impact swaps
+  - Best $/gram opportunities under $100
+- [ ] Displays top 5-10 suggestions sorted by $/gram
+- [ ] Each suggestion shows:
+  - Component name and upgrade
+  - Weight saved
+  - Cost
+  - $/gram rating with color
+  - [Add This] button
+- [ ] Shows combined impact if user does multiple quick wins
+- [ ] **Filter by budget:** [Under $50] [Under $100] [Under $250] [Sky's Limit]
+
+**Example suggestions:**
+- TPU Tubes: -120g for $60 ($0.50/gram) 🟢
+- Carbon Bottle Cages: -50g for $40 ($0.80/gram) 🟢
+- Ti Seatpost Clamp: -35g for $25 ($0.71/gram) 🟢
+- Lighter Saddle: -80g for $160 ($2.00/gram) 🟡
+
+---
+
+### Visual Design (The "Scale" Aesthetic):
+
+**Color Scheme:**
+- [ ] Dark background (workshop table black/charcoal)
+- [ ] Weight numbers: Neon green (digital scale LED display)
+- [ ] Cost numbers: Bright red (danger/warning)
+- [ ] Good $/gram: Green highlights
+- [ ] Bad $/gram: Red/orange/purple gradients
+
+**Typography:**
+- [ ] Weight numbers: Monospace, bold, large (digital scale font)
+- [ ] Cost numbers: Bold, attention-grabbing
+- [ ] Body text: Clean sans-serif
+
+**Animations:**
+- [ ] Weight drops: Number animates down with green flash/pulse
+- [ ] Cost rises: Number animates up with red pulse
+- [ ] Smooth transitions when adding/removing upgrades
+- [ ] Haptic feedback on mobile for milestone moments
+
+**Mobile Optimizations:**
+- [ ] Terror display sticky at top (always visible)
+- [ ] Swipe to switch baseline/target views
+- [ ] Bottom sheet for upgrade options
+- [ ] Large touch targets
+- [ ] Quick Wins as expandable panel
+
+---
+
+### User Flow:
+
+**Step 1: Landing**
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━
+  THE SCALE
+  How heavy is your bike?
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[Import from Builder]
+or
+[Enter Manually]
+```
+
+**Step 2: Baseline Displayed**
+- Shows weight breakdown
+- Big total weight number
+- Category percentages
+- Buttons: [🎯 Quick Wins] [⚡ Optimize Rotating] [🔧 Start Upgrading]
+
+**Step 3: Upgrade Simulator**
+- Split view: Current vs. Options
+- Click component → See upgrades sorted by $/gram
+- Add to target → Numbers update live in Terror Display
+
+**Step 4: Review & Save**
+- Summary of all upgrades
+- Before/after comparison
+- Total cost breakdown
+- [Save Target Build] [Share Results] [Start Over]
+
+---
+
+### Optional Enhancements (Phase 3+):
+
+#### Reality Check Toggle (Optional Humor)
+- [ ] "Brutal Truth Mode" toggle
+- [ ] Shows occasional reality checks:
+  - "That's $4.85/gram. A nice dinner costs less."
+  - "Skipping breakfast saves 500g for $0"
+  - "Training for 2 months > $2,000 in upgrades"
+- [ ] User can turn off if they don't want sass
+
+#### Weight Category Badge (Subtle)
+- [ ] Small badge display: "Sub-7kg Club 🏆" or "UCI Legal ✅"
+- [ ] Not prominent, just a nice touch at top corner
+- [ ] Categories:
+  - Featherweight (<6.8kg)
+  - UCI Legal (6.8kg)
+  - Climbing Machine (<7.5kg)
+  - Enthusiast (7.5-9kg)
+  - Tank (>9kg)
+
+#### Share Graphics
+- [ ] Generate clean before/after card
+- [ ] Shows: Weight saved, cost added, $/gram avg
+- [ ] Optimized for Reddit, forums, Instagram
+- [ ] "I saved 650g for $3,150" headline
+
+#### "Are You Sure?" Moment
+- [ ] When total cost exceeds threshold ($5k? $10k?)
+- [ ] Popup: "😱 That's $8,500. Last chance to reconsider."
+- [ ] Just for fun, easy to dismiss
+
+---
+
+### Data Structure:
+
+**Baseline Build:**
+```typescript
+{
+  id: string;
+  name: string;
+  components: [
+    {
+      category: 'wheels' | 'frame' | 'fork' | 'tires' | 'cassette' | ...;
+      component_id: string;
+      name: string;
+      weight: number;
+      cost: number;
+      is_rotating: boolean;
+    }
+  ];
+  total_weight: number;
+  total_cost: number;
+}
+```
+
+**Target Build (Upgrade Simulation):**
+```typescript
+{
+  baseline_id: string;
+  upgrades: [
+    {
+      category: string;
+      old_component_id: string;
+      new_component_id: string;
+      weight_saved: number;
+      cost_added: number;
+      cost_per_gram: number;
+      is_rotating: boolean;
+    }
+  ];
+  new_total_weight: number;
+  total_weight_saved: number;
+  total_cost_added: number;
+  avg_cost_per_gram: number;
+}
+```
+
+---
+
+### Implementation Phases:
+
+**Phase 1: MVP (Core Functionality)**
+Priority: Weeks 1-2
+- [x] Page layout and routing (/weight)
+- [ ] Baseline entry (import from builder)
+- [ ] Manual component picker
+- [ ] Weight breakdown display
+- [ ] Upgrade simulator interface
+- [ ] Component search and filter
+- [ ] Cost per gram calculation with color coding
+- [ ] Live running totals (Terror Display)
+- [ ] Save target build
+
+**Phase 2: Smart Features (Intelligence Layer)**
+Priority: Week 3
+- [ ] Quick Wins algorithm and display
+- [ ] Rotating weight highlighting and special treatment
+- [ ] Budget filters in Quick Wins
+- [ ] "Optimize Rotating Weight" filter
+- [ ] Integration with Garage (save/load builds)
+
+**Phase 3: Polish & Delight (User Experience)**
+Priority: Week 4
+- [ ] Animations and transitions
+- [ ] Haptic feedback on mobile
+- [ ] Share graphics generation
+- [ ] Reality check toggle (optional humor)
+- [ ] Weight category badges
+- [ ] Mobile optimizations and gestures
+
+**Phase 4: Community & Data (Future)**
+- [ ] User-submitted verified weights
+- [ ] Component database expansion
+- [ ] Photo uploads of components on scales
 - [ ] Upvote/verification system
-- [ ] Contributor badges
 
-### Share Features:
-- [ ] Weight breakdown infographic
-- [ ] "Flex Your Build" social cards
-- [ ] Before/after upgrade comparison graphics
+---
 
-### Integration:
-- [ ] Deep link to bike builder for purchase flow
-- [ ] Affiliate links to retailers (monetization)
+### Success Metrics:
+
+**User Engagement:**
+- % of users who import vs. manual entry
+- Average # of upgrades simulated per session
+- % who save target build
+- % who use Quick Wins feature
+
+**Product Value:**
+- Average weight saved in simulations
+- Average cost added
+- Most popular upgrade categories
+- $/gram distribution (are users making smart choices?)
+
+**Technical:**
+- Page load time <1s
+- Component search response <100ms
+- Smooth 60fps animations
+
+---
+
+### Key Differentiators:
+
+What makes this better than a spreadsheet:
+1. **Visual & Interactive** — See impact immediately, not just numbers
+2. **Cost per gram front and center** — The ultimate reality check
+3. **Quick Wins intelligence** — AI suggests best opportunities
+4. **Rotating weight education** — Most users don't know this matters
+5. **Terror Display** — Makes cost visceral and real
+6. **Mobile-friendly** — Use at bike shop or on couch
+
+---
+
+**Design Principle:** Keep it focused. Cost per gram is king. Everything else supports that one brutal, beautiful metric.
 
 ---
 

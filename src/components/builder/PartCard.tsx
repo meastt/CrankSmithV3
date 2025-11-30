@@ -3,6 +3,7 @@
 import React from 'react';
 import { Component } from '@/lib/validation';
 import { Plus, Check, Scale, ExternalLink } from 'lucide-react';
+import { haptic } from '@/lib/haptics';
 
 interface PartCardProps {
     component: Component;
@@ -11,6 +12,10 @@ interface PartCardProps {
 }
 
 export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelected }) => {
+    const handleSelect = () => {
+        haptic('medium');
+        onSelect(component);
+    };
     const formatKey = (key: string) => key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
     const formatValue = (key: string, value: unknown) => {
@@ -110,7 +115,7 @@ export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelec
         >
             {/* Main content - tappable area */}
             <button
-                onClick={() => onSelect(component)}
+                onClick={handleSelect}
                 className="w-full text-left p-4 sm:p-5 focus:outline-none"
             >
                 {/* Header */}

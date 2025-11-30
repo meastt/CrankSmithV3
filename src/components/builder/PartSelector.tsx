@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { Component, validateComponent } from '@/lib/validation';
 import { PartCard } from './PartCard';
 import { useBuildStore } from '@/store/buildStore';
@@ -14,9 +15,16 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShareCard } from './ShareCard';
 import { getAllGearRatios, getSpeedRange, calculateClimbingIndex, parseCassetteRange } from '@/lib/gearCalculations';
 import { calculateBuildWeight, formatWeight, getBikeCategory } from '@/lib/weightCalculations';
+
+// Dynamically import ShareCard to reduce initial bundle size
+const ShareCard = dynamic(() => import('./ShareCard').then(mod => ({ default: mod.ShareCard })), {
+    ssr: false,
+    loading: () => <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="animate-pulse text-stone-400">Loading...</div>
+    </div>
+});
 
 // Build sequence - the logical order for building a bike
 // Note: types must match database values (Crankset, RearDerailleur)
