@@ -1,9 +1,25 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { DrivetrainLab } from '@/components/tools/DrivetrainLab';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+
+function DrivetrainLabLoader() {
+    return (
+        <div className="w-full max-w-6xl mx-auto animate-pulse">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+                <div className="lg:col-span-4 space-y-4">
+                    <div className="bg-stone-900/50 border border-white/5 rounded-xl h-64" />
+                    <div className="bg-stone-900/50 border border-white/5 rounded-xl h-64" />
+                </div>
+                <div className="lg:col-span-8">
+                    <div className="bg-stone-900/50 border border-white/5 rounded-xl h-80" />
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function PerformancePage() {
     return (
@@ -32,7 +48,9 @@ export default function PerformancePage() {
                     </p>
                 </div>
 
-                <DrivetrainLab />
+                <Suspense fallback={<DrivetrainLabLoader />}>
+                    <DrivetrainLab />
+                </Suspense>
             </main>
         </div>
     );
