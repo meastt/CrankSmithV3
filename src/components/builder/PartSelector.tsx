@@ -7,8 +7,10 @@ import { useBuildStore } from '@/store/buildStore';
 import {
     Eye, EyeOff, ChevronLeft, ChevronRight, Check,
     Circle, Bike, CircleDot, Disc, Settings,
-    Gauge, Cog, Layers, ArrowRight, HelpCircle, X
+    Gauge, Cog, Layers, ArrowRight, HelpCircle, X,
+    PartyPopper, Save, BarChart3, Home, RotateCcw
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -66,8 +68,19 @@ export const PartSelector: React.FC = () => {
     const [selectedWheelWidth, setSelectedWheelWidth] = useState<string | null>(null);
     const [selectedFreehub, setSelectedFreehub] = useState<string | null>(null);
     const [showFreehubGuide, setShowFreehubGuide] = useState(false);
+    const [showBuildComplete, setShowBuildComplete] = useState(false);
+    const [savingBuild, setSavingBuild] = useState(false);
     const { parts, setPart } = useBuildStore();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const router = useRouter();
+
+    // Check if build is complete (all parts selected)
+    const isBuildComplete = BUILD_SEQUENCE.every(step => parts[step.type] !== null);
+
+    // Calculate total weight
+    const totalWeight = Object.values(parts).reduce((sum, part) => {
+        return sum + (part?.attributes?.weight || part?.attributes?.weight_g || 0);
+    }, 0);
 
     const activeType = BUILD_SEQUENCE[currentStep]?.type || 'Frame';
 
@@ -88,9 +101,21 @@ export const PartSelector: React.FC = () => {
         });
     }, []);
 
-    // Also scroll to top whenever currentStep changes
+    // Scroll to top whenever currentStep changes - use multiple methods for reliability
     useEffect(() => {
+        // Immediate scroll
         scrollToTop(true);
+
+        // Also scroll the window in case the container isn't the scrolling element
+        window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+
+        // Delayed scroll to handle any async rendering
+        const timer = setTimeout(() => {
+            scrollToTop(true);
+            window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+        }, 50);
+
+        return () => clearTimeout(timer);
     }, [currentStep, scrollToTop]);
 
     // Fetch components when step changes
@@ -120,9 +145,70 @@ export const PartSelector: React.FC = () => {
             })
             .finally(() => {
                 setLoading(false);
-                scrollToTop();
+                // Scroll after loading - use multiple methods and timing
+                scrollToTop(true);
+                window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+                setTimeout(() => {
+                    scrollToTop(true);
+                    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+                }, 100);
             });
     }, [activeType, resetFilters, scrollToTop]);
+
+    // Show build complete modal when all parts are selected
+    useEffect(() => {
+        if (isBuildComplete && currentStep === BUILD_SEQUENCE.length - 1) {
+            // Small delay so the user sees their selection before the modal
+            const timer = setTimeout(() => {
+                setShowBuildComplete(true);
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [isBuildComplete, currentStep]);
+
+    // Save build function
+    const handleSaveBuild = async () => {
+        const name = window.prompt('Name your build:');
+        if (!name) return;
+
+        setSavingBuild(true);
+        try {
+            const res = await fetch('/api/builds', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, parts }),
+            });
+
+            if (res.ok) {
+                setShowBuildComplete(false);
+                router.push('/garage');
+            } else {
+                if (res.status === 401) {
+                    alert('Please sign in to save builds.');
+                } else {
+                    const errorText = await res.text();
+                    console.error('Save failed:', errorText);
+                    alert('Failed to save build. Please try again.');
+                }
+            }
+        } catch (err) {
+            console.error('Save error:', err);
+            alert('An error occurred while saving.');
+        } finally {
+            setSavingBuild(false);
+        }
+    };
+
+    // Reset build function
+    const handleResetBuild = () => {
+        BUILD_SEQUENCE.forEach(step => {
+            useBuildStore.getState().removePart(step.type);
+        });
+        setCurrentStep(0);
+        setFrameCategory(null);
+        resetFilters();
+        setShowBuildComplete(false);
+    };
 
     // Auto-advance to next step when a part is selected
     const handleSelectPart = useCallback((component: Component) => {
@@ -551,36 +637,29 @@ export const PartSelector: React.FC = () => {
                                 columns={availableWheelWidths.length <= 4 ? availableWheelWidths.length as 2 | 3 | 4 : 4}
                             />
                         ) : showFreehubSelection ? (
-                            <div>
-                                <SelectionGrid
-                                    key="freehub"
-                                    title="Select Your Freehub"
-                                    subtitle="Match your wheel's freehub body"
-                                    items={availableFreehubs.map(option => {
-                                        const count = filteredComponents.filter(c => {
-                                            const freehub = c.interfaces?.freehub_mount || c.interfaces?.freehub || '';
-                                            const freehubLower = String(freehub).toLowerCase();
-                                            return option.patterns.some(p => freehubLower.includes(p));
-                                        }).length;
-                                        return {
-                                            id: option.id,
-                                            title: option.label,
-                                            subtitle: option.subtitle,
-                                            count,
-                                            countLabel: 'cassettes'
-                                        };
-                                    })}
-                                    onSelect={(id) => setSelectedFreehub(id)}
-                                    columns={availableFreehubs.length <= 4 ? availableFreehubs.length as 2 | 3 | 4 : 2}
-                                />
-                                <button
-                                    onClick={() => setShowFreehubGuide(true)}
-                                    className="mt-4 flex items-center gap-2 mx-auto text-sm text-stone-400 hover:text-primary transition-colors"
-                                >
-                                    <HelpCircle className="w-4 h-4" />
-                                    I don&apos;t know what freehub I have
-                                </button>
-                            </div>
+                            <SelectionGrid
+                                key="freehub"
+                                title="Select Your Freehub"
+                                subtitle="Match your wheel's freehub body"
+                                helpAction={() => setShowFreehubGuide(true)}
+                                helpText="I don't know what freehub I have"
+                                items={availableFreehubs.map(option => {
+                                    const count = filteredComponents.filter(c => {
+                                        const freehub = c.interfaces?.freehub_mount || c.interfaces?.freehub || '';
+                                        const freehubLower = String(freehub).toLowerCase();
+                                        return option.patterns.some(p => freehubLower.includes(p));
+                                    }).length;
+                                    return {
+                                        id: option.id,
+                                        title: option.label,
+                                        subtitle: option.subtitle,
+                                        count,
+                                        countLabel: 'cassettes'
+                                    };
+                                })}
+                                onSelect={(id) => setSelectedFreehub(id)}
+                                columns={availableFreehubs.length <= 4 ? availableFreehubs.length as 2 | 3 | 4 : 2}
+                            />
                         ) : showBrandSelection ? (
                             <SelectionGrid
                                 key="brand"
@@ -734,6 +813,137 @@ export const PartSelector: React.FC = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Build Complete Modal */}
+            <AnimatePresence>
+                {showBuildComplete && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                        onClick={() => setShowBuildComplete(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                            className="relative w-full max-w-md bg-gray-900 rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Success Header */}
+                            <div className="pt-8 pb-4 px-6 text-center">
+                                <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ delay: 0.1, type: 'spring', damping: 15 }}
+                                    className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-primary mx-auto flex items-center justify-center mb-4"
+                                >
+                                    <PartyPopper className="w-10 h-10 text-white" />
+                                </motion.div>
+                                <motion.h2
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="text-2xl font-bold text-stone-100 mb-2"
+                                >
+                                    Build Complete!
+                                </motion.h2>
+                                <motion.p
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.3 }}
+                                    className="text-stone-400 text-sm"
+                                >
+                                    You&apos;ve selected all {BUILD_SEQUENCE.length} components
+                                    {totalWeight > 0 && (
+                                        <span className="block mt-1 text-stone-300 font-medium">
+                                            Total weight: {totalWeight.toLocaleString()}g
+                                        </span>
+                                    )}
+                                </motion.p>
+                            </div>
+
+                            {/* Next Steps */}
+                            <div className="px-6 pb-6">
+                                <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-3">
+                                    What&apos;s next?
+                                </p>
+                                <div className="space-y-2">
+                                    <button
+                                        onClick={handleSaveBuild}
+                                        disabled={savingBuild}
+                                        className="w-full flex items-center gap-3 p-4 rounded-xl bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors text-left group"
+                                    >
+                                        <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+                                            <Save className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium text-stone-100">Save to Garage</p>
+                                            <p className="text-xs text-stone-500">Keep this build for later</p>
+                                        </div>
+                                        <ArrowRight className="w-5 h-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            setShowBuildComplete(false);
+                                            router.push('/performance');
+                                        }}
+                                        className="w-full flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-violet-500/10 to-cyan-500/10 border border-violet-500/20 hover:from-violet-500/20 hover:to-cyan-500/20 transition-colors text-left group"
+                                    >
+                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500/30 to-cyan-500/30 flex items-center justify-center shrink-0">
+                                            <BarChart3 className="w-5 h-5 text-cyan-400" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium text-stone-100">Analyze Performance</p>
+                                            <p className="text-xs text-stone-400">Gear ratios, speed charts & more</p>
+                                        </div>
+                                        <ArrowRight className="w-5 h-5 text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </button>
+
+                                    <button
+                                        onClick={handleResetBuild}
+                                        className="w-full flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-colors text-left group"
+                                    >
+                                        <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                                            <RotateCcw className="w-5 h-5 text-stone-400" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium text-stone-100">Start New Build</p>
+                                            <p className="text-xs text-stone-500">Clear & begin fresh</p>
+                                        </div>
+                                        <ArrowRight className="w-5 h-5 text-stone-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </button>
+
+                                    <button
+                                        onClick={() => router.push('/')}
+                                        className="w-full flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-colors text-left group"
+                                    >
+                                        <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                                            <Home className="w-5 h-5 text-stone-400" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium text-stone-100">Go Home</p>
+                                            <p className="text-xs text-stone-500">Back to homepage</p>
+                                        </div>
+                                        <ArrowRight className="w-5 h-5 text-stone-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Close button */}
+                            <button
+                                onClick={() => setShowBuildComplete(false)}
+                                className="absolute top-4 right-4 p-2 text-stone-400 hover:text-white transition-colors rounded-lg hover:bg-white/10"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
@@ -750,6 +960,8 @@ interface SelectionItem {
 interface SelectionGridProps {
     title: string;
     subtitle?: string;
+    helpAction?: () => void;
+    helpText?: string;
     items: SelectionItem[];
     onSelect: (id: string) => void;
     columns?: 2 | 3 | 4;
@@ -759,6 +971,8 @@ interface SelectionGridProps {
 const SelectionGrid: React.FC<SelectionGridProps> = ({
     title,
     subtitle,
+    helpAction,
+    helpText,
     items,
     onSelect,
     columns = 3,
@@ -780,6 +994,15 @@ const SelectionGrid: React.FC<SelectionGridProps> = ({
             <div className="text-center mb-8">
                 <h2 className="text-2xl md:text-3xl font-bold text-stone-100 mb-2">{title}</h2>
                 {subtitle && <p className="text-stone-500 text-sm">{subtitle}</p>}
+                {helpAction && helpText && (
+                    <button
+                        onClick={helpAction}
+                        className="mt-2 inline-flex items-center gap-1.5 text-sm text-stone-400 hover:text-primary transition-colors"
+                    >
+                        <HelpCircle className="w-4 h-4" />
+                        {helpText}
+                    </button>
+                )}
             </div>
             <div className={`grid ${gridCols[columns]} gap-3 md:gap-4 mx-auto`}>
                 {items.map((item, idx) => (

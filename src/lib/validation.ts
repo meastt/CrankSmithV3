@@ -424,9 +424,23 @@ export function validateDrivetrain(
     const shifterProtocol = getInterface(shifter, 'protocol');
     const derailleurProtocol = getInterface(derailleur, 'protocol', 'cable_pull');
 
-    if (shifterProtocol && derailleurProtocol && shifterProtocol !== derailleurProtocol) {
-        compatible = false;
-        reasons.push(`Shifter protocol (${shifterProtocol}) incompatible with derailleur (${derailleurProtocol})`);
+    if (shifterProtocol && derailleurProtocol) {
+        // Normalize protocols for comparison
+        // Handle variations: "SRAM_AXS" vs "AXS", case differences, etc.
+        const normalizeProtocol = (p: string): string => {
+            let norm = String(p).toLowerCase().replace(/[\s_-]/g, '');
+            // "sramaxs" -> "axs", but keep "axs" as "axs"
+            if (norm === 'sramaxs') norm = 'axs';
+            return norm;
+        };
+
+        const norm1 = normalizeProtocol(shifterProtocol);
+        const norm2 = normalizeProtocol(derailleurProtocol);
+
+        if (norm1 !== norm2) {
+            compatible = false;
+            reasons.push(`Shifter protocol (${shifterProtocol}) incompatible with derailleur (${derailleurProtocol})`);
+        }
     }
 
     // 2. Speed Count Check (all must match)
