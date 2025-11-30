@@ -7,8 +7,9 @@ import { useBuildStore } from '@/store/buildStore';
 import {
     Eye, EyeOff, ChevronLeft, ChevronRight, Check,
     Circle, Bike, CircleDot, Disc, Settings,
-    Gauge, Cog, Layers, ArrowRight
+    Gauge, Cog, Layers, ArrowRight, HelpCircle, X
 } from 'lucide-react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Build sequence - the logical order for building a bike
@@ -64,6 +65,7 @@ export const PartSelector: React.FC = () => {
     const [selectedTireWidth, setSelectedTireWidth] = useState<string | null>(null);
     const [selectedWheelWidth, setSelectedWheelWidth] = useState<string | null>(null);
     const [selectedFreehub, setSelectedFreehub] = useState<string | null>(null);
+    const [showFreehubGuide, setShowFreehubGuide] = useState(false);
     const { parts, setPart } = useBuildStore();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -549,27 +551,36 @@ export const PartSelector: React.FC = () => {
                                 columns={availableWheelWidths.length <= 4 ? availableWheelWidths.length as 2 | 3 | 4 : 4}
                             />
                         ) : showFreehubSelection ? (
-                            <SelectionGrid
-                                key="freehub"
-                                title="Select Your Freehub"
-                                subtitle="Match your wheel's freehub body - check your hub specs if unsure"
-                                items={availableFreehubs.map(option => {
-                                    const count = filteredComponents.filter(c => {
-                                        const freehub = c.interfaces?.freehub_mount || c.interfaces?.freehub || '';
-                                        const freehubLower = String(freehub).toLowerCase();
-                                        return option.patterns.some(p => freehubLower.includes(p));
-                                    }).length;
-                                    return {
-                                        id: option.id,
-                                        title: option.label,
-                                        subtitle: option.subtitle,
-                                        count,
-                                        countLabel: 'cassettes'
-                                    };
-                                })}
-                                onSelect={(id) => setSelectedFreehub(id)}
-                                columns={availableFreehubs.length <= 4 ? availableFreehubs.length as 2 | 3 | 4 : 2}
-                            />
+                            <div>
+                                <SelectionGrid
+                                    key="freehub"
+                                    title="Select Your Freehub"
+                                    subtitle="Match your wheel's freehub body"
+                                    items={availableFreehubs.map(option => {
+                                        const count = filteredComponents.filter(c => {
+                                            const freehub = c.interfaces?.freehub_mount || c.interfaces?.freehub || '';
+                                            const freehubLower = String(freehub).toLowerCase();
+                                            return option.patterns.some(p => freehubLower.includes(p));
+                                        }).length;
+                                        return {
+                                            id: option.id,
+                                            title: option.label,
+                                            subtitle: option.subtitle,
+                                            count,
+                                            countLabel: 'cassettes'
+                                        };
+                                    })}
+                                    onSelect={(id) => setSelectedFreehub(id)}
+                                    columns={availableFreehubs.length <= 4 ? availableFreehubs.length as 2 | 3 | 4 : 2}
+                                />
+                                <button
+                                    onClick={() => setShowFreehubGuide(true)}
+                                    className="mt-4 flex items-center gap-2 mx-auto text-sm text-stone-400 hover:text-primary transition-colors"
+                                >
+                                    <HelpCircle className="w-4 h-4" />
+                                    I don&apos;t know what freehub I have
+                                </button>
+                            </div>
                         ) : showBrandSelection ? (
                             <SelectionGrid
                                 key="brand"
@@ -659,6 +670,70 @@ export const PartSelector: React.FC = () => {
                     </AnimatePresence>
                 </div>
             </div>
+
+            {/* Freehub Guide Modal - Mobile-first */}
+            <AnimatePresence>
+                {showFreehubGuide && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm"
+                        onClick={() => setShowFreehubGuide(false)}
+                    >
+                        <motion.div
+                            initial={{ y: '100%', opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: '100%', opacity: 0 }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                            className="relative w-full sm:max-w-lg sm:mx-4 bg-gray-900 rounded-t-2xl sm:rounded-2xl overflow-hidden border-t sm:border border-white/10 shadow-2xl max-h-[90vh] flex flex-col"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Drag handle for mobile */}
+                            <div className="sm:hidden flex justify-center pt-3 pb-1">
+                                <div className="w-10 h-1 rounded-full bg-white/20" />
+                            </div>
+
+                            {/* Header */}
+                            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+                                <h3 className="text-lg font-semibold text-stone-100">Freehub Guide</h3>
+                                <button
+                                    onClick={() => setShowFreehubGuide(false)}
+                                    className="p-2 -mr-2 text-stone-400 hover:text-white transition-colors rounded-lg hover:bg-white/10"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {/* Image - scrollable on small screens */}
+                            <div className="flex-1 overflow-auto">
+                                <div className="relative w-full aspect-[4/3]">
+                                    <Image
+                                        src="/images/freehub-guide.jpeg"
+                                        alt="Freehub identification guide showing Shimano HG, SRAM XDR, SRAM XD, and Campagnolo freehub bodies"
+                                        fill
+                                        className="object-contain"
+                                        priority
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="p-4 border-t border-white/10 bg-gray-950/50">
+                                <p className="text-xs sm:text-sm text-stone-400 text-center">
+                                    Still unsure? Check your wheel&apos;s product page or hub documentation.
+                                </p>
+                                <button
+                                    onClick={() => setShowFreehubGuide(false)}
+                                    className="mt-3 w-full py-3 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-colors sm:hidden"
+                                >
+                                    Got it
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
