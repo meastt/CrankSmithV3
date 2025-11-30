@@ -264,11 +264,8 @@ export function validateWheelTire(wheel: Component, tire: Component, frame?: Com
     const tireDiameter = getInterface(tire, 'diameter');
 
     if (wheelDiameter && tireDiameter) {
-        // Normalize: "700c" and "700C" should match, "29" and "29in" should match
-        const normWheel = String(wheelDiameter).toLowerCase().replace(/[^0-9a-z]/g, '');
-        const normTire = String(tireDiameter).toLowerCase().replace(/[^0-9a-z]/g, '');
-
-        if (normWheel !== normTire) {
+        // Use equivalence check: 700c ≈ 29", 650b ≈ 27.5"
+        if (!wheelSizesEquivalent(String(wheelDiameter), String(tireDiameter))) {
             compatible = false;
             reasons.push(`Wheel diameter (${wheelDiameter}) doesn't match tire (${tireDiameter})`);
         }

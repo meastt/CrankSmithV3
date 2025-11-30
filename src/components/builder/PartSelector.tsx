@@ -44,6 +44,14 @@ const WHEEL_WIDTH_RANGES = [
     { id: 'extra-wide', label: '30mm+', subtitle: 'MTB/Monster gravel', min: 30, max: 999 },
 ];
 
+// Freehub types for cassette filtering
+const FREEHUB_OPTIONS = [
+    { id: 'shimano', label: 'Shimano HG', subtitle: '11s road / 11-12s MTB', patterns: ['shimano', 'hg'] },
+    { id: 'sram-xdr', label: 'SRAM XDR', subtitle: '12s road', patterns: ['xdr'] },
+    { id: 'sram-xd', label: 'SRAM XD', subtitle: '12s MTB', patterns: ['xd'] },
+    { id: 'campagnolo', label: 'Campagnolo', subtitle: 'N3W / older', patterns: ['campagnolo', 'n3w', 'campy'] },
+];
+
 export const PartSelector: React.FC = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [frameCategory, setFrameCategory] = useState<string | null>(null);
@@ -55,6 +63,7 @@ export const PartSelector: React.FC = () => {
     const [crankConfiguration, setCrankConfiguration] = useState<'1x' | '2x' | null>(null);
     const [selectedTireWidth, setSelectedTireWidth] = useState<string | null>(null);
     const [selectedWheelWidth, setSelectedWheelWidth] = useState<string | null>(null);
+    const [selectedFreehub, setSelectedFreehub] = useState<string | null>(null);
     const { parts, setPart } = useBuildStore();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -66,12 +75,21 @@ export const PartSelector: React.FC = () => {
         setCrankConfiguration(null);
         setSelectedTireWidth(null);
         setSelectedWheelWidth(null);
+        setSelectedFreehub(null);
     }, []);
 
     // Scroll to top when step changes
-    const scrollToTop = useCallback(() => {
-        scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    const scrollToTop = useCallback((immediate = false) => {
+        scrollContainerRef.current?.scrollTo({
+            top: 0,
+            behavior: immediate ? 'instant' : 'smooth'
+        });
     }, []);
+
+    // Also scroll to top whenever currentStep changes
+    useEffect(() => {
+        scrollToTop(true);
+    }, [currentStep, scrollToTop]);
 
     // Fetch components when step changes
     useEffect(() => {
@@ -216,6 +234,18 @@ export const PartSelector: React.FC = () => {
         }
     }
 
+    // 7. Freehub filter for cassettes (user selection based on their wheel)
+    if (activeType === 'Cassette' && selectedFreehub) {
+        const option = FREEHUB_OPTIONS.find(o => o.id === selectedFreehub);
+        if (option) {
+            filteredComponents = filteredComponents.filter(c => {
+                const freehub = c.interfaces?.freehub_mount || c.interfaces?.freehub || '';
+                const freehubLower = String(freehub).toLowerCase();
+                return option.patterns.some(p => freehubLower.includes(p));
+            });
+        }
+    }
+
     // Get available tire width ranges based on compatible tires
     const availableTireRanges = activeType === 'Tire'
         ? TIRE_WIDTH_RANGES.filter(range => {
@@ -240,15 +270,37 @@ export const PartSelector: React.FC = () => {
         })
         : [];
 
+    // Get available freehub options based on selected wheel and cassettes
+    const availableFreehubs = activeType === 'Cassette'
+        ? FREEHUB_OPTIONS.filter(option => {
+            // Check if wheel supports this freehub
+            const wheelFreehub = parts.Wheel?.interfaces?.freehub;
+            const wheelSupports = !wheelFreehub || (Array.isArray(wheelFreehub)
+                ? wheelFreehub.some((f: string) => option.patterns.some(p => f.toLowerCase().includes(p)))
+                : option.patterns.some(p => String(wheelFreehub).toLowerCase().includes(p)));
+
+            if (!wheelSupports) return false;
+
+            // Check if any cassettes match this freehub
+            return filteredComponents.some(c => {
+                const freehub = c.interfaces?.freehub_mount || c.interfaces?.freehub || '';
+                const freehubLower = String(freehub).toLowerCase();
+                return option.patterns.some(p => freehubLower.includes(p));
+            });
+        })
+        : [];
+
     // Determine what selection UI to show - simplified to only meaningful choices
     const showCategorySelection = activeType === 'Frame' && !frameCategory;
     const showTireWidthSelection = activeType === 'Tire' && !selectedTireWidth && availableTireRanges.length > 1;
     const showWheelWidthSelection = activeType === 'Wheel' && !selectedWheelWidth && availableWheelWidths.length > 1;
+    const showFreehubSelection = activeType === 'Cassette' && !selectedFreehub && availableFreehubs.length > 1;
     const showBrandSelection = !selectedBrand &&
         ['Frame', 'Tire', 'Crankset', 'Wheel'].includes(activeType) &&
         !(activeType === 'Frame' && !frameCategory) &&
         !(activeType === 'Tire' && !selectedTireWidth && availableTireRanges.length > 1) &&
         !(activeType === 'Wheel' && !selectedWheelWidth && availableWheelWidths.length > 1) &&
+        !(activeType === 'Cassette' && !selectedFreehub && availableFreehubs.length > 1) &&
         filteredComponents.length > 6 && // Only show brand filter if there are many options
         uniqueBrands.length > 1;
     const showCrankConfigSelection = activeType === 'Crankset' && selectedBrand && !crankConfiguration;
@@ -259,6 +311,8 @@ export const PartSelector: React.FC = () => {
             setCrankConfiguration(null);
         } else if (selectedBrand) {
             setSelectedBrand(null);
+        } else if (selectedFreehub) {
+            setSelectedFreehub(null);
         } else if (selectedWheelWidth) {
             setSelectedWheelWidth(null);
         } else if (selectedTireWidth) {
@@ -280,6 +334,10 @@ export const PartSelector: React.FC = () => {
     if (selectedTireWidth) {
         const range = TIRE_WIDTH_RANGES.find(r => r.id === selectedTireWidth);
         if (range) breadcrumbs.push(range.label);
+    }
+    if (selectedFreehub) {
+        const option = FREEHUB_OPTIONS.find(o => o.id === selectedFreehub);
+        if (option) breadcrumbs.push(option.label);
     }
     if (selectedBrand) breadcrumbs.push(selectedBrand);
     if (crankConfiguration) breadcrumbs.push(crankConfiguration);
@@ -489,6 +547,28 @@ export const PartSelector: React.FC = () => {
                                 })}
                                 onSelect={(id) => setSelectedWheelWidth(id)}
                                 columns={availableWheelWidths.length <= 4 ? availableWheelWidths.length as 2 | 3 | 4 : 4}
+                            />
+                        ) : showFreehubSelection ? (
+                            <SelectionGrid
+                                key="freehub"
+                                title="Select Your Freehub"
+                                subtitle="Match your wheel's freehub body - check your hub specs if unsure"
+                                items={availableFreehubs.map(option => {
+                                    const count = filteredComponents.filter(c => {
+                                        const freehub = c.interfaces?.freehub_mount || c.interfaces?.freehub || '';
+                                        const freehubLower = String(freehub).toLowerCase();
+                                        return option.patterns.some(p => freehubLower.includes(p));
+                                    }).length;
+                                    return {
+                                        id: option.id,
+                                        title: option.label,
+                                        subtitle: option.subtitle,
+                                        count,
+                                        countLabel: 'cassettes'
+                                    };
+                                })}
+                                onSelect={(id) => setSelectedFreehub(id)}
+                                columns={availableFreehubs.length <= 4 ? availableFreehubs.length as 2 | 3 | 4 : 2}
                             />
                         ) : showBrandSelection ? (
                             <SelectionGrid
