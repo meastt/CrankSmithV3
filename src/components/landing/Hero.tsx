@@ -77,7 +77,7 @@ export const Hero = () => {
                     className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4"
                 >
                     <Link
-                        href="/builder"
+                        href="/builder?new=true"
                         className="group btn-primary px-6 sm:px-8 py-3.5 sm:py-4 text-white font-semibold rounded-xl flex items-center justify-center gap-2 text-base sm:text-lg"
                     >
                         Start Configuration

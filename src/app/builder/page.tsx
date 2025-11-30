@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { PartSelector } from '@/components/builder/PartSelector';
 import { Metadata } from 'next';
 
@@ -13,10 +13,20 @@ export const metadata: Metadata = {
     }
 };
 
+function BuilderLoading() {
+    return (
+        <div className="h-full flex items-center justify-center">
+            <div className="animate-pulse text-stone-400">Loading builder...</div>
+        </div>
+    );
+}
+
 export default function BuilderPage() {
     return (
         <div className="h-full flex flex-col overflow-hidden">
-            <PartSelector />
+            <Suspense fallback={<BuilderLoading />}>
+                <PartSelector />
+            </Suspense>
         </div>
     );
 }

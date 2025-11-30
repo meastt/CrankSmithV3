@@ -8,11 +8,14 @@ import {
     Eye, EyeOff, ChevronLeft, ChevronRight, Check,
     Circle, Bike, CircleDot, Disc, Settings,
     Gauge, Cog, Layers, ArrowRight, HelpCircle, X,
-    PartyPopper, Save, BarChart3, Home, RotateCcw
+    PartyPopper, Save, BarChart3, Home, RotateCcw, Share2
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ShareCard } from './ShareCard';
+import { getAllGearRatios, getSpeedRange, calculateClimbingIndex, parseCassetteRange } from '@/lib/gearCalculations';
+import { calculateBuildWeight, formatWeight, getBikeCategory } from '@/lib/weightCalculations';
 
 // Build sequence - the logical order for building a bike
 // Note: types must match database values (Crankset, RearDerailleur)
@@ -29,23 +32,46 @@ const BUILD_SEQUENCE = [
 
 const FRAME_CATEGORIES = ['Road', 'Gravel', 'MTB'];
 
-// Tire width categories for filtering
-const TIRE_WIDTH_RANGES = [
-    { id: 'road', label: '23-28mm', subtitle: 'Road racing', min: 23, max: 28 },
-    { id: 'endurance', label: '30-35mm', subtitle: 'Endurance/All-road', min: 30, max: 35 },
-    { id: 'gravel-light', label: '36-42mm', subtitle: 'Light gravel', min: 36, max: 42 },
-    { id: 'gravel', label: '43-50mm', subtitle: 'Gravel', min: 43, max: 50 },
-    { id: 'monster', label: '50-61mm', subtitle: 'Gravel Monster', min: 50, max: 61 },
-    { id: 'mtb', label: '2.4"+', subtitle: 'MTB', min: 61, max: 999 },
-];
+// Tire width categories by bike type
+const TIRE_WIDTH_RANGES_BY_CATEGORY: Record<string, { id: string; label: string; subtitle: string; min: number; max: number }[]> = {
+    Road: [
+        { id: 'race', label: '23-25mm', subtitle: 'Race', min: 23, max: 25 },
+        { id: 'standard', label: '26-28mm', subtitle: 'Standard', min: 26, max: 28 },
+        { id: 'endurance', label: '30-32mm', subtitle: 'Endurance', min: 30, max: 32 },
+    ],
+    Gravel: [
+        { id: 'fast', label: '35-40mm', subtitle: 'Fast gravel', min: 35, max: 40 },
+        { id: 'allround', label: '40-45mm', subtitle: 'All-around', min: 40, max: 45 },
+        { id: 'adventure', label: '45-50mm', subtitle: 'Adventure', min: 45, max: 50 },
+        { id: 'monster', label: '50mm+', subtitle: 'Monster gravel', min: 50, max: 70 },
+    ],
+    MTB: [
+        { id: 'xc', label: '2.0-2.25"', subtitle: 'XC Racing', min: 50, max: 57 },
+        { id: 'trail', label: '2.3-2.4"', subtitle: 'Trail', min: 58, max: 61 },
+        { id: 'enduro', label: '2.4-2.6"', subtitle: 'Enduro/AM', min: 61, max: 66 },
+        { id: 'dh', label: '2.5"+', subtitle: 'DH/Gravity', min: 64, max: 999 },
+    ],
+};
 
-// Wheel inner width categories
-const WHEEL_WIDTH_RANGES = [
-    { id: 'narrow', label: '17-21mm', subtitle: 'Road', min: 17, max: 21 },
-    { id: 'medium', label: '21-25mm', subtitle: 'All-road/Light gravel', min: 21, max: 25 },
-    { id: 'wide', label: '25-30mm', subtitle: 'Gravel', min: 25, max: 30 },
-    { id: 'extra-wide', label: '30mm+', subtitle: 'MTB/Monster gravel', min: 30, max: 999 },
-];
+// Wheel inner width categories by bike type
+const WHEEL_WIDTH_RANGES_BY_CATEGORY: Record<string, { id: string; label: string; subtitle: string; min: number; max: number }[]> = {
+    Road: [
+        { id: 'aero', label: '17-19mm', subtitle: 'Aero/Race', min: 17, max: 19 },
+        { id: 'standard', label: '19-21mm', subtitle: 'Standard', min: 19, max: 21 },
+        { id: 'wide', label: '21-25mm', subtitle: 'Wide/Endurance', min: 21, max: 25 },
+    ],
+    Gravel: [
+        { id: 'light', label: '21-24mm', subtitle: 'Light gravel', min: 21, max: 24 },
+        { id: 'allround', label: '24-28mm', subtitle: 'All-around', min: 24, max: 28 },
+        { id: 'wide', label: '28-32mm', subtitle: 'Wide/Adventure', min: 28, max: 32 },
+    ],
+    MTB: [
+        { id: 'xc', label: '25-28mm', subtitle: 'XC', min: 25, max: 28 },
+        { id: 'trail', label: '28-32mm', subtitle: 'Trail', min: 28, max: 32 },
+        { id: 'enduro', label: '32-35mm', subtitle: 'Enduro', min: 32, max: 35 },
+        { id: 'dh', label: '35mm+', subtitle: 'DH/Plus', min: 35, max: 999 },
+    ],
+};
 
 // Freehub types for cassette filtering
 const FREEHUB_OPTIONS = [
@@ -69,20 +95,37 @@ export const PartSelector: React.FC = () => {
     const [selectedFreehub, setSelectedFreehub] = useState<string | null>(null);
     const [showFreehubGuide, setShowFreehubGuide] = useState(false);
     const [showBuildComplete, setShowBuildComplete] = useState(false);
+    const [showShareCard, setShowShareCard] = useState(false);
     const [savingBuild, setSavingBuild] = useState(false);
-    const { parts, setPart } = useBuildStore();
+    const [electronicFilter, setElectronicFilter] = useState<boolean | null>(null); // null = all, true = electronic, false = mechanical
+    const [drivetrainBrandFilter, setDrivetrainBrandFilter] = useState<string | null>(null);
+    const [frameMaterialFilter, setFrameMaterialFilter] = useState<string | null>(null); // null = all, 'Carbon', 'Aluminum'
+    const [frameMtbTypeFilter, setFrameMtbTypeFilter] = useState<string | null>(null); // null = all, 'XC', 'Trail', 'Enduro'
+    const { parts, setPart, clearBuild } = useBuildStore();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     // Check if build is complete (all parts selected)
     const isBuildComplete = BUILD_SEQUENCE.every(step => parts[step.type] !== null);
 
-    // Calculate total weight
-    const totalWeight = Object.values(parts).reduce((sum, part) => {
-        return sum + (part?.attributes?.weight || part?.attributes?.weight_g || 0);
-    }, 0);
+    // Calculate total weight with finishing kit estimates
+    const weightData = calculateBuildWeight(parts);
+    const bikeCategory = getBikeCategory(parts.Frame);
+    const weightFormatted = formatWeight(weightData.totalWeight, 'metric');
 
     const activeType = BUILD_SEQUENCE[currentStep]?.type || 'Frame';
+
+    // Clear build when starting fresh (from homepage with ?new=true)
+    useEffect(() => {
+        if (searchParams.get('new') === 'true') {
+            clearBuild();
+            setCurrentStep(0);
+            setFrameCategory(null);
+            // Remove the ?new param from URL without navigation
+            window.history.replaceState({}, '', '/builder');
+        }
+    }, [searchParams, clearBuild]);
 
     // Reset filters when changing steps
     const resetFilters = useCallback(() => {
@@ -91,6 +134,10 @@ export const PartSelector: React.FC = () => {
         setSelectedTireWidth(null);
         setSelectedWheelWidth(null);
         setSelectedFreehub(null);
+        setElectronicFilter(null);
+        setDrivetrainBrandFilter(null);
+        setFrameMaterialFilter(null);
+        setFrameMtbTypeFilter(null);
     }, []);
 
     // Scroll to top when step changes
@@ -259,8 +306,18 @@ export const PartSelector: React.FC = () => {
     // Helper functions
     const getBrand = (name: string) => {
         if (name.startsWith('Santa Cruz')) return 'Santa Cruz';
-        return name.split(' ')[0];
+        if (name.startsWith('S-Works')) return 'Specialized';
+        const firstWord = name.split(' ')[0];
+        // Normalize Cervélo variants (with/without accent)
+        if (firstWord.toLowerCase().startsWith('cerv') && firstWord.toLowerCase().includes('lo')) {
+            return 'Cervelo';
+        }
+        return firstWord;
     };
+
+    // Get the tire/wheel width ranges based on selected frame category
+    const tireWidthRanges = TIRE_WIDTH_RANGES_BY_CATEGORY[frameCategory || 'Gravel'] || TIRE_WIDTH_RANGES_BY_CATEGORY.Gravel;
+    const wheelWidthRanges = WHEEL_WIDTH_RANGES_BY_CATEGORY[frameCategory || 'Gravel'] || WHEEL_WIDTH_RANGES_BY_CATEGORY.Gravel;
 
     const is1x = (component: Component) => {
         const teeth = component.attributes.teeth;
@@ -298,7 +355,7 @@ export const PartSelector: React.FC = () => {
 
     // 5. Tire width filter (user preference)
     if (activeType === 'Tire' && selectedTireWidth) {
-        const range = TIRE_WIDTH_RANGES.find(r => r.id === selectedTireWidth);
+        const range = tireWidthRanges.find(r => r.id === selectedTireWidth);
         if (range) {
             filteredComponents = filteredComponents.filter(c => {
                 const width = c.interfaces?.width || c.attributes?.width;
@@ -311,7 +368,7 @@ export const PartSelector: React.FC = () => {
 
     // 6. Wheel inner width filter (user preference)
     if (activeType === 'Wheel' && selectedWheelWidth) {
-        const range = WHEEL_WIDTH_RANGES.find(r => r.id === selectedWheelWidth);
+        const range = wheelWidthRanges.find(r => r.id === selectedWheelWidth);
         if (range) {
             filteredComponents = filteredComponents.filter(c => {
                 const width = c.attributes?.internal_width || c.attributes?.inner_width;
@@ -334,9 +391,79 @@ export const PartSelector: React.FC = () => {
         }
     }
 
+    // 8. Electronic/Mechanical filter for shifters and derailleurs
+    if ((activeType === 'Shifter' || activeType === 'RearDerailleur') && electronicFilter !== null) {
+        filteredComponents = filteredComponents.filter(c => {
+            const isElectronic = c.attributes?.electronic === true;
+            return electronicFilter ? isElectronic : !isElectronic;
+        });
+    }
+
+    // 9. Drivetrain brand filter for shifters and derailleurs
+    if ((activeType === 'Shifter' || activeType === 'RearDerailleur') && drivetrainBrandFilter) {
+        filteredComponents = filteredComponents.filter(c => getBrand(c.name) === drivetrainBrandFilter);
+    }
+
+    // 10. Frame material filter (Carbon vs Aluminum)
+    if (activeType === 'Frame' && frameCategory && frameMaterialFilter) {
+        filteredComponents = filteredComponents.filter(c => {
+            const material = c.attributes?.material || '';
+            return material.toLowerCase().includes(frameMaterialFilter.toLowerCase());
+        });
+    }
+
+    // 11. MTB subcategory filter (XC, Trail, Enduro)
+    if (activeType === 'Frame' && frameCategory === 'MTB' && frameMtbTypeFilter) {
+        filteredComponents = filteredComponents.filter(c => {
+            const subcategory = c.attributes?.subcategory || '';
+            return subcategory.toLowerCase() === frameMtbTypeFilter.toLowerCase();
+        });
+    }
+
+    // Get available drivetrain brands (for shifters/derailleurs)
+    const drivetrainBrands = (activeType === 'Shifter' || activeType === 'RearDerailleur')
+        ? Array.from(new Set(components.filter(c => isCompatible(c)).map(c => getBrand(c.name)))).sort()
+        : [];
+
+    // Check if electronic/mechanical options exist for shifters/derailleurs
+    const hasElectronicOptions = (activeType === 'Shifter' || activeType === 'RearDerailleur')
+        ? components.filter(c => isCompatible(c)).some(c => c.attributes?.electronic === true)
+        : false;
+    const hasMechanicalOptions = (activeType === 'Shifter' || activeType === 'RearDerailleur')
+        ? components.filter(c => isCompatible(c)).some(c => c.attributes?.electronic !== true)
+        : false;
+
+    // Get available frame materials for current category
+    const frameMaterials = (activeType === 'Frame' && frameCategory)
+        ? Array.from(new Set(
+            components
+                .filter(c => c.attributes.category === frameCategory)
+                .map(c => {
+                    const mat = String(c.attributes?.material || '').toLowerCase();
+                    if (mat.includes('carbon')) return 'Carbon';
+                    if (mat.includes('alum') || mat.includes('alloy')) return 'Aluminum';
+                    return null;
+                })
+                .filter(Boolean)
+          )).sort() as string[]
+        : [];
+
+    // Get available MTB subcategories
+    const mtbSubcategories = (activeType === 'Frame' && frameCategory === 'MTB')
+        ? Array.from(new Set(
+            components
+                .filter(c => c.attributes.category === 'MTB')
+                .map(c => c.attributes?.subcategory as string)
+                .filter(Boolean)
+          )).sort()
+        : [];
+
+    // Should show frame filters (material or MTB type)?
+    const showFrameFilters = activeType === 'Frame' && frameCategory && (frameMaterials.length > 1 || mtbSubcategories.length > 1);
+
     // Get available tire width ranges based on compatible tires
     const availableTireRanges = activeType === 'Tire'
-        ? TIRE_WIDTH_RANGES.filter(range => {
+        ? tireWidthRanges.filter(range => {
             return filteredComponents.some(c => {
                 const width = c.interfaces?.width || c.attributes?.width;
                 if (!width) return false;
@@ -348,7 +475,7 @@ export const PartSelector: React.FC = () => {
 
     // Get available wheel width ranges
     const availableWheelWidths = activeType === 'Wheel'
-        ? WHEEL_WIDTH_RANGES.filter(range => {
+        ? wheelWidthRanges.filter(range => {
             return filteredComponents.some(c => {
                 const width = c.attributes?.internal_width || c.attributes?.inner_width;
                 if (!width) return false;
@@ -379,9 +506,11 @@ export const PartSelector: React.FC = () => {
         : [];
 
     // Determine what selection UI to show - simplified to only meaningful choices
+    // Only Gravel needs tire/wheel width filters due to its wide range of options
+    // Road and MTB have more predictable sizing, so skip straight to component selection
     const showCategorySelection = activeType === 'Frame' && !frameCategory;
-    const showTireWidthSelection = activeType === 'Tire' && !selectedTireWidth && availableTireRanges.length > 1;
-    const showWheelWidthSelection = activeType === 'Wheel' && !selectedWheelWidth && availableWheelWidths.length > 1;
+    const showTireWidthSelection = activeType === 'Tire' && !selectedTireWidth && availableTireRanges.length > 1 && frameCategory === 'Gravel';
+    const showWheelWidthSelection = activeType === 'Wheel' && !selectedWheelWidth && availableWheelWidths.length > 1 && frameCategory === 'Gravel';
     const showFreehubSelection = activeType === 'Cassette' && !selectedFreehub && availableFreehubs.length > 1;
     const showBrandSelection = !selectedBrand &&
         ['Frame', 'Tire', 'Crankset', 'Wheel'].includes(activeType) &&
@@ -416,11 +545,11 @@ export const PartSelector: React.FC = () => {
     const breadcrumbs: string[] = [];
     if (frameCategory) breadcrumbs.push(frameCategory);
     if (selectedWheelWidth) {
-        const range = WHEEL_WIDTH_RANGES.find(r => r.id === selectedWheelWidth);
+        const range = wheelWidthRanges.find(r => r.id === selectedWheelWidth);
         if (range) breadcrumbs.push(range.label);
     }
     if (selectedTireWidth) {
-        const range = TIRE_WIDTH_RANGES.find(r => r.id === selectedTireWidth);
+        const range = tireWidthRanges.find(r => r.id === selectedTireWidth);
         if (range) breadcrumbs.push(range.label);
     }
     if (selectedFreehub) {
@@ -586,7 +715,7 @@ export const PartSelector: React.FC = () => {
                                     subtitle: cat === 'Road' ? 'Speed & efficiency on pavement' : cat === 'Gravel' ? 'Mixed terrain adventure' : 'Technical off-road',
                                     count: components.filter(c => c.attributes.category === cat).length,
                                     countLabel: 'frames'
-                                }))}
+                                })).filter(item => item.count > 0)}
                                 onSelect={(id) => setFrameCategory(id)}
                                 columns={3}
                             />
@@ -609,7 +738,7 @@ export const PartSelector: React.FC = () => {
                                         count,
                                         countLabel: 'tires'
                                     };
-                                })}
+                                }).filter(item => item.count > 0)}
                                 onSelect={(id) => setSelectedTireWidth(id)}
                                 columns={availableTireRanges.length <= 3 ? availableTireRanges.length as 2 | 3 : 3}
                             />
@@ -632,7 +761,7 @@ export const PartSelector: React.FC = () => {
                                         count,
                                         countLabel: 'wheels'
                                     };
-                                })}
+                                }).filter(item => item.count > 0)}
                                 onSelect={(id) => setSelectedWheelWidth(id)}
                                 columns={availableWheelWidths.length <= 4 ? availableWheelWidths.length as 2 | 3 | 4 : 4}
                             />
@@ -656,7 +785,7 @@ export const PartSelector: React.FC = () => {
                                         count,
                                         countLabel: 'cassettes'
                                     };
-                                })}
+                                }).filter(item => item.count > 0)}
                                 onSelect={(id) => setSelectedFreehub(id)}
                                 columns={availableFreehubs.length <= 4 ? availableFreehubs.length as 2 | 3 | 4 : 2}
                             />
@@ -665,12 +794,14 @@ export const PartSelector: React.FC = () => {
                                 key="brand"
                                 title="Choose Brand"
                                 subtitle="Filter by manufacturer"
-                                items={uniqueBrands.map(brand => ({
-                                    id: brand,
-                                    title: brand,
-                                    count: filteredComponents.filter(c => getBrand(c.name) === brand).length,
-                                    countLabel: 'models'
-                                }))}
+                                items={uniqueBrands
+                                    .map(brand => ({
+                                        id: brand,
+                                        title: brand,
+                                        count: filteredComponents.filter(c => getBrand(c.name) === brand).length,
+                                        countLabel: 'models'
+                                    }))
+                                    .filter(item => item.count > 0)}
                                 onSelect={(id) => setSelectedBrand(id)}
                                 columns={4}
                             />
@@ -682,7 +813,7 @@ export const PartSelector: React.FC = () => {
                                 items={[
                                     { id: '1x', title: '1x', subtitle: 'Single chainring - Simple & light', count: filteredComponents.filter(c => is1x(c)).length, countLabel: 'cranks' },
                                     { id: '2x', title: '2x', subtitle: 'Double chainring - Wider range', count: filteredComponents.filter(c => !is1x(c)).length, countLabel: 'cranks' }
-                                ]}
+                                ].filter(item => item.count > 0)}
                                 onSelect={(id) => setCrankConfiguration(id as '1x' | '2x')}
                                 columns={2}
                             />
@@ -719,31 +850,167 @@ export const PartSelector: React.FC = () => {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
                             >
-                                {filteredComponents.map((component, idx) => {
-                                    const compatible = isCompatible(component);
-                                    return (
-                                        <motion.div
-                                            key={component.id}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: idx * 0.03 }}
-                                            className={!compatible ? 'opacity-50 grayscale' : ''}
-                                        >
-                                            <PartCard
-                                                component={component}
-                                                onSelect={handleSelectPart}
-                                                isSelected={parts[activeType]?.id === component.id}
-                                            />
-                                            {!compatible && showIncompatible && (
-                                                <div className="text-xs text-red-400 mt-2 text-center font-medium">
-                                                    Incompatible with current build
-                                                </div>
-                                            )}
-                                        </motion.div>
-                                    );
-                                })}
+                                {/* Filter Chips for Shifters and Derailleurs */}
+                                {(activeType === 'Shifter' || activeType === 'RearDerailleur') && (drivetrainBrands.length > 1 || (hasElectronicOptions && hasMechanicalOptions)) && (
+                                    <div className="mb-4 flex flex-wrap gap-2">
+                                        {/* Electronic/Mechanical Toggle */}
+                                        {hasElectronicOptions && hasMechanicalOptions && (
+                                            <div className="flex gap-1 p-1 bg-white/5 rounded-lg">
+                                                <button
+                                                    onClick={() => setElectronicFilter(null)}
+                                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                                                        electronicFilter === null
+                                                            ? 'bg-primary text-white'
+                                                            : 'text-stone-400 hover:text-stone-200'
+                                                    }`}
+                                                >
+                                                    All
+                                                </button>
+                                                <button
+                                                    onClick={() => setElectronicFilter(true)}
+                                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
+                                                        electronicFilter === true
+                                                            ? 'bg-cyan-500 text-white'
+                                                            : 'text-stone-400 hover:text-stone-200'
+                                                    }`}
+                                                >
+                                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                                    </svg>
+                                                    Electronic
+                                                </button>
+                                                <button
+                                                    onClick={() => setElectronicFilter(false)}
+                                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
+                                                        electronicFilter === false
+                                                            ? 'bg-amber-500 text-white'
+                                                            : 'text-stone-400 hover:text-stone-200'
+                                                    }`}
+                                                >
+                                                    <Settings className="w-3 h-3" />
+                                                    Mechanical
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {/* Brand Filter Pills */}
+                                        {drivetrainBrands.length > 1 && (
+                                            <div className="flex gap-1 flex-wrap">
+                                                {drivetrainBrands.map(brand => (
+                                                    <button
+                                                        key={brand}
+                                                        onClick={() => setDrivetrainBrandFilter(drivetrainBrandFilter === brand ? null : brand)}
+                                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                                                            drivetrainBrandFilter === brand
+                                                                ? 'bg-primary text-white'
+                                                                : 'bg-white/5 text-stone-400 hover:text-stone-200 hover:bg-white/10'
+                                                        }`}
+                                                    >
+                                                        {brand}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Filter Chips for Frames */}
+                                {showFrameFilters && (
+                                    <div className="mb-4 flex flex-wrap gap-2">
+                                        {/* Material Toggle (Carbon / Aluminum) */}
+                                        {frameMaterials.length > 1 && (
+                                            <div className="flex gap-1 p-1 bg-white/5 rounded-lg">
+                                                <button
+                                                    onClick={() => setFrameMaterialFilter(null)}
+                                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                                                        frameMaterialFilter === null
+                                                            ? 'bg-primary text-white'
+                                                            : 'text-stone-400 hover:text-stone-200'
+                                                    }`}
+                                                >
+                                                    All
+                                                </button>
+                                                {frameMaterials.includes('Carbon') && (
+                                                    <button
+                                                        onClick={() => setFrameMaterialFilter(frameMaterialFilter === 'Carbon' ? null : 'Carbon')}
+                                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
+                                                            frameMaterialFilter === 'Carbon'
+                                                                ? 'bg-violet-500 text-white'
+                                                                : 'text-stone-400 hover:text-stone-200'
+                                                        }`}
+                                                    >
+                                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                                        </svg>
+                                                        Carbon
+                                                    </button>
+                                                )}
+                                                {frameMaterials.includes('Aluminum') && (
+                                                    <button
+                                                        onClick={() => setFrameMaterialFilter(frameMaterialFilter === 'Aluminum' ? null : 'Aluminum')}
+                                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
+                                                            frameMaterialFilter === 'Aluminum'
+                                                                ? 'bg-amber-500 text-white'
+                                                                : 'text-stone-400 hover:text-stone-200'
+                                                        }`}
+                                                    >
+                                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                                        </svg>
+                                                        Aluminum
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* MTB Type Filter (XC, Trail, Enduro) */}
+                                        {frameCategory === 'MTB' && mtbSubcategories.length > 1 && (
+                                            <div className="flex gap-1 flex-wrap">
+                                                {mtbSubcategories.map(subcat => (
+                                                    <button
+                                                        key={subcat}
+                                                        onClick={() => setFrameMtbTypeFilter(frameMtbTypeFilter === subcat ? null : subcat)}
+                                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                                                            frameMtbTypeFilter === subcat
+                                                                ? 'bg-emerald-500 text-white'
+                                                                : 'bg-white/5 text-stone-400 hover:text-stone-200 hover:bg-white/10'
+                                                        }`}
+                                                    >
+                                                        {subcat}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Parts Grid */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                                    {filteredComponents.map((component, idx) => {
+                                        const compatible = isCompatible(component);
+                                        return (
+                                            <motion.div
+                                                key={component.id}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: idx * 0.03 }}
+                                                className={!compatible ? 'opacity-50 grayscale' : ''}
+                                            >
+                                                <PartCard
+                                                    component={component}
+                                                    onSelect={handleSelectPart}
+                                                    isSelected={parts[activeType]?.id === component.id}
+                                                />
+                                                {!compatible && showIncompatible && (
+                                                    <div className="text-xs text-red-400 mt-2 text-center font-medium">
+                                                        Incompatible with current build
+                                                    </div>
+                                                )}
+                                            </motion.div>
+                                        );
+                                    })}
+                                </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -857,9 +1124,14 @@ export const PartSelector: React.FC = () => {
                                     className="text-stone-400 text-sm"
                                 >
                                     You&apos;ve selected all {BUILD_SEQUENCE.length} components
-                                    {totalWeight > 0 && (
-                                        <span className="block mt-1 text-stone-300 font-medium">
-                                            Total weight: {totalWeight.toLocaleString()}g
+                                    {weightData.totalWeight > 0 && (
+                                        <span className="block mt-1">
+                                            <span className="text-stone-300 font-medium">
+                                                Est. weight: {weightFormatted.value} {weightFormatted.unit}
+                                            </span>
+                                            <span className="block text-[10px] text-stone-500 mt-0.5">
+                                                Includes {bikeCategory} finishing kit estimate
+                                            </span>
                                         </span>
                                     )}
                                 </motion.p>
@@ -884,6 +1156,23 @@ export const PartSelector: React.FC = () => {
                                             <p className="text-xs text-stone-500">Keep this build for later</p>
                                         </div>
                                         <ArrowRight className="w-5 h-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            setShowBuildComplete(false);
+                                            setShowShareCard(true);
+                                        }}
+                                        className="w-full flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-pink-500/10 to-violet-500/10 border border-pink-500/20 hover:from-pink-500/20 hover:to-violet-500/20 transition-colors text-left group"
+                                    >
+                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500/30 to-violet-500/30 flex items-center justify-center shrink-0">
+                                            <Share2 className="w-5 h-5 text-pink-400" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium text-stone-100">Share Your Build</p>
+                                            <p className="text-xs text-stone-400">Create a shareable card</p>
+                                        </div>
+                                        <ArrowRight className="w-5 h-5 text-pink-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </button>
 
                                     <button
@@ -943,6 +1232,84 @@ export const PartSelector: React.FC = () => {
                         </motion.div>
                     </motion.div>
                 )}
+            </AnimatePresence>
+
+            {/* Share Card Modal */}
+            <AnimatePresence>
+                {showShareCard && parts.Frame && (() => {
+                    // Calculate data for share card
+                    const crank = parts.Crankset;
+                    const cassette = parts.Cassette;
+
+                    // Parse chainrings
+                    let chainrings: number[] = [];
+                    if (crank) {
+                        const large = crank.attributes.chainring_large as number;
+                        const small = crank.attributes.chainring_small as number;
+                        if (large) {
+                            if (small && small !== 0) chainrings = [large, small];
+                            else chainrings = [large];
+                        } else {
+                            const teeth = crank.attributes.teeth as string;
+                            if (teeth && typeof teeth === 'string') {
+                                if (teeth.includes('/')) {
+                                    chainrings = teeth.split('/').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+                                } else {
+                                    const single = parseInt(teeth, 10);
+                                    if (!isNaN(single)) chainrings = [single];
+                                }
+                            }
+                        }
+                    }
+
+                    // Parse cassette cogs
+                    let cassetteCogs: number[] = [];
+                    if (cassette) {
+                        const largest = cassette.attributes.largest_cog as number;
+                        const diff = cassette.attributes.diff as number;
+                        if (largest && diff) {
+                            cassetteCogs = parseCassetteRange(largest, largest - diff);
+                        } else {
+                            const range = cassette.attributes.range as string;
+                            if (range && typeof range === 'string') {
+                                const match = range.match(/(\d+)-(\d+)/);
+                                if (match) {
+                                    const smallest = parseInt(match[1], 10);
+                                    const largestCog = parseInt(match[2], 10);
+                                    if (!isNaN(smallest) && !isNaN(largestCog)) {
+                                        cassetteCogs = parseCassetteRange(largestCog, smallest);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Calculate metrics
+                    const gears = chainrings.length > 0 && cassetteCogs.length > 0
+                        ? getAllGearRatios(chainrings, cassetteCogs)
+                        : [];
+                    const speedRange = chainrings.length > 0 && cassetteCogs.length > 0
+                        ? getSpeedRange(chainrings, cassetteCogs, 90)
+                        : undefined;
+                    const climbingScore = gears.length > 0
+                        ? Math.min(calculateClimbingIndex(gears[0].ratio) * 100, 100)
+                        : 0;
+
+                    return (
+                        <ShareCard
+                            isModal={true}
+                            frameName={parts.Frame.name}
+                            parts={parts}
+                            chainrings={chainrings}
+                            cassetteCogs={cassetteCogs}
+                            totalWeight={weightData.totalWeight}
+                            climbingScore={climbingScore}
+                            speedRange={speedRange}
+                            unitSystem="metric"
+                            onClose={() => setShowShareCard(false)}
+                        />
+                    );
+                })()}
             </AnimatePresence>
         </div>
     );

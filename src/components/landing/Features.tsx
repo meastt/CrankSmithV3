@@ -81,7 +81,7 @@ export const Features = () => {
                     className="text-center mt-12 md:mt-16"
                 >
                     <Link
-                        href="/builder"
+                        href="/builder?new=true"
                         className="group inline-flex items-center gap-2 text-primary hover:text-primary-light font-medium transition-colors"
                     >
                         Try the builder

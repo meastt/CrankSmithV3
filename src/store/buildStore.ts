@@ -9,6 +9,7 @@ interface BuildState {
     unitSystem: 'imperial' | 'metric';
     setPart: (type: string, component: Component) => void;
     removePart: (type: string) => void;
+    clearBuild: () => void;
     setCadence: (cadence: number) => void;
     toggleUnits: () => void;
     setBuild: (parts: Record<string, Component | null>) => void;
@@ -21,10 +22,10 @@ export const useBuildStore = create<BuildState>((set, get) => ({
         Wheel: null,
         Tire: null,
         BottomBracket: null,
-        Crank: null,
-        Shifter: null,
-        Derailleur: null,
+        Crankset: null,
         Cassette: null,
+        RearDerailleur: null,
+        Shifter: null,
     },
     validationErrors: [],
     cadence: 90,
@@ -61,6 +62,22 @@ export const useBuildStore = create<BuildState>((set, get) => ({
             };
         });
         get().validateBuild();
+    },
+    clearBuild: () => {
+        set({
+            parts: {
+                Frame: null,
+                Wheel: null,
+                Tire: null,
+                BottomBracket: null,
+                Crankset: null,
+                Cassette: null,
+                RearDerailleur: null,
+                Shifter: null,
+            },
+            validationErrors: [],
+            totalWeight: 0,
+        });
     },
     setCadence: (cadence) => {
         set({ cadence });
@@ -111,9 +128,9 @@ export const useBuildStore = create<BuildState>((set, get) => ({
         }
 
         // BB-Crank Validation (check BB-Crank interface match)
-        if (parts.BottomBracket && parts.Crank) {
+        if (parts.BottomBracket && parts.Crankset) {
             const bb = parts.BottomBracket;
-            const crank = parts.Crank;
+            const crank = parts.Crankset;
             if (bb.interfaces.crank_interface !== crank.interfaces.spindle_type) {
                 errors.push(`BB crank interface (${bb.interfaces.crank_interface}) does not match Crank spindle (${crank.interfaces.spindle_type})`);
             }
@@ -121,17 +138,17 @@ export const useBuildStore = create<BuildState>((set, get) => ({
 
 
         // Shifter-Derailleur Protocol Validation
-        if (parts.Shifter && parts.Derailleur) {
+        if (parts.Shifter && parts.RearDerailleur) {
             const shifter = parts.Shifter;
-            const derailleur = parts.Derailleur;
+            const derailleur = parts.RearDerailleur;
             if (shifter.interfaces.protocol !== derailleur.interfaces.protocol) {
                 errors.push(`Shifter protocol (${shifter.interfaces.protocol}) does not match Derailleur protocol (${derailleur.interfaces.protocol})`);
             }
         }
 
         // Derailleur-Cassette Validation (max tooth and capacity)
-        if (parts.Derailleur && parts.Cassette) {
-            const derailleur = parts.Derailleur;
+        if (parts.RearDerailleur && parts.Cassette) {
+            const derailleur = parts.RearDerailleur;
             const cassette = parts.Cassette;
 
             // Max tooth check
@@ -142,10 +159,10 @@ export const useBuildStore = create<BuildState>((set, get) => ({
             }
 
             // Capacity check (if crank is present)
-            if (parts.Crank) {
+            if (parts.Crankset) {
                 const capacity = derailleur.attributes.capacity;
                 const cassetteDiff = cassette.attributes.diff;
-                const chainringDiff = parts.Crank.attributes.chainring_diff || 0;
+                const chainringDiff = parts.Crankset.attributes.chainring_diff || 0;
 
                 if (capacity && cassetteDiff !== undefined) {
                     const requiredCapacity = cassetteDiff + chainringDiff;

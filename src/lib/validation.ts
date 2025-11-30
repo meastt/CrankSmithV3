@@ -167,6 +167,7 @@ export function validateFrameWheel(frame: Component, wheel: Component, tire?: Co
     const frameWheelSize = getInterface(frame, 'wheel_size', 'wheel_diameter') ||
                            getAttribute(frame, 'wheel_size', 'wheel_diameter');
     const wheelDiameter = getInterface(wheel, 'diameter');
+    const category = getAttribute(frame, 'category');
 
     if (wheelDiameter) {
         const wheelSizeNorm = String(wheelDiameter).toLowerCase().replace(/[^0-9a-z]/g, '');
@@ -180,7 +181,6 @@ export function validateFrameWheel(frame: Component, wheel: Component, tire?: Co
             }
         } else {
             // Infer wheel size from frame category
-            const category = getAttribute(frame, 'category');
             const frameAxle = getInterface(frame, 'rear_axle');
             const isBoost = frameAxle && String(frameAxle).toLowerCase().includes('boost');
 
@@ -204,6 +204,41 @@ export function validateFrameWheel(frame: Component, wheel: Component, tire?: Co
                     compatible = false;
                     reasons.push(`MTB frame requires 29" or 27.5" wheels, not ${wheelDiameter}`);
                 }
+            }
+        }
+    }
+
+    // 1b. Wheel Inner Width Check (filter gravel wheels from road builds, etc.)
+    // Road wheels: 17-23mm inner width
+    // Gravel wheels: 21-32mm inner width
+    // MTB wheels: 25-40mm inner width
+    const wheelInnerWidth = getAttribute(wheel, 'internal_width', 'inner_width');
+    if (wheelInnerWidth && category) {
+        const innerW = Number(wheelInnerWidth);
+
+        if (category === 'Road') {
+            // Road wheels should be 17-23mm inner width
+            // Wheels wider than 23mm are gravel/MTB wheels
+            if (innerW > 23) {
+                compatible = false;
+                reasons.push(`Wheel inner width (${innerW}mm) too wide for road bike - use wheels with 17-23mm inner width`);
+            }
+        } else if (category === 'Gravel') {
+            // Gravel wheels are typically 21-32mm
+            // Anything under 19mm is too narrow (pure road), over 35mm is MTB
+            if (innerW < 19) {
+                compatible = false;
+                reasons.push(`Wheel inner width (${innerW}mm) too narrow for gravel bike - use wheels with 21-32mm inner width`);
+            } else if (innerW > 35) {
+                compatible = false;
+                reasons.push(`Wheel inner width (${innerW}mm) too wide for gravel bike - use wheels with 21-32mm inner width`);
+            }
+        } else if (category === 'MTB') {
+            // MTB wheels are typically 25-40mm
+            // Anything under 25mm is too narrow
+            if (innerW < 25) {
+                compatible = false;
+                reasons.push(`Wheel inner width (${innerW}mm) too narrow for MTB - use wheels with 25-40mm inner width`);
             }
         }
     }
@@ -431,6 +466,10 @@ export function validateDrivetrain(
             let norm = String(p).toLowerCase().replace(/[\s_-]/g, '');
             // "sramaxs" -> "axs", but keep "axs" as "axs"
             if (norm === 'sramaxs') norm = 'axs';
+            // Normalize Di2 variations: "shimanodi2", "di212swireless" -> "di2"
+            if (norm.includes('di2')) norm = 'di2';
+            // Normalize mechanical Shimano road 12s: "shimanoroad12smech" -> "shimanoroad12smech"
+            if (norm.includes('shimanoroad12smech')) norm = 'shimanoroad12smech';
             return norm;
         };
 
