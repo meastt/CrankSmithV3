@@ -26,6 +26,15 @@ const BUILD_SEQUENCE = [
 
 const FRAME_CATEGORIES = ['Road', 'Gravel', 'MTB'];
 
+// Tire width categories for filtering
+const TIRE_WIDTH_RANGES = [
+    { id: 'road', label: '23-28mm', subtitle: 'Road racing', min: 23, max: 28 },
+    { id: 'endurance', label: '30-35mm', subtitle: 'Endurance/All-road', min: 30, max: 35 },
+    { id: 'gravel-light', label: '36-42mm', subtitle: 'Light gravel', min: 36, max: 42 },
+    { id: 'gravel', label: '43-50mm', subtitle: 'Gravel', min: 43, max: 50 },
+    { id: 'mtb', label: '50mm+', subtitle: 'MTB/Bikepacking', min: 50, max: 999 },
+];
+
 export const PartSelector: React.FC = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [frameCategory, setFrameCategory] = useState<string | null>(null);
@@ -35,6 +44,7 @@ export const PartSelector: React.FC = () => {
     const [showIncompatible, setShowIncompatible] = useState(false);
     const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
     const [crankConfiguration, setCrankConfiguration] = useState<'1x' | '2x' | null>(null);
+    const [selectedTireWidth, setSelectedTireWidth] = useState<string | null>(null);
     const { parts, setPart } = useBuildStore();
 
     const activeType = BUILD_SEQUENCE[currentStep]?.type || 'Frame';
@@ -43,6 +53,7 @@ export const PartSelector: React.FC = () => {
     const resetFilters = useCallback(() => {
         setSelectedBrand(null);
         setCrankConfiguration(null);
+        setSelectedTireWidth(null);
     }, []);
 
     // Fetch components when step changes
@@ -154,28 +165,57 @@ export const PartSelector: React.FC = () => {
     }
 
     // 4. Crank configuration filter (user preference)
-    if (activeType === 'Crank' && crankConfiguration) {
+    if (activeType === 'Crankset' && crankConfiguration) {
         filteredComponents = filteredComponents.filter(c => {
             const isSingle = is1x(c);
             return crankConfiguration === '1x' ? isSingle : !isSingle;
         });
     }
 
+    // 5. Tire width filter (user preference)
+    if (activeType === 'Tire' && selectedTireWidth) {
+        const range = TIRE_WIDTH_RANGES.find(r => r.id === selectedTireWidth);
+        if (range) {
+            filteredComponents = filteredComponents.filter(c => {
+                const width = c.interfaces?.width || c.attributes?.width;
+                if (!width) return true;
+                const w = Number(width);
+                return w >= range.min && w <= range.max;
+            });
+        }
+    }
+
+    // Get available tire width ranges based on compatible tires
+    const availableTireRanges = activeType === 'Tire'
+        ? TIRE_WIDTH_RANGES.filter(range => {
+            return filteredComponents.some(c => {
+                const width = c.interfaces?.width || c.attributes?.width;
+                if (!width) return false;
+                const w = Number(width);
+                return w >= range.min && w <= range.max;
+            });
+        })
+        : [];
+
     // Determine what selection UI to show - simplified to only meaningful choices
     const showCategorySelection = activeType === 'Frame' && !frameCategory;
+    const showTireWidthSelection = activeType === 'Tire' && !selectedTireWidth && availableTireRanges.length > 1;
     const showBrandSelection = !selectedBrand &&
-        ['Frame', 'Tire', 'Crank'].includes(activeType) &&
+        ['Frame', 'Tire', 'Crankset'].includes(activeType) &&
         !(activeType === 'Frame' && !frameCategory) &&
+        !(activeType === 'Tire' && !selectedTireWidth && availableTireRanges.length > 1) &&
         filteredComponents.length > 6 && // Only show brand filter if there are many options
         uniqueBrands.length > 1;
-    const showCrankConfigSelection = activeType === 'Crank' && selectedBrand && !crankConfiguration;
+    const showCrankConfigSelection = activeType === 'Crankset' && selectedBrand && !crankConfiguration;
 
     // Handle back navigation
     const handleBack = () => {
-        if (activeType === 'Crank' && crankConfiguration) {
+        if (activeType === 'Crankset' && crankConfiguration) {
             setCrankConfiguration(null);
         } else if (selectedBrand) {
             setSelectedBrand(null);
+        } else if (selectedTireWidth) {
+            setSelectedTireWidth(null);
         } else if (frameCategory) {
             setFrameCategory(null);
         } else if (currentStep > 0) {
@@ -186,6 +226,10 @@ export const PartSelector: React.FC = () => {
     // Breadcrumbs
     const breadcrumbs: string[] = [];
     if (frameCategory) breadcrumbs.push(frameCategory);
+    if (selectedTireWidth) {
+        const range = TIRE_WIDTH_RANGES.find(r => r.id === selectedTireWidth);
+        if (range) breadcrumbs.push(range.label);
+    }
     if (selectedBrand) breadcrumbs.push(selectedBrand);
     if (crankConfiguration) breadcrumbs.push(crankConfiguration);
 
@@ -348,6 +392,29 @@ export const PartSelector: React.FC = () => {
                                 }))}
                                 onSelect={(id) => setFrameCategory(id)}
                                 columns={3}
+                            />
+                        ) : showTireWidthSelection ? (
+                            <SelectionGrid
+                                key="tirewidth"
+                                title="Select Tire Width"
+                                subtitle="Choose your preferred tire size range"
+                                items={availableTireRanges.map(range => {
+                                    const count = filteredComponents.filter(c => {
+                                        const width = c.interfaces?.width || c.attributes?.width;
+                                        if (!width) return false;
+                                        const w = Number(width);
+                                        return w >= range.min && w <= range.max;
+                                    }).length;
+                                    return {
+                                        id: range.id,
+                                        title: range.label,
+                                        subtitle: range.subtitle,
+                                        count,
+                                        countLabel: 'tires'
+                                    };
+                                })}
+                                onSelect={(id) => setSelectedTireWidth(id)}
+                                columns={availableTireRanges.length <= 3 ? availableTireRanges.length as 2 | 3 : 3}
                             />
                         ) : showBrandSelection ? (
                             <SelectionGrid
