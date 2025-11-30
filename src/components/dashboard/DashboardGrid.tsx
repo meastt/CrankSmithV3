@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Activity, Scale, Wrench, Gauge, ArrowRight } from 'lucide-react';
+import { Activity, Scale, Wrench, Gauge, ArrowRight, Bike } from 'lucide-react';
 import { haptic } from '@/lib/haptics';
 
 const tools = [
@@ -151,6 +151,57 @@ export const DashboardGrid = () => {
                         </Link>
                     ))}
                 </div>
+
+                {/* My Garage Card */}
+                <Link
+                    href="/garage"
+                    className="block group relative mt-6"
+                    onClick={() => haptic('light')}
+                >
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                        className="
+                            relative overflow-hidden p-8 rounded-3xl bg-stone-900/40 backdrop-blur-md border border-white/5
+                            transition-all duration-500 ease-out
+                            group-hover:border-violet-500/50 hover:bg-stone-900/60 hover:scale-[1.01] hover:shadow-2xl
+                        "
+                    >
+                        {/* Hover Gradient Background */}
+                        <div className="
+                            absolute inset-0 rounded-3xl bg-gradient-to-r from-violet-500/20 via-purple-500/20 to-indigo-500/20
+                            opacity-0 group-hover:opacity-100 transition-opacity duration-500
+                        " />
+
+                        <div className="relative z-10 flex flex-col items-center text-center gap-4">
+                            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-violet-400 group-hover:bg-white/10 transition-colors mb-2">
+                                <Bike className="w-8 h-8" />
+                            </div>
+
+                            <div>
+                                <h3 className="text-sm font-mono font-medium text-stone-500 mb-1 uppercase tracking-wider">
+                                    Your Collection
+                                </h3>
+                                <h2 className="text-3xl font-bold text-white group-hover:text-violet-400 transition-colors">
+                                    My Garage
+                                </h2>
+                                <p className="text-stone-400 mt-1 group-hover:text-stone-300 transition-colors max-w-lg mx-auto">
+                                    Manage your saved builds, projects, and dream bikes.
+                                </p>
+                            </div>
+
+                            <div className="
+                                absolute right-8 top-1/2 -translate-y-1/2
+                                p-3 rounded-full border border-white/5 text-stone-500
+                                group-hover:border-white/20 group-hover:text-white transition-all
+                                group-hover:translate-x-1 hidden md:block
+                            ">
+                                <ArrowRight className="w-6 h-6" />
+                            </div>
+                        </div>
+                    </motion.div>
+                </Link>
             </div>
         </section>
     );

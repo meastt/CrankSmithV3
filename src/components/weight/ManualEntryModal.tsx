@@ -7,6 +7,7 @@ import type { WeightComponent, ComponentCategory } from '@/types/weight';
 import { ROTATING_WEIGHT_CATEGORIES, CATEGORY_GROUPS } from '@/types/weight';
 import { createEmptyBaselineBuild, addComponentToBaseline } from '@/lib/weightConversion';
 import { haptic } from '@/lib/haptics';
+import { useToast } from '@/components/ui/Toast';
 
 interface ManualEntryModalProps {
     isOpen: boolean;
@@ -15,6 +16,7 @@ interface ManualEntryModalProps {
 }
 
 export function ManualEntryModal({ isOpen, onClose, onSave }: ManualEntryModalProps) {
+    const { toast } = useToast();
     const [components, setComponents] = useState<WeightComponent[]>([]);
     const [formData, setFormData] = useState({
         category: '' as ComponentCategory | '',
@@ -32,7 +34,11 @@ export function ManualEntryModal({ isOpen, onClose, onSave }: ManualEntryModalPr
 
     const handleAddComponent = () => {
         if (!formData.category || !formData.name || !formData.weight) {
-            alert('Please fill in category, name, and weight');
+            toast({
+                type: 'error',
+                title: 'Missing Fields',
+                message: 'Please fill in category, name, and weight',
+            });
             return;
         }
 
@@ -42,12 +48,20 @@ export function ManualEntryModal({ isOpen, onClose, onSave }: ManualEntryModalPr
         const cost = formData.cost ? parseFloat(formData.cost) : undefined;
 
         if (isNaN(weight) || weight <= 0) {
-            alert('Please enter a valid weight');
+            toast({
+                type: 'error',
+                title: 'Invalid Weight',
+                message: 'Please enter a valid weight in grams',
+            });
             return;
         }
 
         if (formData.cost && (isNaN(cost!) || cost! < 0)) {
-            alert('Please enter a valid cost');
+            toast({
+                type: 'error',
+                title: 'Invalid Cost',
+                message: 'Please enter a valid cost',
+            });
             return;
         }
 
@@ -82,7 +96,11 @@ export function ManualEntryModal({ isOpen, onClose, onSave }: ManualEntryModalPr
 
     const handleSave = () => {
         if (components.length === 0) {
-            alert('Please add at least one component');
+            toast({
+                type: 'error',
+                title: 'Empty Build',
+                message: 'Please add at least one component',
+            });
             return;
         }
 

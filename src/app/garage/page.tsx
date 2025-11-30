@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 export const dynamic = 'force-dynamic';
 import { useBuildStore } from '@/store/buildStore';
 import { useRouter } from 'next/navigation';
-import { Trash2, Edit3, Bike, ArrowRight } from 'lucide-react';
+import { Trash2, Edit3, Bike, ArrowRight, Settings } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 
 interface SavedBuild {
@@ -92,12 +92,21 @@ export default function GaragePage() {
                         <h1 className="text-3xl font-bold text-white tracking-tight">My Garage</h1>
                         <p className="text-gray-400 mt-2">Manage your saved builds and projects.</p>
                     </div>
-                    <button
-                        onClick={() => router.push('/builder')}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors flex items-center"
-                    >
-                        New Build <ArrowRight className="w-4 h-4 ml-2" />
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => router.push('/settings')}
+                            className="p-2 text-stone-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                            title="Settings"
+                        >
+                            <Settings className="w-5 h-5" />
+                        </button>
+                        <button
+                            onClick={() => router.push('/builder')}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors flex items-center"
+                        >
+                            New Build <ArrowRight className="w-4 h-4 ml-2" />
+                        </button>
+                    </div>
                 </div>
 
                 {builds.length === 0 ? (
