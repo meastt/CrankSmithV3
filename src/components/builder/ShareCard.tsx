@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Component } from '@/lib/validation';
 import html2canvas from 'html2canvas';
+import { toSpeed, speedUnit, toWeight, weightUnit } from '@/lib/unitConversions';
 
 interface ShareCardProps {
     frameName: string;
@@ -48,14 +49,12 @@ export const ShareCard: React.FC<ShareCardProps> = ({
     const [copied, setCopied] = useState(false);
     const [downloading, setDownloading] = useState(false);
 
-    const weightDisplay = unitSystem === 'imperial'
-        ? (totalWeight / 453.592).toFixed(1)
-        : (totalWeight / 1000).toFixed(1);
-    const weightUnit = unitSystem === 'imperial' ? 'lbs' : 'kg';
+    const weightDisplay = toWeight(totalWeight / 1000, unitSystem).toFixed(1);
+    const weightLabel = weightUnit(unitSystem);
 
-    const speedMin = speedRange ? (unitSystem === 'imperial' ? speedRange.min * 0.621371 : speedRange.min).toFixed(0) : '--';
-    const speedMax = speedRange ? (unitSystem === 'imperial' ? speedRange.max * 0.621371 : speedRange.max).toFixed(0) : '--';
-    const speedUnit = unitSystem === 'imperial' ? 'mph' : 'km/h';
+    const speedMin = speedRange ? toSpeed(speedRange.min, unitSystem).toFixed(0) : '--';
+    const speedMax = speedRange ? toSpeed(speedRange.max, unitSystem).toFixed(0) : '--';
+    const speedLabel = speedUnit(unitSystem);
 
     const gearConfig = chainrings.length === 1 ? '1x' : '2x';
     const totalGears = chainrings.length * cassetteCogs.length;
@@ -173,7 +172,7 @@ export const ShareCard: React.FC<ShareCardProps> = ({
                         <span className="text-2xl font-bold font-mono text-white">{speedMin}</span>
                         <span className="text-stone-500">to</span>
                         <span className="text-2xl font-bold font-mono text-cyan-400">{speedMax}</span>
-                        <span className="text-xs text-stone-500 ml-1">{speedUnit}</span>
+                        <span className="text-xs text-stone-500 ml-1">{speedLabel}</span>
                     </div>
                     <div className="text-[10px] text-stone-600 mt-1">Low gear → Top gear</div>
                 </div>
@@ -186,7 +185,7 @@ export const ShareCard: React.FC<ShareCardProps> = ({
                     </div>
                     <div className="flex items-baseline gap-1">
                         <span className="text-2xl font-bold font-mono text-white">{weightDisplay}</span>
-                        <span className="text-xs text-stone-500">{weightUnit}</span>
+                        <span className="text-xs text-stone-500">{weightLabel}</span>
                     </div>
                 </div>
 

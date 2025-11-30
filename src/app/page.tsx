@@ -1,5 +1,4 @@
-import { Hero } from "@/components/landing/Hero";
-import { Features } from "@/components/landing/Features";
+import { DashboardGrid } from "@/components/dashboard/DashboardGrid";
 
 export default function Home() {
   const schema = {
@@ -42,9 +41,8 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
-      <main className="min-h-screen bg-stone-950 relative noise-overlay">
-        <Hero />
-        <Features />
+      <main className="min-h-screen bg-stone-950 relative">
+        <DashboardGrid />
       </main>
     </>
   );

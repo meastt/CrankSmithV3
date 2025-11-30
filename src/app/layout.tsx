@@ -27,13 +27,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "CrankSmith | Professional Bicycle Compatibility & Builder Tool",
-  description: "Professional bike compatibility checker and builder tool. Validate part compatibility, calculate gear ratios, and engineer your dream build with precision. Free compatibility checker for road, gravel, and MTB.",
-  keywords: ["bike compatibility checker", "bicycle gear ratio calculator", "bike builder tool", "bike weight calculator", "drivetrain compatibility", "bottom bracket compatibility", "mullet drivetrain", "cycling tool", "bike part compatibility"],
+  title: "CrankSmith | The Ultimate Bicycle Builder & Compatibility Tool",
+  description: "Build your dream bike with confidence. Check part compatibility, calculate gear ratios, optimize tire pressure, and estimate weight. The precision tool for serious cyclists.",
+  keywords: ["bike compatibility checker", "bicycle gear ratio calculator", "bike builder tool", "bike weight calculator", "drivetrain compatibility", "tire pressure calculator", "cycling tool", "bike part compatibility"],
   authors: [{ name: "CrankSmith Team" }],
   openGraph: {
-    title: "CrankSmith | Professional Bicycle Compatibility & Builder Tool",
-    description: "Professional bike compatibility checker and builder tool. Validate part compatibility, calculate gear ratios, and engineer your dream build.",
+    title: "CrankSmith | The Ultimate Bicycle Builder & Compatibility Tool",
+    description: "Build your dream bike with confidence. Check part compatibility, calculate gear ratios, optimize tire pressure, and estimate weight.",
     url: "https://cranksmith.com",
     siteName: "CrankSmith",
     locale: "en_US",
@@ -41,8 +41,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "CrankSmith | Bike Compatibility & Builder Tool",
-    description: "Professional bike compatibility checker. Validate parts, calculate gear ratios, and build with confidence.",
+    title: "CrankSmith | The Ultimate Bicycle Builder & Compatibility Tool",
+    description: "Build your dream bike with confidence. Check part compatibility, calculate gear ratios, and optimize tire pressure.",
   },
   robots: {
     index: true,

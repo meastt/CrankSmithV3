@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useBuildStore } from '@/store/buildStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { Scale, Gauge, Mountain, Settings2, Zap } from 'lucide-react';
 import {
     getAllGearRatios,
@@ -9,9 +10,11 @@ import {
     calculateClimbingIndex,
     parseCassetteRange,
 } from '@/lib/gearCalculations';
+import { toSpeed, speedUnit, toWeight, weightUnit } from '@/lib/unitConversions';
 
 export const PerformancePanel: React.FC = () => {
-    const { parts, cadence, totalWeight, unitSystem, setCadence, toggleUnits } = useBuildStore();
+    const { parts, cadence, totalWeight, setCadence } = useBuildStore();
+    const { unitSystem, toggleUnitSystem } = useSettingsStore();
 
     const crank = parts.Crank;
     const cassette = parts.Cassette;
@@ -43,15 +46,10 @@ export const PerformancePanel: React.FC = () => {
         climbingIndex = calculateClimbingIndex(gears[0].ratio);
     }
 
-    const weightDisplay = unitSystem === 'imperial'
-        ? (totalWeight / 453.592).toFixed(2)
-        : (totalWeight / 1000).toFixed(2);
-    const weightUnit = unitSystem === 'imperial' ? 'lbs' : 'kg';
+    const weightDisplay = toWeight(totalWeight / 1000, unitSystem).toFixed(2);
+    const weightLabel = weightUnit(unitSystem);
 
-    const convertSpeed = (kmh: number) => {
-        return unitSystem === 'imperial' ? kmh * 0.621371 : kmh;
-    };
-    const speedUnit = unitSystem === 'imperial' ? 'mph' : 'km/h';
+    const speedLabel = speedUnit(unitSystem);
 
     return (
         <div className="flex flex-col h-full">
@@ -62,7 +60,7 @@ export const PerformancePanel: React.FC = () => {
                     <p className="text-xs text-stone-500 mt-0.5">Real-time build metrics</p>
                 </div>
                 <button
-                    onClick={toggleUnits}
+                    onClick={toggleUnitSystem}
                     className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-medium text-stone-400 hover:text-stone-200 transition-colors border border-white/5"
                 >
                     {unitSystem === 'imperial' ? 'US' : 'METRIC'}
@@ -81,7 +79,7 @@ export const PerformancePanel: React.FC = () => {
                         {totalWeight > 0 ? (
                             <>
                                 {weightDisplay}
-                                <span className="text-base text-stone-500 font-medium ml-1">{weightUnit}</span>
+                                <span className="text-base text-stone-500 font-medium ml-1">{weightLabel}</span>
                             </>
                         ) : (
                             <span className="text-lg text-stone-600">--</span>
@@ -159,15 +157,15 @@ export const PerformancePanel: React.FC = () => {
                                     <div>
                                         <p className="text-xs text-stone-500 mb-1">Min</p>
                                         <p className="text-xl font-bold text-stone-100 font-mono">
-                                            {convertSpeed(speedRange.min).toFixed(1)}
-                                            <span className="text-xs text-stone-500 font-normal ml-1">{speedUnit}</span>
+                                            {toSpeed(speedRange.min, unitSystem).toFixed(1)}
+                                            <span className="text-xs text-stone-500 font-normal ml-1">{speedLabel}</span>
                                         </p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-stone-500 mb-1">Max</p>
                                         <p className="text-xl font-bold text-stone-100 font-mono">
-                                            {convertSpeed(speedRange.max).toFixed(1)}
-                                            <span className="text-xs text-stone-500 font-normal ml-1">{speedUnit}</span>
+                                            {toSpeed(speedRange.max, unitSystem).toFixed(1)}
+                                            <span className="text-xs text-stone-500 font-normal ml-1">{speedLabel}</span>
                                         </p>
                                     </div>
                                 </div>

@@ -4,18 +4,20 @@ import { UserButton, SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Wrench, Warehouse, GitCompare, BookOpen } from 'lucide-react';
+import { Menu, X, Wrench, Activity, Gauge, Scale } from 'lucide-react';
+import { useSettingsStore } from '@/store/settingsStore';
 
 const navLinks = [
     { href: '/builder', label: 'Builder', icon: Wrench },
-    { href: '/garage', label: 'Garage', icon: Warehouse },
-    { href: '/compatibility', label: 'Compatibility', icon: GitCompare },
-    { href: '/guides', label: 'Guides', icon: BookOpen },
+    { href: '/performance', label: 'Drivetrain', icon: Activity },
+    { href: '/tire-pressure', label: 'Tire Pressure', icon: Gauge },
+    { href: '/weight', label: 'Scale', icon: Scale },
 ];
 
 export function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const { unitSystem, toggleUnitSystem } = useSettingsStore();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -40,11 +42,10 @@ export function Header() {
     return (
         <>
             <header
-                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-                    scrolled
-                        ? 'bg-stone-950/90 backdrop-blur-xl border-b border-white/5'
-                        : 'bg-transparent'
-                }`}
+                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
+                    ? 'bg-stone-950/90 backdrop-blur-xl border-b border-white/5'
+                    : 'bg-transparent'
+                    }`}
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6">
                     <div className="flex justify-between items-center h-16 md:h-18">
@@ -90,6 +91,12 @@ export function Header() {
                             ))}
 
                             <div className="ml-4 pl-4 border-l border-white/10 flex items-center gap-3">
+                                <button
+                                    onClick={toggleUnitSystem}
+                                    className="px-3 py-1.5 text-xs font-mono font-bold text-stone-500 hover:text-white border border-white/10 rounded uppercase transition-colors"
+                                >
+                                    {unitSystem === 'metric' ? 'KM/H' : 'MPH'}
+                                </button>
                                 <SignedIn>
                                     <UserButton
                                         appearance={{
@@ -181,6 +188,22 @@ export function Header() {
                                         </Link>
                                     </motion.div>
                                 ))}
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.3 }}
+                                    className="px-4 py-4"
+                                >
+                                    <button
+                                        onClick={toggleUnitSystem}
+                                        className="w-full flex items-center justify-between px-4 py-3 text-lg font-medium text-stone-300 hover:text-stone-100 bg-white/5 rounded-xl transition-all"
+                                    >
+                                        <span>Units</span>
+                                        <span className="font-mono font-bold text-primary">
+                                            {unitSystem === 'metric' ? 'Metric (KM/H)' : 'Imperial (MPH)'}
+                                        </span>
+                                    </button>
+                                </motion.div>
                             </div>
 
                             <motion.div

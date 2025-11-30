@@ -6,12 +6,10 @@ interface BuildState {
     validationErrors: string[];
     cadence: number;
     totalWeight: number;
-    unitSystem: 'imperial' | 'metric';
     setPart: (type: string, component: Component) => void;
     removePart: (type: string) => void;
     clearBuild: () => void;
     setCadence: (cadence: number) => void;
-    toggleUnits: () => void;
     setBuild: (parts: Record<string, Component | null>) => void;
     validateBuild: () => Promise<void>;
 }
@@ -30,7 +28,6 @@ export const useBuildStore = create<BuildState>((set, get) => ({
     validationErrors: [],
     cadence: 90,
     totalWeight: 0,
-    unitSystem: 'imperial',
     setPart: (type, component) => {
         set((state) => {
             const newParts = { ...state.parts, [type]: component };
@@ -81,11 +78,6 @@ export const useBuildStore = create<BuildState>((set, get) => ({
     },
     setCadence: (cadence) => {
         set({ cadence });
-    },
-    toggleUnits: () => {
-        set((state) => ({
-            unitSystem: state.unitSystem === 'imperial' ? 'metric' : 'imperial',
-        }));
     },
     setBuild: (parts) => {
         set((state) => {

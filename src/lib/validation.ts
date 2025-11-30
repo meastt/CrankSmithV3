@@ -118,16 +118,16 @@ function isDiscBrake(brakeValue: string | undefined): boolean {
     if (!brakeValue) return false;
     const lower = brakeValue.toLowerCase();
     return lower.includes('disc') ||
-           lower.includes('flat_mount') ||
-           lower.includes('flat mount') ||
-           lower.includes('post_mount') ||
-           lower.includes('post mount') ||
-           lower.includes('direct_mount') ||
-           lower.includes('direct mount') ||
-           lower.includes('centerlock') ||
-           lower.includes('6-bolt') ||
-           lower.includes('160mm') ||    // Rotor size implies disc
-           lower.includes('140mm');      // Rotor size implies disc
+        lower.includes('flat_mount') ||
+        lower.includes('flat mount') ||
+        lower.includes('post_mount') ||
+        lower.includes('post mount') ||
+        lower.includes('direct_mount') ||
+        lower.includes('direct mount') ||
+        lower.includes('centerlock') ||
+        lower.includes('6-bolt') ||
+        lower.includes('160mm') ||    // Rotor size implies disc
+        lower.includes('140mm');      // Rotor size implies disc
 }
 
 /**
@@ -165,7 +165,7 @@ export function validateFrameWheel(frame: Component, wheel: Component, tire?: Co
     // 1. Wheel Size Check
     // Frame may have wheel_size, or we infer from category
     const frameWheelSize = getInterface(frame, 'wheel_size', 'wheel_diameter') ||
-                           getAttribute(frame, 'wheel_size', 'wheel_diameter');
+        getAttribute(frame, 'wheel_size', 'wheel_diameter');
     const wheelDiameter = getInterface(wheel, 'diameter');
     const category = getAttribute(frame, 'category');
 
@@ -192,12 +192,14 @@ export function validateFrameWheel(frame: Component, wheel: Component, tire?: Co
                 }
             } else if (category === 'Gravel') {
                 // Most gravel frames are 700c, some accept 650b
-                // For now, default to 700c unless frame explicitly says otherwise
-                if (wheelSizeNorm !== '700c' && wheelSizeNorm !== '650b') {
+                // Allow both unless frame explicitly restricts it (handled above)
+                const is700c = wheelSizesEquivalent(wheelSizeNorm, '700c');
+                const is650b = wheelSizesEquivalent(wheelSizeNorm, '650b');
+
+                if (!is700c && !is650b) {
                     compatible = false;
                     reasons.push(`Gravel frame requires 700c or 650b wheels, not ${wheelDiameter}`);
                 }
-                // TODO: Some gravel frames are 700c-only - would need data to distinguish
             } else if (category === 'MTB') {
                 // MTB frames use 29" or 27.5" (not 700c/650b naming)
                 if (!['29', '29in', '275', '275in', '27.5', '27.5in'].includes(wheelSizeNorm)) {
@@ -394,8 +396,8 @@ export function validateWheelCassette(wheel: Component, cassette: Component): Va
         const isCompatible = wheelOptions.some(opt => {
             const optNorm = String(opt).toLowerCase().replace(/[\s_-]/g, '');
             return optNorm === cassetteNorm ||
-                   optNorm.includes(cassetteNorm) ||
-                   cassetteNorm.includes(optNorm);
+                optNorm.includes(cassetteNorm) ||
+                cassetteNorm.includes(optNorm);
         });
 
         if (!isCompatible) {

@@ -2,9 +2,8 @@
  * Gear ratio and performance calculations for bicycle drivetrains
  */
 
-const WHEEL_DIAMETER_700C = 622; // mm (standard road wheel)
-const WHEEL_DIAMETER_29 = 622; // mm (same as 700c)
-const WHEEL_DIAMETER_27_5 = 584; // mm (650b)
+const RIM_DIAMETER_700C = 622; // mm (standard road/gravel rim)
+const RIM_DIAMETER_650B = 584; // mm (650b/27.5" rim)
 
 /**
  * Calculate gear ratio (chainring teeth / cog teeth)
@@ -20,7 +19,7 @@ export function calculateGearRatio(chainring: number, cog: number): number {
 export function calculateGearInches(
     chainring: number,
     cog: number,
-    wheelDiameterMm: number = WHEEL_DIAMETER_700C
+    wheelDiameterMm: number = RIM_DIAMETER_700C + (2 * 28) // Default to 700x28c equivalent
 ): number {
     const wheelDiameterInches = wheelDiameterMm / 25.4;
     return (chainring / cog) * wheelDiameterInches;
@@ -48,12 +47,19 @@ export function calculateSpeed(
 }
 
 /**
- * Calculate wheel circumference from diameter
- * @param diameterMm - wheel diameter in mm
+ * Calculate wheel circumference from rim diameter and tire width
+ * @param rimDiameterMm - rim diameter in mm (default 622 for 700c)
+ * @param tireWidthMm - tire width in mm (default 28mm)
  * @returns circumference in mm
  */
-export function calculateWheelCircumference(diameterMm: number = WHEEL_DIAMETER_700C): number {
-    return Math.PI * diameterMm;
+export function calculateWheelCircumference(
+    rimDiameterMm: number = RIM_DIAMETER_700C,
+    tireWidthMm: number = 28
+): number {
+    // Total diameter = Rim Diameter + (2 * Tire Height)
+    // Tire height is approximately equal to tire width for standard clinchers
+    const totalDiameter = rimDiameterMm + (2 * tireWidthMm);
+    return Math.PI * totalDiameter;
 }
 
 /**
@@ -96,9 +102,10 @@ export function getSpeedRange(
     chainrings: number[],
     cassetteCogs: number[],
     cadenceRpm: number,
-    wheelDiameterMm: number = WHEEL_DIAMETER_700C
+    rimDiameterMm: number = RIM_DIAMETER_700C,
+    tireWidthMm: number = 28
 ): { min: number; max: number; speeds: number[] } {
-    const wheelCircumference = calculateWheelCircumference(wheelDiameterMm);
+    const wheelCircumference = calculateWheelCircumference(rimDiameterMm, tireWidthMm);
     const gears = getAllGearRatios(chainrings, cassetteCogs);
 
     const speeds = gears.map(gear =>
@@ -145,4 +152,19 @@ export function parseCassetteRange(largestCog: number, smallestCog: number = 10)
     const numCogs = 12; // Assume 12-speed
     const increment = (largestCog - smallestCog) / (numCogs - 1);
     return Array.from({ length: numCogs }, (_, i) => Math.round(smallestCog + increment * i));
+}
+
+/**
+ * Convert speed from km/h to target unit
+ */
+export function convertSpeed(speedKmh: number, targetUnit: 'imperial' | 'metric'): number {
+    if (targetUnit === 'metric') return speedKmh;
+    return speedKmh * 0.621371;
+}
+
+/**
+ * Get display label for speed unit
+ */
+export function getSpeedUnit(unitSystem: 'imperial' | 'metric'): string {
+    return unitSystem === 'metric' ? 'km/h' : 'mph';
 }

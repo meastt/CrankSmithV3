@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Component, validateComponent } from '@/lib/validation';
 import { PartCard } from './PartCard';
 import { useBuildStore } from '@/store/buildStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import {
     Eye, EyeOff, ChevronLeft, ChevronRight, Check,
     Circle, Bike, CircleDot, Disc, Settings,
@@ -102,6 +103,7 @@ export const PartSelector: React.FC = () => {
     const [frameMaterialFilter, setFrameMaterialFilter] = useState<string | null>(null); // null = all, 'Carbon', 'Aluminum'
     const [frameMtbTypeFilter, setFrameMtbTypeFilter] = useState<string | null>(null); // null = all, 'XC', 'Trail', 'Enduro'
     const { parts, setPart, clearBuild } = useBuildStore();
+    const { unitSystem } = useSettingsStore();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -112,7 +114,7 @@ export const PartSelector: React.FC = () => {
     // Calculate total weight with finishing kit estimates
     const weightData = calculateBuildWeight(parts);
     const bikeCategory = getBikeCategory(parts.Frame);
-    const weightFormatted = formatWeight(weightData.totalWeight, 'metric');
+    const weightFormatted = formatWeight(weightData.totalWeight, unitSystem);
 
     const activeType = BUILD_SEQUENCE[currentStep]?.type || 'Frame';
 
@@ -445,7 +447,7 @@ export const PartSelector: React.FC = () => {
                     return null;
                 })
                 .filter(Boolean)
-          )).sort() as string[]
+        )).sort() as string[]
         : [];
 
     // Get available MTB subcategories
@@ -455,7 +457,7 @@ export const PartSelector: React.FC = () => {
                 .filter(c => c.attributes.category === 'MTB')
                 .map(c => c.attributes?.subcategory as string)
                 .filter(Boolean)
-          )).sort()
+        )).sort()
         : [];
 
     // Should show frame filters (material or MTB type)?
@@ -576,19 +578,17 @@ export const PartSelector: React.FC = () => {
                             <button
                                 key={step.type}
                                 onClick={() => goToStep(idx)}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${
-                                    isCurrent
-                                        ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                                        : isComplete
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${isCurrent
+                                    ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                                    : isComplete
                                         ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
                                         : isPast
-                                        ? 'bg-white/5 text-stone-400'
-                                        : 'text-stone-600 hover:text-stone-400 hover:bg-white/5'
-                                }`}
+                                            ? 'bg-white/5 text-stone-400'
+                                            : 'text-stone-600 hover:text-stone-400 hover:bg-white/5'
+                                    }`}
                             >
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                                    isComplete && !isCurrent ? 'bg-emerald-500/20' : ''
-                                }`}>
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${isComplete && !isCurrent ? 'bg-emerald-500/20' : ''
+                                    }`}>
                                     {isComplete && !isCurrent ? (
                                         <Check className="w-3 h-3" />
                                     ) : (
@@ -632,11 +632,10 @@ export const PartSelector: React.FC = () => {
 
                     <button
                         onClick={() => setShowIncompatible(!showIncompatible)}
-                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                            showIncompatible
-                                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                                : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                        }`}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${showIncompatible
+                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                            : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            }`}
                     >
                         {showIncompatible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                         <span className="hidden sm:inline">{showIncompatible ? 'Showing All' : 'Compatible Only'}</span>
@@ -859,21 +858,19 @@ export const PartSelector: React.FC = () => {
                                             <div className="flex gap-1 p-1 bg-white/5 rounded-lg">
                                                 <button
                                                     onClick={() => setElectronicFilter(null)}
-                                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                                                        electronicFilter === null
-                                                            ? 'bg-primary text-white'
-                                                            : 'text-stone-400 hover:text-stone-200'
-                                                    }`}
+                                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${electronicFilter === null
+                                                        ? 'bg-primary text-white'
+                                                        : 'text-stone-400 hover:text-stone-200'
+                                                        }`}
                                                 >
                                                     All
                                                 </button>
                                                 <button
                                                     onClick={() => setElectronicFilter(true)}
-                                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
-                                                        electronicFilter === true
-                                                            ? 'bg-cyan-500 text-white'
-                                                            : 'text-stone-400 hover:text-stone-200'
-                                                    }`}
+                                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${electronicFilter === true
+                                                        ? 'bg-cyan-500 text-white'
+                                                        : 'text-stone-400 hover:text-stone-200'
+                                                        }`}
                                                 >
                                                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -882,11 +879,10 @@ export const PartSelector: React.FC = () => {
                                                 </button>
                                                 <button
                                                     onClick={() => setElectronicFilter(false)}
-                                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
-                                                        electronicFilter === false
-                                                            ? 'bg-amber-500 text-white'
-                                                            : 'text-stone-400 hover:text-stone-200'
-                                                    }`}
+                                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${electronicFilter === false
+                                                        ? 'bg-amber-500 text-white'
+                                                        : 'text-stone-400 hover:text-stone-200'
+                                                        }`}
                                                 >
                                                     <Settings className="w-3 h-3" />
                                                     Mechanical
@@ -901,11 +897,10 @@ export const PartSelector: React.FC = () => {
                                                     <button
                                                         key={brand}
                                                         onClick={() => setDrivetrainBrandFilter(drivetrainBrandFilter === brand ? null : brand)}
-                                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-                                                            drivetrainBrandFilter === brand
-                                                                ? 'bg-primary text-white'
-                                                                : 'bg-white/5 text-stone-400 hover:text-stone-200 hover:bg-white/10'
-                                                        }`}
+                                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${drivetrainBrandFilter === brand
+                                                            ? 'bg-primary text-white'
+                                                            : 'bg-white/5 text-stone-400 hover:text-stone-200 hover:bg-white/10'
+                                                            }`}
                                                     >
                                                         {brand}
                                                     </button>
@@ -923,22 +918,20 @@ export const PartSelector: React.FC = () => {
                                             <div className="flex gap-1 p-1 bg-white/5 rounded-lg">
                                                 <button
                                                     onClick={() => setFrameMaterialFilter(null)}
-                                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                                                        frameMaterialFilter === null
-                                                            ? 'bg-primary text-white'
-                                                            : 'text-stone-400 hover:text-stone-200'
-                                                    }`}
+                                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${frameMaterialFilter === null
+                                                        ? 'bg-primary text-white'
+                                                        : 'text-stone-400 hover:text-stone-200'
+                                                        }`}
                                                 >
                                                     All
                                                 </button>
                                                 {frameMaterials.includes('Carbon') && (
                                                     <button
                                                         onClick={() => setFrameMaterialFilter(frameMaterialFilter === 'Carbon' ? null : 'Carbon')}
-                                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
-                                                            frameMaterialFilter === 'Carbon'
-                                                                ? 'bg-violet-500 text-white'
-                                                                : 'text-stone-400 hover:text-stone-200'
-                                                        }`}
+                                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${frameMaterialFilter === 'Carbon'
+                                                            ? 'bg-violet-500 text-white'
+                                                            : 'text-stone-400 hover:text-stone-200'
+                                                            }`}
                                                     >
                                                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
@@ -949,11 +942,10 @@ export const PartSelector: React.FC = () => {
                                                 {frameMaterials.includes('Aluminum') && (
                                                     <button
                                                         onClick={() => setFrameMaterialFilter(frameMaterialFilter === 'Aluminum' ? null : 'Aluminum')}
-                                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
-                                                            frameMaterialFilter === 'Aluminum'
-                                                                ? 'bg-amber-500 text-white'
-                                                                : 'text-stone-400 hover:text-stone-200'
-                                                        }`}
+                                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${frameMaterialFilter === 'Aluminum'
+                                                            ? 'bg-amber-500 text-white'
+                                                            : 'text-stone-400 hover:text-stone-200'
+                                                            }`}
                                                     >
                                                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -971,11 +963,10 @@ export const PartSelector: React.FC = () => {
                                                     <button
                                                         key={subcat}
                                                         onClick={() => setFrameMtbTypeFilter(frameMtbTypeFilter === subcat ? null : subcat)}
-                                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-                                                            frameMtbTypeFilter === subcat
-                                                                ? 'bg-emerald-500 text-white'
-                                                                : 'bg-white/5 text-stone-400 hover:text-stone-200 hover:bg-white/10'
-                                                        }`}
+                                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${frameMtbTypeFilter === subcat
+                                                            ? 'bg-emerald-500 text-white'
+                                                            : 'bg-white/5 text-stone-400 hover:text-stone-200 hover:bg-white/10'
+                                                            }`}
                                                     >
                                                         {subcat}
                                                     </button>
@@ -1305,7 +1296,7 @@ export const PartSelector: React.FC = () => {
                             totalWeight={weightData.totalWeight}
                             climbingScore={climbingScore}
                             speedRange={speedRange}
-                            unitSystem="metric"
+                            unitSystem={unitSystem}
                             onClose={() => setShowShareCard(false)}
                         />
                     );
