@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Component, validateComponent } from '@/lib/validation';
 import { PartCard } from './PartCard';
 import { useBuildStore } from '@/store/buildStore';
@@ -36,6 +36,22 @@ const TIRE_WIDTH_RANGES = [
     { id: 'mtb', label: '2.4"+', subtitle: 'MTB', min: 61, max: 999 },
 ];
 
+// Wheel depth categories for filtering
+const WHEEL_DEPTH_RANGES = [
+    { id: 'shallow', label: '25-35mm', subtitle: 'Climbing/All-round', min: 0, max: 35 },
+    { id: 'mid', label: '36-50mm', subtitle: 'All-round aero', min: 36, max: 50 },
+    { id: 'deep', label: '51-65mm', subtitle: 'Aero/TT', min: 51, max: 65 },
+    { id: 'ultra', label: '65mm+', subtitle: 'Deep aero', min: 65, max: 999 },
+];
+
+// Wheel inner width categories
+const WHEEL_WIDTH_RANGES = [
+    { id: 'narrow', label: '17-21mm', subtitle: 'Road', min: 17, max: 21 },
+    { id: 'medium', label: '21-25mm', subtitle: 'All-road/Light gravel', min: 21, max: 25 },
+    { id: 'wide', label: '25-30mm', subtitle: 'Gravel', min: 25, max: 30 },
+    { id: 'extra-wide', label: '30mm+', subtitle: 'MTB/Monster gravel', min: 30, max: 999 },
+];
+
 export const PartSelector: React.FC = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [frameCategory, setFrameCategory] = useState<string | null>(null);
@@ -46,7 +62,10 @@ export const PartSelector: React.FC = () => {
     const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
     const [crankConfiguration, setCrankConfiguration] = useState<'1x' | '2x' | null>(null);
     const [selectedTireWidth, setSelectedTireWidth] = useState<string | null>(null);
+    const [selectedWheelDepth, setSelectedWheelDepth] = useState<string | null>(null);
+    const [selectedWheelWidth, setSelectedWheelWidth] = useState<string | null>(null);
     const { parts, setPart } = useBuildStore();
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     const activeType = BUILD_SEQUENCE[currentStep]?.type || 'Frame';
 
@@ -55,6 +74,13 @@ export const PartSelector: React.FC = () => {
         setSelectedBrand(null);
         setCrankConfiguration(null);
         setSelectedTireWidth(null);
+        setSelectedWheelDepth(null);
+        setSelectedWheelWidth(null);
+    }, []);
+
+    // Scroll to top when step changes
+    const scrollToTop = useCallback(() => {
+        scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
     // Fetch components when step changes
@@ -84,8 +110,9 @@ export const PartSelector: React.FC = () => {
             })
             .finally(() => {
                 setLoading(false);
+                scrollToTop();
             });
-    }, [activeType, resetFilters]);
+    }, [activeType, resetFilters, scrollToTop]);
 
     // Auto-advance to next step when a part is selected
     const handleSelectPart = useCallback((component: Component) => {
@@ -186,6 +213,32 @@ export const PartSelector: React.FC = () => {
         }
     }
 
+    // 6. Wheel depth filter (user preference)
+    if (activeType === 'Wheel' && selectedWheelDepth) {
+        const range = WHEEL_DEPTH_RANGES.find(r => r.id === selectedWheelDepth);
+        if (range) {
+            filteredComponents = filteredComponents.filter(c => {
+                const depth = c.attributes?.depth || c.attributes?.rim_depth;
+                if (!depth) return range.id === 'shallow'; // No depth = assume shallow
+                const d = Number(depth);
+                return d >= range.min && d <= range.max;
+            });
+        }
+    }
+
+    // 7. Wheel inner width filter (user preference)
+    if (activeType === 'Wheel' && selectedWheelWidth) {
+        const range = WHEEL_WIDTH_RANGES.find(r => r.id === selectedWheelWidth);
+        if (range) {
+            filteredComponents = filteredComponents.filter(c => {
+                const width = c.attributes?.internal_width || c.attributes?.inner_width;
+                if (!width) return true;
+                const w = Number(width);
+                return w >= range.min && w <= range.max;
+            });
+        }
+    }
+
     // Get available tire width ranges based on compatible tires
     const availableTireRanges = activeType === 'Tire'
         ? TIRE_WIDTH_RANGES.filter(range => {
@@ -198,13 +251,40 @@ export const PartSelector: React.FC = () => {
         })
         : [];
 
+    // Get available wheel depth ranges
+    const availableWheelDepths = activeType === 'Wheel'
+        ? WHEEL_DEPTH_RANGES.filter(range => {
+            return filteredComponents.some(c => {
+                const depth = c.attributes?.depth || c.attributes?.rim_depth;
+                if (!depth) return range.id === 'shallow';
+                const d = Number(depth);
+                return d >= range.min && d <= range.max;
+            });
+        })
+        : [];
+
+    // Get available wheel width ranges
+    const availableWheelWidths = activeType === 'Wheel'
+        ? WHEEL_WIDTH_RANGES.filter(range => {
+            return filteredComponents.some(c => {
+                const width = c.attributes?.internal_width || c.attributes?.inner_width;
+                if (!width) return false;
+                const w = Number(width);
+                return w >= range.min && w <= range.max;
+            });
+        })
+        : [];
+
     // Determine what selection UI to show - simplified to only meaningful choices
     const showCategorySelection = activeType === 'Frame' && !frameCategory;
     const showTireWidthSelection = activeType === 'Tire' && !selectedTireWidth && availableTireRanges.length > 1;
+    const showWheelDepthSelection = activeType === 'Wheel' && !selectedWheelDepth && availableWheelDepths.length > 1;
+    const showWheelWidthSelection = activeType === 'Wheel' && selectedWheelDepth && !selectedWheelWidth && availableWheelWidths.length > 1;
     const showBrandSelection = !selectedBrand &&
-        ['Frame', 'Tire', 'Crankset'].includes(activeType) &&
+        ['Frame', 'Tire', 'Crankset', 'Wheel'].includes(activeType) &&
         !(activeType === 'Frame' && !frameCategory) &&
         !(activeType === 'Tire' && !selectedTireWidth && availableTireRanges.length > 1) &&
+        !(activeType === 'Wheel' && (!selectedWheelDepth || !selectedWheelWidth) && (availableWheelDepths.length > 1 || availableWheelWidths.length > 1)) &&
         filteredComponents.length > 6 && // Only show brand filter if there are many options
         uniqueBrands.length > 1;
     const showCrankConfigSelection = activeType === 'Crankset' && selectedBrand && !crankConfiguration;
@@ -215,6 +295,10 @@ export const PartSelector: React.FC = () => {
             setCrankConfiguration(null);
         } else if (selectedBrand) {
             setSelectedBrand(null);
+        } else if (selectedWheelWidth) {
+            setSelectedWheelWidth(null);
+        } else if (selectedWheelDepth) {
+            setSelectedWheelDepth(null);
         } else if (selectedTireWidth) {
             setSelectedTireWidth(null);
         } else if (frameCategory) {
@@ -227,6 +311,14 @@ export const PartSelector: React.FC = () => {
     // Breadcrumbs
     const breadcrumbs: string[] = [];
     if (frameCategory) breadcrumbs.push(frameCategory);
+    if (selectedWheelDepth) {
+        const range = WHEEL_DEPTH_RANGES.find(r => r.id === selectedWheelDepth);
+        if (range) breadcrumbs.push(range.label);
+    }
+    if (selectedWheelWidth) {
+        const range = WHEEL_WIDTH_RANGES.find(r => r.id === selectedWheelWidth);
+        if (range) breadcrumbs.push(range.label);
+    }
     if (selectedTireWidth) {
         const range = TIRE_WIDTH_RANGES.find(r => r.id === selectedTireWidth);
         if (range) breadcrumbs.push(range.label);
@@ -343,7 +435,7 @@ export const PartSelector: React.FC = () => {
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto pb-28 lg:pb-6">
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pb-28 lg:pb-6">
                 <div className="p-4 md:p-6">
                     <AnimatePresence mode="wait">
                         {loading ? (
@@ -416,6 +508,52 @@ export const PartSelector: React.FC = () => {
                                 })}
                                 onSelect={(id) => setSelectedTireWidth(id)}
                                 columns={availableTireRanges.length <= 3 ? availableTireRanges.length as 2 | 3 : 3}
+                            />
+                        ) : showWheelDepthSelection ? (
+                            <SelectionGrid
+                                key="wheeldepth"
+                                title="Select Rim Depth"
+                                subtitle="Deeper rims = more aero, shallower = lighter climbing"
+                                items={availableWheelDepths.map(range => {
+                                    const count = filteredComponents.filter(c => {
+                                        const depth = c.attributes?.depth || c.attributes?.rim_depth;
+                                        if (!depth) return range.id === 'shallow';
+                                        const d = Number(depth);
+                                        return d >= range.min && d <= range.max;
+                                    }).length;
+                                    return {
+                                        id: range.id,
+                                        title: range.label,
+                                        subtitle: range.subtitle,
+                                        count,
+                                        countLabel: 'wheels'
+                                    };
+                                })}
+                                onSelect={(id) => setSelectedWheelDepth(id)}
+                                columns={availableWheelDepths.length <= 4 ? availableWheelDepths.length as 2 | 3 | 4 : 4}
+                            />
+                        ) : showWheelWidthSelection ? (
+                            <SelectionGrid
+                                key="wheelwidth"
+                                title="Select Inner Width"
+                                subtitle="Wider rims = better tire support for wider tires"
+                                items={availableWheelWidths.map(range => {
+                                    const count = filteredComponents.filter(c => {
+                                        const width = c.attributes?.internal_width || c.attributes?.inner_width;
+                                        if (!width) return false;
+                                        const w = Number(width);
+                                        return w >= range.min && w <= range.max;
+                                    }).length;
+                                    return {
+                                        id: range.id,
+                                        title: range.label,
+                                        subtitle: range.subtitle,
+                                        count,
+                                        countLabel: 'wheels'
+                                    };
+                                })}
+                                onSelect={(id) => setSelectedWheelWidth(id)}
+                                columns={availableWheelWidths.length <= 4 ? availableWheelWidths.length as 2 | 3 | 4 : 4}
                             />
                         ) : showBrandSelection ? (
                             <SelectionGrid
