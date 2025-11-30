@@ -122,8 +122,12 @@ function isDiscBrake(brakeValue: string | undefined): boolean {
            lower.includes('flat mount') ||
            lower.includes('post_mount') ||
            lower.includes('post mount') ||
+           lower.includes('direct_mount') ||
+           lower.includes('direct mount') ||
            lower.includes('centerlock') ||
-           lower.includes('6-bolt');
+           lower.includes('6-bolt') ||
+           lower.includes('160mm') ||    // Rotor size implies disc
+           lower.includes('140mm');      // Rotor size implies disc
 }
 
 /**
