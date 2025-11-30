@@ -559,12 +559,12 @@ export function validateComponent(
             if (currentBuild.Wheel) {
                 addResult(validateWheelCassette(currentBuild.Wheel, component));
             }
-            if (currentBuild.Derailleur || currentBuild.Shifter) {
+            if (currentBuild.RearDerailleur || currentBuild.Shifter) {
                 addResult(validateDrivetrain(
                     currentBuild.Shifter || component,
-                    currentBuild.Derailleur || component,
+                    currentBuild.RearDerailleur || component,
                     component,
-                    currentBuild.Crank
+                    currentBuild.Crankset
                 ));
             }
             break;
@@ -574,12 +574,12 @@ export function validateComponent(
                 addResult(validateFrameBBCrank(
                     currentBuild.Frame,
                     component,
-                    currentBuild.Crank || component
+                    currentBuild.Crankset || component
                 ));
             }
             break;
 
-        case 'Crank':
+        case 'Crankset':
             if (currentBuild.Frame && currentBuild.BottomBracket) {
                 addResult(validateFrameBBCrank(
                     currentBuild.Frame,
@@ -587,34 +587,34 @@ export function validateComponent(
                     component
                 ));
             }
-            if (currentBuild.Derailleur && currentBuild.Cassette) {
+            if (currentBuild.RearDerailleur && currentBuild.Cassette) {
                 addResult(validateDrivetrain(
                     currentBuild.Shifter || component,
-                    currentBuild.Derailleur,
+                    currentBuild.RearDerailleur,
                     currentBuild.Cassette,
                     component
                 ));
             }
             break;
 
-        case 'Derailleur':
+        case 'RearDerailleur':
             if (currentBuild.Shifter || currentBuild.Cassette) {
                 addResult(validateDrivetrain(
                     currentBuild.Shifter || component,
                     component,
                     currentBuild.Cassette || component,
-                    currentBuild.Crank
+                    currentBuild.Crankset
                 ));
             }
             break;
 
         case 'Shifter':
-            if (currentBuild.Derailleur) {
+            if (currentBuild.RearDerailleur) {
                 addResult(validateDrivetrain(
                     component,
-                    currentBuild.Derailleur,
+                    currentBuild.RearDerailleur,
                     currentBuild.Cassette || component,
-                    currentBuild.Crank
+                    currentBuild.Crankset
                 ));
             }
             break;

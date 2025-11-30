@@ -57,6 +57,7 @@ export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelec
                 if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
                 break;
 
+            case 'RearDerailleur':
             case 'Derailleur':
                 if (attrs.speeds) result.push({ label: 'Speed', value: `${attrs.speeds}s` });
                 if (attrs.max_cog) result.push({ label: 'Max Cog', value: `${attrs.max_cog}t` });
@@ -70,6 +71,7 @@ export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelec
                 if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
                 break;
 
+            case 'Crankset':
             case 'Crank':
                 if (attrs.teeth) result.push({ label: 'Chainring', value: String(attrs.teeth) });
                 if (attrs.crank_length) result.push({ label: 'Length', value: `${attrs.crank_length}mm` });

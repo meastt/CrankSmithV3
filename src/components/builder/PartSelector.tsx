@@ -12,14 +12,15 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Build sequence - the logical order for building a bike
+// Note: types must match database values (Crankset, RearDerailleur)
 const BUILD_SEQUENCE = [
     { type: 'Frame', label: 'Frame', icon: Bike, description: 'Start with your foundation' },
     { type: 'Wheel', label: 'Wheels', icon: CircleDot, description: 'Choose your rolling stock' },
     { type: 'Tire', label: 'Tires', icon: Circle, description: 'Rubber meets road' },
     { type: 'BottomBracket', label: 'BB', icon: Disc, description: 'The heart of power transfer' },
-    { type: 'Crank', label: 'Crank', icon: Settings, description: 'Your power input' },
+    { type: 'Crankset', label: 'Crankset', icon: Settings, description: 'Your power input' },
     { type: 'Cassette', label: 'Cassette', icon: Cog, description: 'Gear range selection' },
-    { type: 'Derailleur', label: 'Derailleur', icon: Layers, description: 'Shifting precision' },
+    { type: 'RearDerailleur', label: 'Derailleur', icon: Layers, description: 'Shifting precision' },
     { type: 'Shifter', label: 'Shifter', icon: Gauge, description: 'Control at your fingertips' },
 ];
 
