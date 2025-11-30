@@ -82,10 +82,17 @@ export const DashboardGrid = () => {
                     className="text-center mb-16"
                 >
                     <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
-                        Choose Your <span className="text-stone-600">Weapon</span>
+                        Crank<span className="text-cyan-400">Smith</span>
                     </h1>
-                    <p className="text-stone-400 text-lg max-w-2xl mx-auto">
-                        The ultimate toolbox for the modern cyclist. Optimize, analyze, and obsess.
+                    <p className="text-stone-400 text-lg max-w-2xl mx-auto mb-12">
+                        The ultimate toolbox for the modern cyclist. Optimize your build with our professional bicycle compatibility checker, gear ratio calculator, and weight analysis tools.
+                    </p>
+
+                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-wide">
+                        <span className="text-cyan-400">Forge</span> The Perfect Ride
+                    </h2>
+                    <p className="text-stone-500 text-base max-w-3xl mx-auto leading-relaxed">
+                        Whether you're dialing in tire pressure for gravel, calculating gear inches for a mullet drivetrain, or shaving grams for a hill climb, CrankSmith provides the precision engineering data you need to build with confidence.
                     </p>
                 </motion.div>
 

@@ -260,7 +260,7 @@ export const TirePressureCalculator = () => {
                         </h3>
                         <div className="grid grid-cols-2 gap-4">
                             <InputField
-                                label="Stated Width"
+                                label="Tire Width"
                                 value={tireWidth}
                                 onChange={setTireWidth}
                                 unit="mm"

@@ -1169,7 +1169,64 @@ export const PartSelector: React.FC = () => {
                                     <button
                                         onClick={() => {
                                             setShowBuildComplete(false);
-                                            router.push('/performance');
+
+                                            // Extract build data
+                                            const crank = parts.Crankset;
+                                            const cassette = parts.Cassette;
+                                            const tire = parts.Tire;
+                                            const wheel = parts.Wheel;
+
+                                            if (!crank || !cassette) {
+                                                router.push('/performance');
+                                                return;
+                                            }
+
+                                            // Chainrings
+                                            let chainringsStr = '';
+                                            if (crank.attributes.chainring_large) {
+                                                chainringsStr = `${crank.attributes.chainring_large}`;
+                                                if (crank.attributes.chainring_small) {
+                                                    chainringsStr += `,${crank.attributes.chainring_small}`;
+                                                }
+                                            } else if (crank.attributes.teeth) {
+                                                chainringsStr = String(crank.attributes.teeth).replace('/', ',');
+                                            }
+
+                                            // Cassette Range
+                                            let cassetteRange = '';
+                                            if (cassette.attributes.range) {
+                                                cassetteRange = String(cassette.attributes.range);
+                                            } else if (cassette.attributes.largest_cog && cassette.attributes.diff) {
+                                                const largest = Number(cassette.attributes.largest_cog);
+                                                const diff = Number(cassette.attributes.diff);
+                                                cassetteRange = `${largest - diff}-${largest}`;
+                                            }
+
+                                            // Tire Width
+                                            let tireWidth = '28';
+                                            if (tire) {
+                                                tireWidth = String(tire.attributes.width || tire.interfaces?.width || '28');
+                                            }
+
+                                            // Wheel Size
+                                            let wheelSize = '622';
+                                            if (wheel) {
+                                                const name = String(wheel.name).toLowerCase();
+                                                const size = String(wheel.attributes?.size || '').toLowerCase();
+                                                if (name.includes('650') || size.includes('650') || size.includes('27.5')) {
+                                                    wheelSize = '584';
+                                                }
+                                            }
+
+                                            const params = new URLSearchParams({
+                                                mode: 'build',
+                                                chainrings: chainringsStr,
+                                                cassette: cassetteRange,
+                                                tire: tireWidth,
+                                                wheel: wheelSize
+                                            });
+
+                                            router.push(`/performance?${params.toString()}`);
                                         }}
                                         className="w-full flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-violet-500/10 to-cyan-500/10 border border-violet-500/20 hover:from-violet-500/20 hover:to-cyan-500/20 transition-colors text-left group"
                                     >

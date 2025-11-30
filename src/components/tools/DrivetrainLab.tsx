@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Activity, ArrowRight, TrendingUp, Settings2, Zap, Mountain, ChevronDown } from 'lucide-react';
 import {
@@ -10,7 +11,7 @@ import {
     parseCassetteRange,
     calculateWheelCircumference
 } from '@/lib/gearCalculations';
-import { toSpeed, speedUnit } from '@/lib/unitConversions';
+import { toSpeed, speedUnit, toWeight, weightUnit, fromWeight } from '@/lib/unitConversions';
 import { useSettingsStore } from '@/store/settingsStore';
 
 // --- Types ---
@@ -144,7 +145,7 @@ const SetupSelector = ({ label, setup, onChange, color }: { label: string, setup
 
 // --- Chart Component ---
 
-const SpeedChart = ({ setupA, setupB, cadence }: { setupA: Setup, setupB: Setup, cadence: number }) => {
+const SpeedChart = ({ setupA, setupB, cadence, showComparison = true }: { setupA: Setup, setupB: Setup, cadence: number, showComparison?: boolean }) => {
     const { unitSystem } = useSettingsStore();
 
     // Generate data points
@@ -197,18 +198,20 @@ const SpeedChart = ({ setupA, setupB, cadence }: { setupA: Setup, setupB: Setup,
             </div>
 
             {/* Bars for Setup B (Overlay) */}
-            <div className="absolute inset-0 p-4 flex items-end gap-1 pointer-events-none">
-                {dataB.map((d, i) => (
-                    <div
-                        key={`b-${i}`}
-                        className="flex-1 border-t-2 border-rose-500/50"
-                        style={{
-                            height: `${(d.speed / maxSpeed) * 100}%`,
-                            marginBottom: '-1px' // Align with bottom
-                        }}
-                    />
-                ))}
-            </div>
+            {showComparison && (
+                <div className="absolute inset-0 p-4 flex items-end gap-1 pointer-events-none">
+                    {dataB.map((d, i) => (
+                        <div
+                            key={`b-${i}`}
+                            className="flex-1 border-t-2 border-rose-500/50"
+                            style={{
+                                height: `${(d.speed / maxSpeed) * 100}%`,
+                                marginBottom: '-1px' // Align with bottom
+                            }}
+                        />
+                    ))}
+                </div>
+            )}
 
             {/* Legend */}
             <div className="absolute top-4 right-4 flex gap-4 text-xs font-mono">
@@ -216,10 +219,12 @@ const SpeedChart = ({ setupA, setupB, cadence }: { setupA: Setup, setupB: Setup,
                     <div className="w-3 h-3 bg-cyan-500/30 rounded-sm" />
                     <span className="text-stone-400">Setup A</span>
                 </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-0.5 bg-rose-500" />
-                    <span className="text-stone-400">Setup B</span>
-                </div>
+                {showComparison && (
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-0.5 bg-rose-500" />
+                        <span className="text-stone-400">Setup B</span>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -229,6 +234,37 @@ const SpeedChart = ({ setupA, setupB, cadence }: { setupA: Setup, setupB: Setup,
 
 export const DrivetrainLab = () => {
     const { unitSystem } = useSettingsStore();
+    const searchParams = useSearchParams();
+    const [viewMode, setViewMode] = useState<'lab' | 'build'>('lab');
+
+    // Initialize from URL params if present
+    useEffect(() => {
+        const mode = searchParams.get('mode');
+        if (mode === 'build') {
+            setViewMode('build');
+
+            const chainringsParam = searchParams.get('chainrings');
+            const cassetteParam = searchParams.get('cassette');
+            const tireParam = searchParams.get('tire');
+            const wheelParam = searchParams.get('wheel');
+
+            if (chainringsParam && cassetteParam) {
+                const chainrings = chainringsParam.split(',').map(Number);
+                const tireSize = tireParam ? Number(tireParam) : 28;
+                const wheelSize = wheelParam ? Number(wheelParam) : 622;
+
+                setSetupA({
+                    id: 'custom-build',
+                    name: 'Your Build',
+                    chainrings,
+                    cassetteRange: cassetteParam,
+                    tireSize,
+                    wheelSize
+                });
+            }
+        }
+    }, [searchParams]);
+
     const [setupA, setSetupA] = useState<Setup>({ ...PRESETS['road-compact'], id: 'setup-a', name: 'Road Compact' });
     const [setupB, setSetupB] = useState<Setup>({ ...PRESETS['road-semi'], id: 'setup-b', name: 'Road Semi-Compact' });
     const [cadence, setCadence] = useState(90);
@@ -244,6 +280,8 @@ export const DrivetrainLab = () => {
         // This is complex to invert. 
         // Let's use: Watts / kg = Speed (m/s) * 9.81 * Grade(%)
         // Speed = (Cadence/60) * (Development in meters)
+
+        if (!setup.cassetteRange.includes('-')) return 0;
 
         const [minCog, maxCog] = setup.cassetteRange.split('-').map(n => parseInt(n));
         const lowestRatio = Math.min(...setup.chainrings) / maxCog;
@@ -268,17 +306,19 @@ export const DrivetrainLab = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
                 <div className="lg:col-span-4 space-y-4">
                     <SetupSelector
-                        label="Setup A (Baseline)"
+                        label={viewMode === 'build' ? "Your Build" : "Setup A (Baseline)"}
                         setup={setupA}
                         onChange={setSetupA}
                         color="text-cyan-400"
                     />
-                    <SetupSelector
-                        label="Setup B (Challenger)"
-                        setup={setupB}
-                        onChange={setSetupB}
-                        color="text-rose-400"
-                    />
+                    {viewMode === 'lab' && (
+                        <SetupSelector
+                            label="Setup B (Challenger)"
+                            setup={setupB}
+                            onChange={setSetupB}
+                            color="text-rose-400"
+                        />
+                    )}
                 </div>
 
                 <div className="lg:col-span-8">
@@ -301,7 +341,7 @@ export const DrivetrainLab = () => {
                             </div>
                         </div>
 
-                        <SpeedChart setupA={setupA} setupB={setupB} cadence={cadence} />
+                        <SpeedChart setupA={setupA} setupB={setupB} cadence={cadence} showComparison={viewMode === 'lab'} />
                     </div>
                 </div>
             </div>
@@ -327,9 +367,11 @@ export const DrivetrainLab = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-xs text-stone-500 mb-1">Weight (kg)</label>
+                            <label className="block text-xs text-stone-500 mb-1">Weight ({weightUnit(unitSystem)})</label>
                             <input
-                                type="number" value={weight} onChange={(e) => setWeight(parseInt(e.target.value))}
+                                type="number"
+                                value={Math.round(toWeight(weight, unitSystem))}
+                                onChange={(e) => setWeight(fromWeight(Number(e.target.value), unitSystem))}
                                 className="bg-black/30 border border-white/10 rounded px-2 py-1 w-20 text-white"
                             />
                         </div>
@@ -345,15 +387,17 @@ export const DrivetrainLab = () => {
                                 <div className="h-full bg-cyan-500" style={{ width: `${Math.min(gradeA * 4, 100)}%` }} />
                             </div>
                         </div>
-                        <div>
-                            <div className="flex justify-between text-sm mb-1">
-                                <span className="text-rose-400">Setup B Limit</span>
-                                <span className="text-white font-mono">{gradeB.toFixed(1)}%</span>
+                        {viewMode === 'lab' && (
+                            <div>
+                                <div className="flex justify-between text-sm mb-1">
+                                    <span className="text-rose-400">Setup B Limit</span>
+                                    <span className="text-white font-mono">{gradeB.toFixed(1)}%</span>
+                                </div>
+                                <div className="h-2 bg-stone-800 rounded-full overflow-hidden">
+                                    <div className="h-full bg-rose-500" style={{ width: `${Math.min(gradeB * 4, 100)}%` }} />
+                                </div>
                             </div>
-                            <div className="h-2 bg-stone-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-rose-500" style={{ width: `${Math.min(gradeB * 4, 100)}%` }} />
-                            </div>
-                        </div>
+                        )}
                         <p className="text-xs text-stone-500 mt-2">
                             Max sustainable gradient at 60rpm (grinding threshold).
                         </p>
@@ -375,13 +419,15 @@ export const DrivetrainLab = () => {
                             </div>
                             <div className="text-xs text-cyan-400 mt-1">Setup A</div>
                         </div>
-                        <div className="p-4 bg-black/20 rounded-lg">
-                            <div className="text-xs text-stone-500 mb-1">Top Speed (110rpm)</div>
-                            <div className="text-xl font-mono text-white">
-                                {toSpeed(calculateSpeed(Math.max(...setupB.chainrings) / 11, 2100, 110), unitSystem).toFixed(1)} <span className="text-xs text-stone-600">{speedUnit(unitSystem)}</span>
+                        {viewMode === 'lab' && (
+                            <div className="p-4 bg-black/20 rounded-lg">
+                                <div className="text-xs text-stone-500 mb-1">Top Speed (110rpm)</div>
+                                <div className="text-xl font-mono text-white">
+                                    {toSpeed(calculateSpeed(Math.max(...setupB.chainrings) / 11, 2100, 110), unitSystem).toFixed(1)} <span className="text-xs text-stone-600">{speedUnit(unitSystem)}</span>
+                                </div>
+                                <div className="text-xs text-rose-400 mt-1">Setup B</div>
                             </div>
-                            <div className="text-xs text-rose-400 mt-1">Setup B</div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>
