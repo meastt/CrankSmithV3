@@ -32,7 +32,8 @@ const TIRE_WIDTH_RANGES = [
     { id: 'endurance', label: '30-35mm', subtitle: 'Endurance/All-road', min: 30, max: 35 },
     { id: 'gravel-light', label: '36-42mm', subtitle: 'Light gravel', min: 36, max: 42 },
     { id: 'gravel', label: '43-50mm', subtitle: 'Gravel', min: 43, max: 50 },
-    { id: 'mtb', label: '50mm+', subtitle: 'MTB/Bikepacking', min: 50, max: 999 },
+    { id: 'monster', label: '50-61mm', subtitle: 'Gravel Monster', min: 50, max: 61 },
+    { id: 'mtb', label: '2.4"+', subtitle: 'MTB', min: 61, max: 999 },
 ];
 
 export const PartSelector: React.FC = () => {
