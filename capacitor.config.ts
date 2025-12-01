@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.cranksmith.app',
+  appId: 'com.cranksmith.mobile',
   appName: 'CrankSmith',
   webDir: 'public',
   server: {

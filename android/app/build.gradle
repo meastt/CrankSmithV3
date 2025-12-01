@@ -4,7 +4,7 @@ android {
     namespace "com.cranksmith.app"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.cranksmith.app"
+        applicationId "com.cranksmith.mobile"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 100
