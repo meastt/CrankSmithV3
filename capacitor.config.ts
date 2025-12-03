@@ -6,7 +6,11 @@ const config: CapacitorConfig = {
   webDir: 'public',
   server: {
     url: 'https://cranksmith.com',
-    androidScheme: 'https'
+    androidScheme: 'https',
+    allowNavigation: [
+      'cranksmith.com',
+      '*.cranksmith.com'
+    ]
   }
 };
 

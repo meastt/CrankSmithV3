@@ -12,8 +12,8 @@ const STATIC_ASSETS = [
     '/tire-pressure',
     '/weight',
     '/offline',
-    '/icon-192.png',
-    '/icon-512.png'
+    '/icon-192.jpeg',
+    '/icon-512.jpeg'
 ];
 
 // Install event - cache static assets
@@ -37,10 +37,10 @@ self.addEventListener('activate', (event) => {
                     cacheNames
                         .filter((cacheName) => {
                             return cacheName.startsWith('cranksmith-') &&
-                                   cacheName !== STATIC_CACHE &&
-                                   cacheName !== DYNAMIC_CACHE &&
-                                   cacheName !== IMAGE_CACHE &&
-                                   cacheName !== API_CACHE;
+                                cacheName !== STATIC_CACHE &&
+                                cacheName !== DYNAMIC_CACHE &&
+                                cacheName !== IMAGE_CACHE &&
+                                cacheName !== API_CACHE;
                         })
                         .map((cacheName) => {
                             console.log('[SW] Deleting old cache:', cacheName);
