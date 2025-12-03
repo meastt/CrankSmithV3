@@ -159,7 +159,7 @@ self.addEventListener('fetch', (event) => {
                     .catch((err) => {
                         console.log('[SW] Fetch failed:', err);
                         // If network fails and we have no cache, show offline page
-                        if (!cachedResponse && request.mode === 'navigate') {
+                        if (request.mode === 'navigate') {
                             return caches.match('/offline')
                                 .then(offlineResponse => {
                                     if (offlineResponse) return offlineResponse;
@@ -169,8 +169,16 @@ self.addEventListener('fetch', (event) => {
                                     });
                                 });
                         }
+
+                        // CRITICAL FIX: Always return a Response if we have no cache and network fails
+                        // This handles Next.js _rsc requests and others
+                        return new Response(JSON.stringify({ error: 'Network Error', offline: true }), {
+                            status: 503,
+                            headers: { 'Content-Type': 'application/json' }
+                        });
                     });
 
+                // Return cached version immediately, update in background
                 return cachedResponse || fetchPromise;
             })
     );
