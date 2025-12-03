@@ -67,32 +67,21 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
             fetch(request)
                 .then((response) => {
-                    // Clone the response
                     const responseClone = response.clone();
-
-                    // Cache successful responses
                     if (response.status === 200) {
                         caches.open(API_CACHE).then((cache) => {
                             cache.put(request, responseClone);
                         });
                     }
-
                     return response;
                 })
                 .catch(() => {
-                    // If network fails, try cache
                     return caches.match(request)
                         .then((cachedResponse) => {
-                            if (cachedResponse) {
-                                return cachedResponse;
-                            }
-                            // Return offline response for API calls
+                            if (cachedResponse) return cachedResponse;
                             return new Response(
                                 JSON.stringify({ error: 'Offline', offline: true }),
-                                {
-                                    headers: { 'Content-Type': 'application/json' },
-                                    status: 503
-                                }
+                                { headers: { 'Content-Type': 'application/json' }, status: 503 }
                             );
                         });
                 })
@@ -105,18 +94,18 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
             caches.match(request)
                 .then((cachedResponse) => {
-                    if (cachedResponse) {
-                        return cachedResponse;
-                    }
-
+                    if (cachedResponse) return cachedResponse;
                     return fetch(request)
                         .then((response) => {
-                            // Clone and cache the response
                             const responseClone = response.clone();
                             caches.open(IMAGE_CACHE).then((cache) => {
                                 cache.put(request, responseClone);
                             });
                             return response;
+                        })
+                        .catch(() => {
+                            // Return a placeholder or nothing if image fails
+                            return new Response('', { status: 404, statusText: 'Not Found' });
                         });
                 })
         );
@@ -128,13 +117,23 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
             caches.match(request)
                 .then((cachedResponse) => {
-                    return cachedResponse || fetch(request)
+                    if (cachedResponse) return cachedResponse;
+                    return fetch(request)
                         .then((response) => {
+                            // Check if valid response before caching
+                            if (!response || response.status !== 200 || response.type !== 'basic') {
+                                return response;
+                            }
                             const responseClone = response.clone();
                             caches.open(STATIC_CACHE).then((cache) => {
                                 cache.put(request, responseClone);
                             });
                             return response;
+                        })
+                        .catch(() => {
+                            // If script fails to load (e.g. Clerk), return 404 to avoid SW crash
+                            // This allows the browser to potentially handle it or fail gracefully
+                            return new Response('', { status: 404, statusText: 'Not Found' });
                         });
                 })
         );
@@ -147,20 +146,31 @@ self.addEventListener('fetch', (event) => {
             .then((cachedResponse) => {
                 const fetchPromise = fetch(request)
                     .then((networkResponse) => {
-                        // Update cache in background
+                        // Check if valid response before caching
+                        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                            return networkResponse;
+                        }
+                        const responseToCache = networkResponse.clone();
                         caches.open(DYNAMIC_CACHE).then((cache) => {
-                            cache.put(request, networkResponse.clone());
+                            cache.put(request, responseToCache);
                         });
                         return networkResponse;
                     })
-                    .catch(() => {
-                        // If both network and cache fail, show offline page
-                        if (request.mode === 'navigate') {
-                            return caches.match('/offline');
+                    .catch((err) => {
+                        console.log('[SW] Fetch failed:', err);
+                        // If network fails and we have no cache, show offline page
+                        if (!cachedResponse && request.mode === 'navigate') {
+                            return caches.match('/offline')
+                                .then(offlineResponse => {
+                                    if (offlineResponse) return offlineResponse;
+                                    // Fallback if /offline is not cached
+                                    return new Response('<h1>Offline</h1><p>Please check your connection.</p>', {
+                                        headers: { 'Content-Type': 'text/html' }
+                                    });
+                                });
                         }
                     });
 
-                // Return cached version immediately, update in background
                 return cachedResponse || fetchPromise;
             })
     );
