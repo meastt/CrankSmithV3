@@ -32,36 +32,44 @@ export const TYPE_TO_CATEGORY_MAP: Record<string, ComponentCategory> = {
 /**
  * Convert a Builder Component to a Weight Component
  */
+/**
+ * Convert a Builder Component to a Weight Component
+ */
 export function builderComponentToWeightComponent(
-    component: Component,
+    component: any, // Accept any to support both legacy Component and new AnyComponent
     type: string
 ): WeightComponent | null {
     const category = TYPE_TO_CATEGORY_MAP[type];
-    if (!category) {
-        console.warn(`Unknown component type: ${type}`);
+    // Map specific builder keys to categories if needed (e.g. WheelFront -> wheels)
+    const mappedCategory = category || (type.includes('Wheel') ? 'wheels' :
+        type.includes('Tire') ? 'tires' :
+            type.includes('Brake') ? 'brakes' : undefined);
+
+    if (!mappedCategory) {
+        // console.warn(`Unknown component type: ${type}`);
         return null;
     }
 
-    // Extract weight from attributes
-    const weight = component.attributes.weight_g || component.attributes.weight || 0;
+    // Extract weight
+    // New strict types use 'weightGrams', legacy uses 'attributes.weight_g'
+    const weight = component.weightGrams || component.attributes?.weight_g || component.attributes?.weight || 0;
+
     if (weight === 0) {
-        console.warn(`Component ${component.name} has no weight`);
+        // console.warn(`Component ${component.name || component.model} has no weight`);
     }
 
-    // Extract brand from name (if available)
-    const nameParts = component.name.split(' ');
-    const brand = nameParts.length > 1 ? nameParts[0] : 'Unknown';
+    // Extract brand/name
+    const brand = component.brand || (component.name ? component.name.split(' ')[0] : 'Unknown');
+    const name = component.model ? `${component.brand} ${component.model}` : component.name || 'Unknown Component';
+    const cost = component.price || component.attributes?.price_msrp || component.attributes?.cost || undefined;
 
     // Determine if this is rotating weight
-    const isRotating = ROTATING_WEIGHT_CATEGORIES.includes(category);
-
-    // Cost might not be available yet - that's okay
-    const cost = component.attributes.price_msrp || component.attributes.cost || undefined;
+    const isRotating = ROTATING_WEIGHT_CATEGORIES.includes(mappedCategory);
 
     return {
         id: component.id,
-        category,
-        name: component.name,
+        category: mappedCategory,
+        name,
         brand,
         weight: Number(weight),
         cost: cost ? Number(cost) : undefined,
@@ -73,7 +81,7 @@ export function builderComponentToWeightComponent(
  * Convert a Builder build (from buildStore) to a BaselineBuild
  */
 export function builderPartsToBaselineBuild(
-    parts: Record<string, Component | null>,
+    parts: any, // Accept any to support BuildParts
     buildName?: string
 ): BaselineBuild | null {
     const components: WeightComponent[] = [];
