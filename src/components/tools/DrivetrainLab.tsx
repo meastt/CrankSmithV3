@@ -354,7 +354,7 @@ export const DrivetrainLab = () => {
     // Build Weight Calculation
     const buildWeight = useMemo(() => {
         if (viewMode === 'build' && Object.keys(parts).length > 0) {
-            return calculateBuildWeight(parts);
+            return calculateBuildWeight(parts as Record<string, any>);
         }
         return null;
     }, [parts, viewMode]);
