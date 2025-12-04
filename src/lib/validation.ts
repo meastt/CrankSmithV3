@@ -455,6 +455,12 @@ export function validateDrivetrain(
     const reasons: string[] = [];
     let compatible = true;
 
+    // 1. Protocol Check (Shifter ↔ Derailleur)
+    // Both use: protocol (e.g., "AXS", "Di2_12s_Wireless", "Shimano_Road_11s")
+    // Derailleur might also use: cable_pull
+    const shifterProtocol = getInterface(shifter, 'protocol');
+    const derailleurProtocol = getInterface(derailleur, 'protocol', 'cable_pull');
+
     // Helper to check if component is electronic
     const isElectronic = (c: Component) => {
         const proto = getInterface(c, 'protocol');
@@ -467,15 +473,18 @@ export function validateDrivetrain(
         return false;
     };
 
-    // 1. Protocol Check (Shifter ↔ Derailleur)
-    // Both use: protocol (e.g., "AXS", "Di2_12s_Wireless", "Shimano_Road_11s")
-    // Derailleur might also use: cable_pull
-    const shifterProtocol = getInterface(shifter, 'protocol');
-    const derailleurProtocol = getInterface(derailleur, 'protocol', 'cable_pull');
+    const shifterIsElectronic = isElectronic(shifter);
+    const derailleurIsElectronic = isElectronic(derailleur);
+
+    // CRITICAL CHECK: Mechanical vs Electronic Separation
+    if (shifterIsElectronic !== derailleurIsElectronic) {
+        compatible = false;
+        reasons.push(`Cannot mix electronic shifter with mechanical derailleur (or vice versa)`);
+        return { compatible, reasons }; // Fail early
+    }
 
     if (shifterProtocol && derailleurProtocol) {
         // Normalize protocols for comparison
-        // Handle variations: "SRAM_AXS" vs "AXS", case differences, etc.
         const normalizeProtocol = (p: string): string => {
             let norm = String(p).toLowerCase().replace(/[\s_-]/g, '');
             // "sramaxs" -> "axs", but keep "axs" as "axs"
@@ -495,13 +504,19 @@ export function validateDrivetrain(
             reasons.push(`Shifter protocol (${shifterProtocol}) incompatible with derailleur (${derailleurProtocol})`);
         }
     } else {
-        // If protocols are missing, fallback to electronic/mechanical check
-        const shifterElectronic = isElectronic(shifter);
-        const derailleurElectronic = isElectronic(derailleur);
-
-        if (shifterElectronic !== derailleurElectronic) {
+        // If protocols are missing...
+        if (shifterIsElectronic && derailleurIsElectronic) {
+            // STRICT MODE: If both are electronic but missing protocols, we CANNOT assume compatibility.
+            // This was the source of the "Di2 works with AXS" bug.
             compatible = false;
-            reasons.push(`Cannot mix electronic shifter with mechanical derailleur (or vice versa)`);
+            reasons.push(`Electronic components missing specific protocol data (e.g., 'AXS', 'Di2'). Cannot verify compatibility.`);
+        } else {
+            // Mechanical fallback:
+            // If both are mechanical but missing 'cable_pull' / 'protocol', we technically don't know if they work.
+            // However, for legacy reasons, we might warn instead of fail, OR fail strictly.
+            // Given the user's request for a "complete audit" and "no small conflicts", we should be strict.
+            compatible = false;
+            reasons.push(`Missing compatibility data (protocol/cable pull) for one or both components.`);
         }
     }
 

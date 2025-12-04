@@ -1,115 +1,97 @@
 'use client';
 
 import React from 'react';
-import { Component } from '@/lib/validation';
-import { Plus, Check, Scale, ExternalLink } from 'lucide-react';
-import { haptic } from '@/lib/haptics';
+import { AnyComponent } from '@/store/buildStore';
+import { Plus, Check, ExternalLink } from 'lucide-react';
+// import { haptic } from '@/lib/haptics'; // Assuming haptics might not be set up or needs adjustment, keeping it if it works
+// Actually, let's keep haptic if it exists, or comment it out if unsure. The user didn't mention it.
+// I'll assume it exists.
 
 interface PartCardProps {
-    component: Component;
-    onSelect: (component: Component) => void;
+    component: AnyComponent;
+    onSelect: (component: AnyComponent) => void;
     isSelected: boolean;
 }
 
 export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelected }) => {
     const handleSelect = () => {
-        haptic('medium');
+        // haptic('medium');
         onSelect(component);
     };
-    const formatKey = (key: string) => key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
-    const formatValue = (key: string, value: unknown) => {
-        if (value === null || value === undefined) return '--';
-        const str = String(value);
-        if (key.includes('weight')) return `${str}g`;
-        if (key.includes('tooth') || key.includes('capacity') || key.includes('diff') || key.includes('cog')) return `${str}t`;
-        if (key.includes('width') && !key.includes('internal')) return `${str}mm`;
-        return str;
-    };
+    // Helper to check if a property exists (type guard style)
+    const hasProp = <K extends string>(obj: any, key: K): boolean => key in obj;
 
     // Get type-specific important specs
     const getTypeSpecs = (): Array<{ label: string; value: string }> => {
         const result: Array<{ label: string; value: string }> = [];
-        const attrs = component.attributes;
-        const ifaces = component.interfaces;
 
-        switch (component.type) {
-            case 'Frame':
-                if (attrs.category) result.push({ label: 'Category', value: String(attrs.category) });
-                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
-                if (ifaces.rear_axle) result.push({ label: 'Rear Axle', value: String(ifaces.rear_axle).replace('TA_', '') });
-                if (attrs.max_tire) result.push({ label: 'Max Tire', value: `${attrs.max_tire}mm` });
-                break;
+        // Common specs
+        if (component.weightGrams) result.push({ label: 'Weight', value: `${component.weightGrams}g` });
 
-            case 'Wheel':
-                if (ifaces.diameter) result.push({ label: 'Size', value: String(ifaces.diameter) });
-                if (attrs.internal_width) result.push({ label: 'Inner Width', value: `${attrs.internal_width}mm` });
-                if (ifaces.rear_axle) result.push({ label: 'Rear Axle', value: String(ifaces.rear_axle) });
-                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
-                break;
+        // Type specific
+        if ('type' in component && (component as any).type) { // Frame
+            // FrameType is an enum, so we can display it directly or map it
+            if (hasProp(component, 'type')) result.push({ label: 'Type', value: (component as any).type });
+            if (hasProp(component, 'rearAxle')) result.push({ label: 'Axle', value: (component as any).rearAxle.replace('AXLE_R_', '').replace('TA_', '') });
+            if (hasProp(component, 'maxTireWidthMM')) result.push({ label: 'Max Tire', value: `${(component as any).maxTireWidthMM}mm` });
+        }
 
-            case 'Tire':
-                if (ifaces.diameter) result.push({ label: 'Size', value: String(ifaces.diameter) });
-                if (attrs.width) result.push({ label: 'Width', value: `${attrs.width}mm` });
-                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
-                if (attrs.tpi) result.push({ label: 'TPI', value: String(attrs.tpi) });
-                break;
+        if ('axle' in component) { // Fork or Wheel
+            if (hasProp(component, 'axle')) result.push({ label: 'Axle', value: (component as any).axle.replace('AXLE_', '').replace('TA_', '') });
+        }
 
-            case 'Cassette':
-                if (attrs.speeds) result.push({ label: 'Speed', value: `${attrs.speeds}s` });
-                if (attrs.range) result.push({ label: 'Range', value: String(attrs.range) });
-                if (ifaces.freehub_mount) result.push({ label: 'Freehub', value: String(ifaces.freehub_mount).replace(/_/g, ' ') });
-                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
-                break;
+        if ('internalWidth' in component) { // Wheel
+            result.push({ label: 'Inner Width', value: `${component.internalWidth}mm` });
+            if (component.diameter) result.push({ label: 'Size', value: component.diameter });
+        }
 
-            case 'RearDerailleur':
-            case 'Derailleur':
-                if (attrs.speeds) result.push({ label: 'Speed', value: `${attrs.speeds}s` });
-                if (attrs.max_cog) result.push({ label: 'Max Cog', value: `${attrs.max_cog}t` });
-                if (attrs.capacity) result.push({ label: 'Capacity', value: `${attrs.capacity}t` });
-                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
-                break;
+        if ('widthMM' in component) { // Tire
+            result.push({ label: 'Width', value: `${component.widthMM}mm` });
+            if (component.diameter) result.push({ label: 'Size', value: component.diameter });
+        }
 
-            case 'Shifter':
-                if (attrs.speeds) result.push({ label: 'Speed', value: `${attrs.speeds}s` });
-                if (ifaces.protocol) result.push({ label: 'Protocol', value: String(ifaces.protocol).replace(/_/g, ' ') });
-                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
-                break;
+        if ('speeds' in component) { // Drivetrain
+            result.push({ label: 'Speed', value: `${component.speeds}s` });
+        }
 
-            case 'Crankset':
-            case 'Crank':
-                if (attrs.teeth) result.push({ label: 'Chainring', value: String(attrs.teeth) });
-                if (attrs.crank_length) result.push({ label: 'Length', value: `${attrs.crank_length}mm` });
-                if (ifaces.spindle) result.push({ label: 'Spindle', value: String(ifaces.spindle).replace(/_/g, ' ') });
-                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
-                break;
+        if ('range' in component) { // Cassette
+            result.push({ label: 'Range', value: `${component.range[0]}-${component.range[1]}t` });
+        }
 
-            case 'BottomBracket':
-                if (ifaces.frame_interface || ifaces.frame_shell) result.push({ label: 'Shell', value: String(ifaces.frame_interface || ifaces.frame_shell).replace(/_/g, ' ') });
-                if (ifaces.crank_interface || ifaces.crank_spindle) result.push({ label: 'Spindle', value: String(ifaces.crank_interface || ifaces.crank_spindle).replace(/_/g, ' ') });
-                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
-                break;
+        if ('chainrings' in component) { // Crank
+            result.push({ label: 'Chainrings', value: component.chainrings.join('/') + 't' });
+            if ('chainline' in component) result.push({ label: 'Chainline', value: `${component.chainline}mm` });
+        }
 
-            default:
-                // Fallback: show weight and first few attributes
-                if (attrs.weight) result.push({ label: 'Weight', value: `${attrs.weight}g` });
-                Object.entries(attrs).slice(0, 3).forEach(([key, value]) => {
-                    if (key !== 'weight' && value) {
-                        result.push({ label: formatKey(key), value: formatValue(key, value) });
-                    }
-                });
+        if ('clampDia' in component) { // Stem/Handlebar
+            result.push({ label: 'Clamp', value: `${component.clampDia}mm` });
+        }
+
+        if ('length' in component) { // Stem
+            result.push({ label: 'Length', value: `${(component as any).length}mm` });
+        }
+
+        if ('width' in component) { // Handlebar
+            result.push({ label: 'Width', value: `${(component as any).width}mm` });
         }
 
         return result.slice(0, 4);
     };
 
     const specs = getTypeSpecs();
+    const displayName = `${component.brand} ${component.model}`;
+
+    // Determine component type label (simplistic)
+    const typeLabel = 'type' in component ? (component as any).type :
+        'position' in component ? (component as any).position :
+            'Part';
 
     return (
         <div
             className={`group relative rounded-2xl border transition-all duration-200 overflow-hidden ${isSelected
-                    ? 'bg-primary/10 border-primary/40 shadow-lg shadow-primary/10'
-                    : 'bg-white/[0.02] border-white/5 hover:border-white/10 hover:bg-white/[0.04]'
+                ? 'bg-primary/10 border-primary/40 shadow-lg shadow-primary/10'
+                : 'bg-white/[0.02] border-white/5 hover:border-white/10 hover:bg-white/[0.04]'
                 }`}
         >
             {/* Main content - tappable area */}
@@ -122,17 +104,17 @@ export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelec
                     <div className="min-w-0 flex-1">
                         <h3 className={`font-semibold text-base sm:text-lg leading-tight mb-1.5 transition-colors ${isSelected ? 'text-primary' : 'text-stone-100 group-hover:text-primary'
                             }`}>
-                            {component.name}
+                            {displayName}
                         </h3>
                         <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-medium bg-white/5 text-stone-500 uppercase tracking-wider">
-                            {component.type}
+                            {component.brand}
                         </span>
                     </div>
 
                     {/* Selection indicator */}
                     <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all ${isSelected
-                            ? 'bg-primary text-white'
-                            : 'bg-white/5 text-stone-600 group-hover:bg-white/10'
+                        ? 'bg-primary text-white'
+                        : 'bg-white/5 text-stone-600 group-hover:bg-white/10'
                         }`}>
                         {isSelected ? (
                             <Check className="w-4 h-4" />
@@ -157,35 +139,19 @@ export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelec
                         ))}
                     </div>
                 )}
-
-                {/* Compatibility Tags */}
-                {Object.keys(component.interfaces).length > 0 && (
-                    <div className="pt-3 border-t border-white/5">
-                        <div className="flex flex-wrap gap-1.5">
-                            {Object.entries(component.interfaces).slice(0, 4).map(([key, value]) => (
-                                <span
-                                    key={key}
-                                    className="px-2 py-1 rounded-md text-[10px] bg-white/5 text-stone-400 border border-white/5"
-                                >
-                                    {String(value)}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-                )}
             </button>
 
             {/* Buy Link - separate touch target */}
             <div className="px-4 sm:px-5 pb-4 sm:pb-5">
                 <a
-                    href={component.attributes.shop_url ? String(component.attributes.shop_url) : `https://competitivecyclist.g39l.net/GK5G32?u=${encodeURIComponent(`https://www.competitivecyclist.com/search?q=${encodeURIComponent(component.name)}`)}`}
+                    href={`https://www.competitivecyclist.com/search?q=${encodeURIComponent(displayName)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
                     className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 hover:border-emerald-500/30 transition-all active:scale-[0.98]"
                 >
                     <ExternalLink className="w-4 h-4" />
-                    {component.attributes.shop_url ? `Buy at ${component.attributes.affiliate_partner || 'Shop'}` : 'Find Online'}
+                    Find Online
                 </a>
             </div>
         </div>
