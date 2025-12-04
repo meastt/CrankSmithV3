@@ -21,6 +21,10 @@ export interface BaseComponent {
     weightGrams: number;
     price: number;
     image: string;
+    // Database fields (JSON parsed)
+    name?: string;
+    attributes?: Record<string, any>;
+    interfaces?: Record<string, any>;
 }
 
 // --- FRAMES & FORKS ---

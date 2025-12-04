@@ -7,7 +7,7 @@ import { AlertTriangle, Trash2, Save, Download, Package } from 'lucide-react';
 export const BuildSummary: React.FC = () => {
     const { parts, removePart, validationResults } = useBuildStore();
 
-    const totalWeight = Object.values(parts).reduce((sum, part) => sum + (part?.attributes?.weight_g || 0), 0);
+    const totalWeight = Object.values(parts).reduce((sum, part) => sum + ((part as any)?.attributes?.weight_g || 0), 0);
     const partsCount = Object.values(parts).filter(Boolean).length;
 
     const handleSave = async () => {
@@ -41,8 +41,8 @@ export const BuildSummary: React.FC = () => {
         const headers = ['Type', 'Component', 'Weight (g)'];
         const rows = Object.entries(parts).map(([type, part]) => [
             type,
-            part?.name || 'Not Selected',
-            part?.attributes?.weight_g || '0'
+            (part as any)?.name || 'Not Selected',
+            (part as any)?.attributes?.weight_g || '0'
         ]);
 
         const csvContent = [
@@ -66,21 +66,25 @@ export const BuildSummary: React.FC = () => {
     // Get extras
     const getExtras = () => {
         const extras: string[] = [];
-        if (parts.Frame && ['Road', 'Gravel'].includes(parts.Frame.attributes.category as string)) {
+        // Check if frame is Road or Gravel for handlebar tape
+        if (parts.Frame && (parts.Frame.type === 'ROAD' || parts.Frame.type === 'GRAVEL')) {
             extras.push('Handlebar Tape');
         }
-        if (parts.Wheel?.attributes?.tubeless_ready && parts.Tire?.attributes?.tubeless_ready) {
+        // Check for tubeless setup
+        if ((parts.WheelFront?.attributes?.tubeless_ready || parts.WheelRear?.attributes?.tubeless_ready) &&
+            (parts.TireFront?.tubeless || parts.TireRear?.tubeless)) {
             extras.push('Tubeless Valves (x2)');
             extras.push('Tire Sealant');
         }
-        if (parts.Frame?.interfaces?.brake_type === 'Disc' || parts.Wheel?.interfaces?.brake_type === 'Disc') {
+        // Check for disc brakes
+        if (parts.Frame?.brakeMount?.includes('FLAT') || parts.WheelFront?.brakeInterface?.includes('DISC')) {
             extras.push('Disc Rotors (x2)');
         }
-        if (parts.Shifter?.interfaces?.protocol) {
-            const proto = (parts.Shifter.interfaces.protocol as string).toLowerCase();
-            if (proto.includes('wireless') || proto.includes('axs') || proto.includes('di2')) {
+        // Check for shifter cables/batteries based on electronic/hydraulic
+        if (parts.Shifter) {
+            if (parts.Shifter.isElectronic) {
                 extras.push('Batteries / Charger');
-            } else if (proto.includes('hydraulic')) {
+            } else if (parts.Shifter.brakeFluid) {
                 extras.push('Hydraulic Hoses & Fluid');
             } else {
                 extras.push('Shift Cables & Housing');
