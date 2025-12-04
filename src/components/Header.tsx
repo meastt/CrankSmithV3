@@ -42,10 +42,11 @@ export function Header() {
     return (
         <>
             <header
-                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
+                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 pt-safe ${scrolled
                     ? 'bg-stone-950/90 backdrop-blur-xl border-b border-white/5'
                     : 'bg-transparent'
                     }`}
+                style={{ paddingTop: 'env(safe-area-inset-top, 20px)' }}
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6">
                     <div className="flex justify-between items-center h-16 md:h-18">

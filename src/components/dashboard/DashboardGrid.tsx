@@ -136,13 +136,13 @@ export const DashboardGrid = () => {
                                     </div>
 
                                     <div className="mt-auto">
-                                        <h3 className="text-sm font-mono font-medium text-stone-500 mb-2 uppercase tracking-wider">
+                                        <h3 className="text-sm font-mono font-medium text-stone-400 mb-2 uppercase tracking-wider">
                                             {tool.subtitle}
                                         </h3>
                                         <h2 className={`text-3xl font-bold text-white mb-3 ${tool.text} transition-colors`}>
                                             {tool.title}
                                         </h2>
-                                        <p className="text-stone-400 leading-relaxed group-hover:text-stone-300 transition-colors">
+                                        <p className="text-stone-300 leading-relaxed group-hover:text-stone-200 transition-colors">
                                             {tool.description}
                                         </p>
                                     </div>
