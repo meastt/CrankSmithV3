@@ -122,7 +122,7 @@ export const BuildSummary: React.FC = () => {
             {/* Parts List */}
             <div className="flex-1 overflow-y-auto p-4">
                 <div className="space-y-2">
-                    {Object.entries(parts).map(([type, component]) => (
+                    {(Object.entries(parts) as [keyof typeof parts, typeof parts[keyof typeof parts]][]).map(([type, component]) => (
                         <div
                             key={type}
                             className={`group rounded-xl border transition-all ${
@@ -138,7 +138,7 @@ export const BuildSummary: React.FC = () => {
                                     </span>
                                     {component ? (
                                         <p className="text-sm font-medium text-stone-200 truncate mt-0.5">
-                                            {component.name}
+                                            {(component as any).name}
                                         </p>
                                     ) : (
                                         <p className="text-sm text-stone-600 italic mt-0.5">Not selected</p>

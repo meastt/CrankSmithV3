@@ -16,21 +16,21 @@ export const PerformancePanel: React.FC = () => {
     const { parts, cadence, totalWeight, setCadence } = useBuildStore();
     const { unitSystem, toggleUnitSystem } = useSettingsStore();
 
-    const crank = parts.Crank;
+    const crank = parts.Crankset;
     const cassette = parts.Cassette;
 
     const chainrings =
-        crank?.attributes.chainring_small && crank.attributes.chainring_small !== 0
-            ? [crank.attributes.chainring_large as number, crank.attributes.chainring_small as number]
-            : crank?.attributes.chainring_large
-                ? [crank.attributes.chainring_large as number]
+        (crank as any)?.attributes?.chainring_small && (crank as any).attributes.chainring_small !== 0
+            ? [(crank as any).attributes.chainring_large as number, (crank as any).attributes.chainring_small as number]
+            : (crank as any)?.attributes?.chainring_large
+                ? [(crank as any).attributes.chainring_large as number]
                 : [];
 
     const cassetteCogs =
-        cassette?.attributes.largest_cog && cassette.attributes.diff
+        (cassette as any)?.attributes?.largest_cog && (cassette as any).attributes.diff
             ? parseCassetteRange(
-                cassette.attributes.largest_cog as number,
-                (cassette.attributes.largest_cog as number) - (cassette.attributes.diff as number)
+                (cassette as any).attributes.largest_cog as number,
+                ((cassette as any).attributes.largest_cog as number) - ((cassette as any).attributes.diff as number)
             )
             : [];
 
