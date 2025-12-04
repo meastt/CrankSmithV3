@@ -12,6 +12,7 @@ interface BuildState {
     setCadence: (cadence: number) => void;
     setBuild: (parts: Record<string, Component | null>) => void;
     validateBuild: () => Promise<void>;
+    loadTemplate: (templateParts: Record<string, Component>) => void;
 }
 
 export const useBuildStore = create<BuildState>((set, get) => ({
@@ -178,4 +179,20 @@ export const useBuildStore = create<BuildState>((set, get) => ({
 
         set({ validationErrors: errors });
     },
+    loadTemplate: (templateParts: Record<string, Component>) => {
+        set((state) => {
+            const newWeight = Object.values(templateParts).reduce((total, part) => {
+                if (part && part.attributes.weight_g) {
+                    return total + (part.attributes.weight_g as number);
+                }
+                return total;
+            }, 0);
+            return {
+                parts: { ...state.parts, ...templateParts },
+                totalWeight: newWeight,
+                validationErrors: []
+            };
+        });
+        get().validateBuild();
+    }
 }));

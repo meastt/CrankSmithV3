@@ -455,6 +455,18 @@ export function validateDrivetrain(
     const reasons: string[] = [];
     let compatible = true;
 
+    // Helper to check if component is electronic
+    const isElectronic = (c: Component) => {
+        const proto = getInterface(c, 'protocol');
+        const attr = getAttribute(c, 'electronic');
+        if (attr === true) return true;
+        if (proto && String(proto).toLowerCase().includes('electronic')) return true;
+        if (proto && String(proto).toLowerCase().includes('di2')) return true;
+        if (proto && String(proto).toLowerCase().includes('axs')) return true;
+        if (proto && String(proto).toLowerCase().includes('eps')) return true;
+        return false;
+    };
+
     // 1. Protocol Check (Shifter ↔ Derailleur)
     // Both use: protocol (e.g., "AXS", "Di2_12s_Wireless", "Shimano_Road_11s")
     // Derailleur might also use: cable_pull
@@ -481,6 +493,15 @@ export function validateDrivetrain(
         if (norm1 !== norm2) {
             compatible = false;
             reasons.push(`Shifter protocol (${shifterProtocol}) incompatible with derailleur (${derailleurProtocol})`);
+        }
+    } else {
+        // If protocols are missing, fallback to electronic/mechanical check
+        const shifterElectronic = isElectronic(shifter);
+        const derailleurElectronic = isElectronic(derailleur);
+
+        if (shifterElectronic !== derailleurElectronic) {
+            compatible = false;
+            reasons.push(`Cannot mix electronic shifter with mechanical derailleur (or vice versa)`);
         }
     }
 

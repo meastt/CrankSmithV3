@@ -20,20 +20,8 @@ export async function POST(request: Request) {
             return new NextResponse("Missing required fields", { status: 400 });
         }
 
-        // Clean up parts data - only save essential info to avoid circular refs
-        const cleanedParts: Record<string, { id: string; name: string; type: string } | null> = {};
-        for (const [key, value] of Object.entries(parts)) {
-            if (value && typeof value === 'object') {
-                const part = value as { id?: string; name?: string; type?: string };
-                cleanedParts[key] = part.id ? {
-                    id: part.id,
-                    name: part.name || '',
-                    type: part.type || key
-                } : null;
-            } else {
-                cleanedParts[key] = null;
-            }
-        }
+        // Save the full parts object to ensure we can reload the build with all attributes/interfaces
+        // We assume 'parts' does not contain circular references, which is true for our Component objects.
 
         // Ensure user exists in our DB
         // We use upsert to create the user if they don't exist yet (first time saving)
@@ -52,7 +40,7 @@ export async function POST(request: Request) {
         const build = await prisma.savedBuild.create({
             data: {
                 name,
-                parts: JSON.stringify(cleanedParts),
+                parts: JSON.stringify(parts),
                 userId
             }
         });

@@ -107,11 +107,10 @@ export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelec
 
     return (
         <div
-            className={`group relative rounded-2xl border transition-all duration-200 overflow-hidden ${
-                isSelected
+            className={`group relative rounded-2xl border transition-all duration-200 overflow-hidden ${isSelected
                     ? 'bg-primary/10 border-primary/40 shadow-lg shadow-primary/10'
                     : 'bg-white/[0.02] border-white/5 hover:border-white/10 hover:bg-white/[0.04]'
-            }`}
+                }`}
         >
             {/* Main content - tappable area */}
             <button
@@ -121,9 +120,8 @@ export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelec
                 {/* Header */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="min-w-0 flex-1">
-                        <h3 className={`font-semibold text-base sm:text-lg leading-tight mb-1.5 transition-colors ${
-                            isSelected ? 'text-primary' : 'text-stone-100 group-hover:text-primary'
-                        }`}>
+                        <h3 className={`font-semibold text-base sm:text-lg leading-tight mb-1.5 transition-colors ${isSelected ? 'text-primary' : 'text-stone-100 group-hover:text-primary'
+                            }`}>
                             {component.name}
                         </h3>
                         <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-medium bg-white/5 text-stone-500 uppercase tracking-wider">
@@ -132,11 +130,10 @@ export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelec
                     </div>
 
                     {/* Selection indicator */}
-                    <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-                        isSelected
+                    <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all ${isSelected
                             ? 'bg-primary text-white'
                             : 'bg-white/5 text-stone-600 group-hover:bg-white/10'
-                    }`}>
+                        }`}>
                         {isSelected ? (
                             <Check className="w-4 h-4" />
                         ) : (
@@ -181,14 +178,14 @@ export const PartCard: React.FC<PartCardProps> = ({ component, onSelect, isSelec
             {/* Buy Link - separate touch target */}
             <div className="px-4 sm:px-5 pb-4 sm:pb-5">
                 <a
-                    href={`https://competitivecyclist.g39l.net/GK5G32?u=${encodeURIComponent(`https://www.competitivecyclist.com/search?q=${encodeURIComponent(component.name)}`)}`}
+                    href={component.attributes.shop_url ? String(component.attributes.shop_url) : `https://competitivecyclist.g39l.net/GK5G32?u=${encodeURIComponent(`https://www.competitivecyclist.com/search?q=${encodeURIComponent(component.name)}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
                     className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 hover:border-emerald-500/30 transition-all active:scale-[0.98]"
                 >
                     <ExternalLink className="w-4 h-4" />
-                    Buy Now
+                    {component.attributes.shop_url ? `Buy at ${component.attributes.affiliate_partner || 'Shop'}` : 'Find Online'}
                 </a>
             </div>
         </div>

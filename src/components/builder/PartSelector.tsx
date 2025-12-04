@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { Component, validateComponent } from '@/lib/validation';
 import { PartCard } from './PartCard';
 import { useBuildStore } from '@/store/buildStore';
+import { useClerk, useUser, SignInButton } from '@clerk/nextjs';
 import { useSettingsStore } from '@/store/settingsStore';
 import {
     Eye, EyeOff, ChevronLeft, ChevronRight, Check,
@@ -85,6 +86,7 @@ const WHEEL_WIDTH_RANGES_BY_CATEGORY: Record<string, { id: string; label: string
 // Freehub types for cassette filtering
 const FREEHUB_OPTIONS = [
     { id: 'shimano', label: 'Shimano HG', subtitle: '11s road / 11-12s MTB', patterns: ['shimano', 'hg'] },
+    { id: 'microspline', label: 'Shimano Microspline', subtitle: '12s MTB', patterns: ['microspline', 'micro spline'] },
     { id: 'sram-xdr', label: 'SRAM XDR', subtitle: '12s road', patterns: ['xdr'] },
     { id: 'sram-xd', label: 'SRAM XD', subtitle: '12s MTB', patterns: ['xd'] },
     { id: 'campagnolo', label: 'Campagnolo', subtitle: 'N3W / older', patterns: ['campagnolo', 'n3w', 'campy'] },
@@ -176,12 +178,16 @@ export const PartSelector: React.FC = () => {
     }, [currentStep, scrollToTop]);
 
     // Fetch components when step changes
+    // Fetch components when step changes
     useEffect(() => {
         setLoading(true);
         setError(null);
         resetFilters();
 
-        fetch(`/api/components?type=${activeType}`)
+        // Map UI types to Database types
+        const typeToFetch = activeType === 'Wheel' ? 'Wheelset' : activeType;
+
+        fetch(`/api/components?type=${typeToFetch}`)
             .then(res => {
                 if (!res.ok) throw new Error('Failed to fetch components');
                 return res.json();
@@ -192,7 +198,7 @@ export const PartSelector: React.FC = () => {
                 } else {
                     console.error('Received non-array data:', data);
                     setComponents([]);
-                    setError(data.error || 'Invalid data received from server');
+                    setError('Invalid data received from server');
                 }
             })
             .catch(err => {
@@ -224,7 +230,30 @@ export const PartSelector: React.FC = () => {
     }, [isBuildComplete, currentStep]);
 
     // Save build function
+    // Save build function
+    const { openSignIn } = useClerk();
+    const { user, isLoaded } = useUser();
+
     const handleSaveBuild = async () => {
+        if (!isLoaded) {
+            console.log('Clerk not loaded yet');
+            return;
+        }
+
+        if (!user) {
+            console.log('User not logged in, opening sign in modal');
+            try {
+                openSignIn({
+                    afterSignInUrl: '/builder',
+                    afterSignUpUrl: '/builder',
+                });
+            } catch (err) {
+                console.error('Failed to open sign in:', err);
+                alert('Unable to open sign in window. Please try again.');
+            }
+            return;
+        }
+
         const name = window.prompt('Name your build:');
         if (!name) return;
 
@@ -240,13 +269,9 @@ export const PartSelector: React.FC = () => {
                 setShowBuildComplete(false);
                 router.push('/garage');
             } else {
-                if (res.status === 401) {
-                    alert('Please sign in to save builds.');
-                } else {
-                    const errorText = await res.text();
-                    console.error('Save failed:', errorText);
-                    alert('Failed to save build. Please try again.');
-                }
+                const errorText = await res.text();
+                console.error('Save failed:', errorText);
+                alert('Failed to save build. Please try again.');
             }
         } catch (err) {
             console.error('Save error:', err);
@@ -573,9 +598,9 @@ export const PartSelector: React.FC = () => {
 
     return (
         <div className="flex-1 flex flex-col h-full bg-gray-950 overflow-hidden">
-            {/* Progress Steps - Horizontal scrollable */}
-            <div className="border-b border-white/5 bg-gray-950/80 backdrop-blur-xl">
-                <div className="flex overflow-x-auto no-scrollbar px-2 py-3 gap-1">
+            {/* Progress Steps */}
+            <div className="sticky top-[calc(4rem+env(safe-area-inset-top))] md:top-[calc(4.5rem+env(safe-area-inset-top))] z-30 bg-stone-950/95 backdrop-blur border-b border-white/5">
+                <div className="px-4 py-3 overflow-x-auto no-scrollbar flex items-center gap-2 md:justify-center">
                     {BUILD_SEQUENCE.map((step, idx) => {
                         const isComplete = parts[step.type];
                         const isCurrent = idx === currentStep;
@@ -675,7 +700,7 @@ export const PartSelector: React.FC = () => {
             </div>
 
             {/* Content */}
-            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pb-28 lg:pb-6">
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pb-40 lg:pb-6">
                 <div className="p-4 md:p-6">
                     <AnimatePresence mode="wait">
                         {loading ? (
@@ -1197,7 +1222,7 @@ export const PartSelector: React.FC = () => {
                                                     chainringsStr += `,${crank.attributes.chainring_small}`;
                                                 }
                                             } else if (crank.attributes.teeth) {
-                                                chainringsStr = String(crank.attributes.teeth).replace('/', ',');
+                                                chainringsStr = String(crank.attributes.teeth).replace(/[^\d,/]/g, '').replace('/', ',');
                                             }
 
                                             // Cassette Range

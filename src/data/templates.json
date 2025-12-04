@@ -1,0 +1,352 @@
+[
+    {
+        "id": "template-road-ultimate",
+        "name": "Ultimate Climbing Machine",
+        "description": "A featherweight road build designed for the steepest ascents. Sub-7kg goal.",
+        "category": "Road",
+        "parts": {
+            "Frame": {
+                "id": "frame-specialized-aethos",
+                "type": "Frame",
+                "name": "Specialized Aethos S-Works",
+                "attributes": {
+                    "weight_g": 585,
+                    "category": "Road",
+                    "max_tire": 32
+                },
+                "interfaces": {
+                    "bottom_bracket_shell": "BSA_Threaded",
+                    "rear_axle": "12x142mm",
+                    "brake_mount": "Flat_Mount",
+                    "wheel_size": "700c",
+                    "steerer_tube": "1_1/8"
+                }
+            },
+            "Wheel": {
+                "id": "wheel-roval-alpinist",
+                "type": "Wheel",
+                "name": "Roval Alpinist CLX II",
+                "attributes": {
+                    "weight_g": 1265,
+                    "internal_width": 21
+                },
+                "interfaces": {
+                    "diameter": "700c",
+                    "rear_axle": "12x142mm",
+                    "brake_type": "Centerlock",
+                    "freehub_body": "Shimano_HG_L2"
+                }
+            },
+            "Tire": {
+                "id": "tire-gp5000-str",
+                "type": "Tire",
+                "name": "Continental GP5000 S TR 28mm",
+                "attributes": {
+                    "weight_g": 280,
+                    "width": 28
+                },
+                "interfaces": {
+                    "diameter": "700c"
+                }
+            },
+            "Crankset": {
+                "id": "crank-dura-ace",
+                "type": "Crankset",
+                "name": "Shimano Dura-Ace R9200",
+                "attributes": {
+                    "weight_g": 690,
+                    "chainring_diff": 16
+                },
+                "interfaces": {
+                    "spindle": "Hollowtech_II_24mm",
+                    "speeds": 12
+                }
+            },
+            "BottomBracket": {
+                "id": "bb-dura-ace",
+                "type": "BottomBracket",
+                "name": "Shimano Dura-Ace BSA",
+                "attributes": {
+                    "weight_g": 65
+                },
+                "interfaces": {
+                    "frame_interface": "BSA_Threaded",
+                    "crank_interface": "Hollowtech_II_24mm"
+                }
+            },
+            "Cassette": {
+                "id": "cassette-dura-ace",
+                "type": "Cassette",
+                "name": "Shimano Dura-Ace 11-34t",
+                "attributes": {
+                    "weight_g": 253,
+                    "largest_cog": 34,
+                    "diff": 23,
+                    "speeds": 12
+                },
+                "interfaces": {
+                    "cassette_mount": "Shimano_HG_L2"
+                }
+            },
+            "RearDerailleur": {
+                "id": "rd-dura-ace",
+                "type": "RearDerailleur",
+                "name": "Shimano Dura-Ace Di2 RD-R9250",
+                "attributes": {
+                    "weight_g": 215,
+                    "max_tooth": 34,
+                    "capacity": 39,
+                    "speeds": 12
+                },
+                "interfaces": {
+                    "protocol": "Di2",
+                    "mount": "Standard"
+                }
+            },
+            "Shifter": {
+                "id": "shifter-dura-ace",
+                "type": "Shifter",
+                "name": "Shimano Dura-Ace Di2 ST-R9270",
+                "attributes": {
+                    "weight_g": 350,
+                    "speeds": 12
+                },
+                "interfaces": {
+                    "protocol": "Di2"
+                }
+            }
+        }
+    },
+    {
+        "id": "template-gravel-adventure",
+        "name": "Unbound Gravel Racer",
+        "description": "Fast, capable, and ready for 200 miles of flint. Aero optimized gravel setup.",
+        "category": "Gravel",
+        "parts": {
+            "Frame": {
+                "id": "frame-cervelo-aspero",
+                "type": "Frame",
+                "name": "Cervelo Aspero-5",
+                "attributes": {
+                    "weight_g": 990,
+                    "category": "Gravel",
+                    "max_tire": 45
+                },
+                "interfaces": {
+                    "bottom_bracket_shell": "BBright",
+                    "rear_axle": "12x142mm",
+                    "brake_mount": "Flat_Mount",
+                    "wheel_size": "700c"
+                }
+            },
+            "Wheel": {
+                "id": "wheel-zipp-303-firecrest",
+                "type": "Wheel",
+                "name": "Zipp 303 Firecrest",
+                "attributes": {
+                    "weight_g": 1352,
+                    "internal_width": 25
+                },
+                "interfaces": {
+                    "diameter": "700c",
+                    "rear_axle": "12x142mm",
+                    "brake_type": "Centerlock",
+                    "freehub_body": "SRAM_XDR"
+                }
+            },
+            "Tire": {
+                "id": "tire-pathfinder-pro",
+                "type": "Tire",
+                "name": "Specialized Pathfinder Pro 42mm",
+                "attributes": {
+                    "weight_g": 540,
+                    "width": 42
+                },
+                "interfaces": {
+                    "diameter": "700c"
+                }
+            },
+            "Crankset": {
+                "id": "crank-red-xplr",
+                "type": "Crankset",
+                "name": "SRAM Red 1 AXS Power Meter",
+                "attributes": {
+                    "weight_g": 565,
+                    "chainring_diff": 0
+                },
+                "interfaces": {
+                    "spindle": "DUB",
+                    "speeds": 12
+                }
+            },
+            "BottomBracket": {
+                "id": "bb-sram-dub",
+                "type": "BottomBracket",
+                "name": "SRAM DUB BBright",
+                "attributes": {
+                    "weight_g": 85
+                },
+                "interfaces": {
+                    "frame_interface": "BBright",
+                    "crank_interface": "DUB"
+                }
+            },
+            "Cassette": {
+                "id": "cassette-xplr",
+                "type": "Cassette",
+                "name": "SRAM XPLR XG-1271 10-44t",
+                "attributes": {
+                    "weight_g": 373,
+                    "largest_cog": 44,
+                    "diff": 34,
+                    "speeds": 12
+                },
+                "interfaces": {
+                    "cassette_mount": "SRAM_XDR"
+                }
+            },
+            "RearDerailleur": {
+                "id": "rd-red-xplr",
+                "type": "RearDerailleur",
+                "name": "SRAM Red XPLR eTap AXS",
+                "attributes": {
+                    "weight_g": 293,
+                    "max_tooth": 44,
+                    "capacity": 34,
+                    "speeds": 12
+                },
+                "interfaces": {
+                    "protocol": "AXS"
+                }
+            },
+            "Shifter": {
+                "id": "shifter-red-axs",
+                "type": "Shifter",
+                "name": "SRAM Red eTap AXS HRD",
+                "attributes": {
+                    "weight_g": 410,
+                    "speeds": 12
+                },
+                "interfaces": {
+                    "protocol": "AXS"
+                }
+            }
+        }
+    },
+    {
+        "id": "template-mtb-trail",
+        "name": "Dream Trail Ripper",
+        "description": "140mm travel do-it-all trail bike. Light enough to climb, burly enough to descend.",
+        "category": "MTB",
+        "parts": {
+            "Frame": {
+                "id": "frame-stumpjumper",
+                "type": "Frame",
+                "name": "Specialized Stumpjumper EVO",
+                "attributes": {
+                    "weight_g": 2750,
+                    "category": "MTB",
+                    "max_tire": 64
+                },
+                "interfaces": {
+                    "bottom_bracket_shell": "BSA_Threaded",
+                    "rear_axle": "12x148mm_Boost",
+                    "brake_mount": "Post_Mount",
+                    "wheel_size": "29"
+                }
+            },
+            "Wheel": {
+                "id": "wheel-reserve-30",
+                "type": "Wheel",
+                "name": "Reserve 30|HD",
+                "attributes": {
+                    "weight_g": 1750,
+                    "internal_width": 30
+                },
+                "interfaces": {
+                    "diameter": "29",
+                    "rear_axle": "12x148mm_Boost",
+                    "brake_type": "6-Bolt",
+                    "freehub_body": "SRAM_XD"
+                }
+            },
+            "Tire": {
+                "id": "tire-minion-dhf",
+                "type": "Tire",
+                "name": "Maxxis Minion DHF 2.5 WT",
+                "attributes": {
+                    "weight_g": 1015,
+                    "width": 63
+                },
+                "interfaces": {
+                    "diameter": "29"
+                }
+            },
+            "Crankset": {
+                "id": "crank-xx1",
+                "type": "Crankset",
+                "name": "SRAM XX1 Eagle Carbon",
+                "attributes": {
+                    "weight_g": 450,
+                    "chainring_diff": 0
+                },
+                "interfaces": {
+                    "spindle": "DUB",
+                    "speeds": 12
+                }
+            },
+            "BottomBracket": {
+                "id": "bb-sram-dub-bsa",
+                "type": "BottomBracket",
+                "name": "SRAM DUB BSA",
+                "attributes": {
+                    "weight_g": 76
+                },
+                "interfaces": {
+                    "frame_interface": "BSA_Threaded",
+                    "crank_interface": "DUB"
+                }
+            },
+            "Cassette": {
+                "id": "cassette-xx1",
+                "type": "Cassette",
+                "name": "SRAM XX1 Eagle 10-52t",
+                "attributes": {
+                    "weight_g": 360,
+                    "largest_cog": 52,
+                    "diff": 42,
+                    "speeds": 12
+                },
+                "interfaces": {
+                    "cassette_mount": "SRAM_XD"
+                }
+            },
+            "RearDerailleur": {
+                "id": "rd-xx1-axs",
+                "type": "RearDerailleur",
+                "name": "SRAM XX1 Eagle AXS",
+                "attributes": {
+                    "weight_g": 350,
+                    "max_tooth": 52,
+                    "capacity": 42,
+                    "speeds": 12
+                },
+                "interfaces": {
+                    "protocol": "AXS"
+                }
+            },
+            "Shifter": {
+                "id": "shifter-axs-controller",
+                "type": "Shifter",
+                "name": "SRAM Eagle AXS Controller",
+                "attributes": {
+                    "weight_g": 70,
+                    "speeds": 12
+                },
+                "interfaces": {
+                    "protocol": "AXS"
+                }
+            }
+        }
+    }
+]

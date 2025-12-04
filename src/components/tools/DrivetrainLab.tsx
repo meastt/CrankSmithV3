@@ -12,7 +12,9 @@ import {
     calculateWheelCircumference
 } from '@/lib/gearCalculations';
 import { toSpeed, speedUnit, toWeight, weightUnit, fromWeight } from '@/lib/unitConversions';
+import { calculateBuildWeight, formatWeight } from '@/lib/weightCalculations';
 import { useSettingsStore } from '@/store/settingsStore';
+import { useBuildStore } from '@/store/buildStore';
 
 // --- Types ---
 
@@ -74,6 +76,7 @@ const PRESETS: Record<string, Omit<Setup, 'id'>> = {
 
 const SetupSelector = ({ label, setup, onChange, color }: { label: string, setup: Setup, onChange: (s: Setup) => void, color: string }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const applyPreset = (key: string) => {
         onChange({ ...setup, ...PRESETS[key], name: PRESETS[key].name });
@@ -81,64 +84,75 @@ const SetupSelector = ({ label, setup, onChange, color }: { label: string, setup
     };
 
     return (
-        <div className="bg-stone-900/50 border border-white/5 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-                <span className={`text-xs font-bold uppercase tracking-wider ${color}`}>{label}</span>
-                <button
-                    onClick={() => setIsOpen(!isOpen)}
-                    className="text-xs text-stone-500 hover:text-white flex items-center gap-1"
-                >
-                    Load Preset <ChevronDown className="w-3 h-3" />
-                </button>
+        <div className="bg-stone-900/50 border border-white/5 rounded-xl overflow-hidden">
+            <div className="p-4 flex items-center justify-between bg-white/5 cursor-pointer" onClick={() => setIsCollapsed(!isCollapsed)}>
+                <div className="flex items-center gap-2">
+                    <span className={`text-xs font-bold uppercase tracking-wider ${color}`}>{label}</span>
+                    <span className="text-xs text-stone-400 font-normal hidden sm:inline">• {setup.name}</span>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-stone-500 transition-transform ${isCollapsed ? '' : 'rotate-180'}`} />
             </div>
 
-            {isOpen && (
-                <div className="mb-4 grid grid-cols-2 gap-2">
-                    {Object.entries(PRESETS).map(([key, preset]) => (
+            {!isCollapsed && (
+                <div className="p-4 border-t border-white/5">
+                    <div className="flex justify-end mb-3">
                         <button
-                            key={key}
-                            onClick={() => applyPreset(key)}
-                            className="text-left text-xs p-2 rounded bg-white/5 hover:bg-white/10 text-stone-300 truncate"
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="text-xs text-stone-500 hover:text-white flex items-center gap-1"
                         >
-                            {preset.name}
+                            Load Preset <ChevronDown className="w-3 h-3" />
                         </button>
-                    ))}
+                    </div>
+
+                    {isOpen && (
+                        <div className="mb-4 grid grid-cols-2 gap-2">
+                            {Object.entries(PRESETS).map(([key, preset]) => (
+                                <button
+                                    key={key}
+                                    onClick={() => applyPreset(key)}
+                                    className="text-left text-xs p-2 rounded bg-white/5 hover:bg-white/10 text-stone-300 truncate"
+                                >
+                                    {preset.name}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="space-y-3">
+                        <div>
+                            <label className="text-[10px] text-stone-500 uppercase">Chainrings</label>
+                            <input
+                                type="text"
+                                value={setup.chainrings.join('/')}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    const rings = val.split('/').map(n => parseInt(n)).filter(n => !isNaN(n));
+                                    if (rings.length > 0) onChange({ ...setup, chainrings: rings });
+                                }}
+                                className="w-full bg-black/30 border border-white/10 rounded px-2 py-1 text-sm font-mono text-white"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-[10px] text-stone-500 uppercase">Cassette Range</label>
+                            <input
+                                type="text"
+                                value={setup.cassetteRange}
+                                onChange={(e) => onChange({ ...setup, cassetteRange: e.target.value })}
+                                className="w-full bg-black/30 border border-white/10 rounded px-2 py-1 text-sm font-mono text-white"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-[10px] text-stone-500 uppercase">Tire Width (mm)</label>
+                            <input
+                                type="number"
+                                value={setup.tireSize}
+                                onChange={(e) => onChange({ ...setup, tireSize: parseInt(e.target.value) || 28 })}
+                                className="w-full bg-black/30 border border-white/10 rounded px-2 py-1 text-sm font-mono text-white"
+                            />
+                        </div>
+                    </div>
                 </div>
             )}
-
-            <div className="space-y-3">
-                <div>
-                    <label className="text-[10px] text-stone-500 uppercase">Chainrings</label>
-                    <input
-                        type="text"
-                        value={setup.chainrings.join('/')}
-                        onChange={(e) => {
-                            const val = e.target.value;
-                            const rings = val.split('/').map(n => parseInt(n)).filter(n => !isNaN(n));
-                            if (rings.length > 0) onChange({ ...setup, chainrings: rings });
-                        }}
-                        className="w-full bg-black/30 border border-white/10 rounded px-2 py-1 text-sm font-mono text-white"
-                    />
-                </div>
-                <div>
-                    <label className="text-[10px] text-stone-500 uppercase">Cassette Range</label>
-                    <input
-                        type="text"
-                        value={setup.cassetteRange}
-                        onChange={(e) => onChange({ ...setup, cassetteRange: e.target.value })}
-                        className="w-full bg-black/30 border border-white/10 rounded px-2 py-1 text-sm font-mono text-white"
-                    />
-                </div>
-                <div>
-                    <label className="text-[10px] text-stone-500 uppercase">Tire Width (mm)</label>
-                    <input
-                        type="number"
-                        value={setup.tireSize}
-                        onChange={(e) => onChange({ ...setup, tireSize: parseInt(e.target.value) || 28 })}
-                        className="w-full bg-black/30 border border-white/10 rounded px-2 py-1 text-sm font-mono text-white"
-                    />
-                </div>
-            </div>
         </div>
     );
 };
@@ -174,55 +188,59 @@ const SpeedChart = ({ setupA, setupB, cadence, showComparison = true }: { setupA
     ) * 1.1;
 
     return (
-        <div className="relative h-64 w-full bg-stone-900/30 rounded-xl border border-white/5 p-4 overflow-hidden">
-            {/* Grid Lines */}
-            <div className="absolute inset-0 p-4 flex flex-col justify-between pointer-events-none">
-                {[0, 1, 2, 3, 4].map(i => (
-                    <div key={i} className="w-full h-px bg-white/5" />
-                ))}
-            </div>
-
-            {/* Bars for Setup A */}
-            <div className="absolute inset-0 p-4 flex items-end gap-1 opacity-50">
-                {dataA.map((d, i) => (
-                    <div
-                        key={`a-${i}`}
-                        className="flex-1 bg-cyan-500/30 rounded-t-sm hover:bg-cyan-500 transition-colors group relative"
-                        style={{ height: `${(d.speed / maxSpeed) * 100}%` }}
-                    >
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-stone-900 text-cyan-400 text-xs px-2 py-1 rounded border border-cyan-500/30 opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-10">
-                            {d.speed.toFixed(1)} {speedUnit(unitSystem)}
-                        </div>
+        <div className="bg-stone-900/30 rounded-xl border border-white/5 p-4">
+            <div className="flex justify-between items-center mb-4">
+                <div className="text-xs font-mono text-stone-500">Speed vs Gear Ratio</div>
+                <div className="flex gap-4 text-xs font-mono">
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-cyan-500/30 rounded-sm" />
+                        <span className="text-stone-400">Setup A</span>
                     </div>
-                ))}
+                    {showComparison && (
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-0.5 bg-rose-500" />
+                            <span className="text-stone-400">Setup B</span>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {/* Bars for Setup B (Overlay) */}
-            {showComparison && (
-                <div className="absolute inset-0 p-4 flex items-end gap-1 pointer-events-none">
-                    {dataB.map((d, i) => (
-                        <div
-                            key={`b-${i}`}
-                            className="flex-1 border-t-2 border-rose-500/50"
-                            style={{
-                                height: `${(d.speed / maxSpeed) * 100}%`,
-                                marginBottom: '-1px' // Align with bottom
-                            }}
-                        />
+            <div className="relative h-64 w-full overflow-hidden">
+                {/* Grid Lines */}
+                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                    {[0, 1, 2, 3, 4].map(i => (
+                        <div key={i} className="w-full h-px bg-white/5" />
                     ))}
                 </div>
-            )}
 
-            {/* Legend */}
-            <div className="absolute top-4 right-4 flex gap-4 text-xs font-mono">
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-cyan-500/30 rounded-sm" />
-                    <span className="text-stone-400">Setup A</span>
+                {/* Bars for Setup A */}
+                <div className="absolute inset-0 flex items-end gap-1 opacity-50">
+                    {dataA.map((d, i) => (
+                        <div
+                            key={`a-${i}`}
+                            className="flex-1 bg-cyan-500/30 rounded-t-sm hover:bg-cyan-500 transition-colors group relative"
+                            style={{ height: `${(d.speed / maxSpeed) * 100}%` }}
+                        >
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-stone-900 text-cyan-400 text-xs px-2 py-1 rounded border border-cyan-500/30 opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-10">
+                                {d.speed.toFixed(1)} {speedUnit(unitSystem)}
+                            </div>
+                        </div>
+                    ))}
                 </div>
+
+                {/* Bars for Setup B (Overlay) */}
                 {showComparison && (
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-0.5 bg-rose-500" />
-                        <span className="text-stone-400">Setup B</span>
+                    <div className="absolute inset-0 flex items-end gap-1 pointer-events-none">
+                        {dataB.map((d, i) => (
+                            <div
+                                key={`b-${i}`}
+                                className="flex-1 border-t-2 border-rose-500/50"
+                                style={{
+                                    height: `${(d.speed / maxSpeed) * 100}%`,
+                                    marginBottom: '-1px' // Align with bottom
+                                }}
+                            />
+                        ))}
                     </div>
                 )}
             </div>
@@ -237,21 +255,23 @@ export const DrivetrainLab = () => {
     const searchParams = useSearchParams();
     const [viewMode, setViewMode] = useState<'lab' | 'build'>('lab');
 
-    // Initialize from URL params if present
+    // Initialize from URL params or Build Store
+    const { parts } = useBuildStore();
+
     useEffect(() => {
         const mode = searchParams.get('mode');
+        // Priority 1: URL Params
         if (mode === 'build') {
             setViewMode('build');
-
             const chainringsParam = searchParams.get('chainrings');
             const cassetteParam = searchParams.get('cassette');
             const tireParam = searchParams.get('tire');
             const wheelParam = searchParams.get('wheel');
 
             if (chainringsParam && cassetteParam) {
-                const chainrings = chainringsParam.split(',').map(Number);
-                const tireSize = tireParam ? Number(tireParam) : 28;
-                const wheelSize = wheelParam ? Number(wheelParam) : 622;
+                const chainrings = chainringsParam.split(',').map(n => parseInt(n)).filter(n => !isNaN(n));
+                const tireSize = tireParam ? parseInt(tireParam) : 28;
+                const wheelSize = wheelParam ? parseInt(wheelParam) : 622;
 
                 setSetupA({
                     id: 'custom-build',
@@ -261,9 +281,40 @@ export const DrivetrainLab = () => {
                     tireSize,
                     wheelSize
                 });
+                return;
             }
         }
-    }, [searchParams]);
+
+        // Priority 2: Active Build in Store
+        if (parts.Crankset && parts.Cassette) {
+            // Parse Chainrings
+            let chainrings: number[] = [];
+            const teethStr = String(parts.Crankset.attributes?.teeth || '').replace(/[^0-9,/]/g, '').replace('/', ',');
+            if (teethStr) {
+                chainrings = teethStr.split(',').map(n => parseInt(n)).filter(n => !isNaN(n));
+            }
+
+            // Parse Cassette
+            const cassetteRange = String(parts.Cassette.attributes?.range || '11-28');
+
+            // Parse Tire
+            const tireSize = parts.Tire ? parseInt(String(parts.Tire.attributes?.width || '28')) : 28;
+
+            // Parse Wheel
+            const wheelSize = parts.Wheel ? (String(parts.Wheel.interfaces?.diameter) === '650b' ? 584 : 622) : 622;
+
+            if (chainrings.length > 0) {
+                setSetupA({
+                    id: 'active-build',
+                    name: 'Current Build',
+                    chainrings,
+                    cassetteRange,
+                    tireSize,
+                    wheelSize
+                });
+            }
+        }
+    }, [searchParams, parts]);
 
     const [setupA, setSetupA] = useState<Setup>({ ...PRESETS['road-compact'], id: 'setup-a', name: 'Road Compact' });
     const [setupB, setSetupB] = useState<Setup>({ ...PRESETS['road-semi'], id: 'setup-b', name: 'Road Semi-Compact' });
@@ -300,8 +351,87 @@ export const DrivetrainLab = () => {
     const gradeA = calculateMaxGrade(setupA);
     const gradeB = calculateMaxGrade(setupB);
 
+    // Build Weight Calculation
+    const buildWeight = useMemo(() => {
+        if (viewMode === 'build' && Object.keys(parts).length > 0) {
+            return calculateBuildWeight(parts);
+        }
+        return null;
+    }, [parts, viewMode]);
+
+    const formattedWeight = buildWeight
+        ? formatWeight(buildWeight.totalWeight, unitSystem)
+        : { value: '0', unit: 'kg' };
+
     return (
         <div className="w-full max-w-6xl mx-auto">
+            {/* Build Report Card */}
+            {viewMode === 'build' && buildWeight && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-gradient-to-br from-stone-900 to-stone-950 border border-white/10 rounded-2xl p-6 mb-8 relative overflow-hidden"
+                >
+                    <div className="absolute top-0 right-0 p-8 opacity-5">
+                        <Activity className="w-64 h-64 text-white" />
+                    </div>
+
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2 bg-primary/20 rounded-lg">
+                                <Settings2 className="w-6 h-6 text-primary" />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-bold text-white">Build Report</h2>
+                                <p className="text-stone-400 text-sm">Analysis of your custom configuration</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="p-4 bg-white/5 rounded-xl border border-white/5">
+                                <div className="text-xs text-stone-500 uppercase tracking-wider mb-1">Est. Weight</div>
+                                <div className="text-3xl font-mono font-bold text-white">
+                                    {formattedWeight.value} <span className="text-sm text-stone-500">{formattedWeight.unit}</span>
+                                </div>
+                                <div className="text-xs text-emerald-400 mt-2 flex items-center gap-1">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                                    Ready to Ride
+                                </div>
+                            </div>
+
+                            <div className="p-4 bg-white/5 rounded-xl border border-white/5">
+                                <div className="text-xs text-stone-500 uppercase tracking-wider mb-1">Gear Range</div>
+                                <div className="text-3xl font-mono font-bold text-white">
+                                    {Math.round((parseInt(setupA.cassetteRange.split('-')[1]) / parseInt(setupA.cassetteRange.split('-')[0])) * 100)}%
+                                </div>
+                                <div className="text-xs text-stone-400 mt-2">
+                                    {setupA.cassetteRange} Cassette
+                                </div>
+                            </div>
+
+                            <div className="p-4 bg-white/5 rounded-xl border border-white/5">
+                                <div className="text-xs text-stone-500 uppercase tracking-wider mb-1">Top Speed</div>
+                                <div className="text-3xl font-mono font-bold text-white">
+                                    {toSpeed(calculateSpeed(Math.max(...setupA.chainrings) / 11, 2100, 90), unitSystem).toFixed(1)} <span className="text-sm text-stone-500">{speedUnit(unitSystem)}</span>
+                                </div>
+                                <div className="text-xs text-stone-400 mt-2">
+                                    @ 90 RPM
+                                </div>
+                            </div>
+
+                            <div className="p-4 bg-white/5 rounded-xl border border-white/5">
+                                <div className="text-xs text-stone-500 uppercase tracking-wider mb-1">Climbing Index</div>
+                                <div className="text-3xl font-mono font-bold text-white">
+                                    {gradeA.toFixed(1)}%
+                                </div>
+                                <div className="text-xs text-stone-400 mt-2">
+                                    Max Gradient
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
             {/* Control Panel */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
                 <div className="lg:col-span-4 space-y-4">

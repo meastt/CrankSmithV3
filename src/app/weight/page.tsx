@@ -76,7 +76,7 @@ export default function WeightPage() {
             />
 
             {/* Header */}
-            <header className="sticky top-0 z-40 bg-stone-950/80 backdrop-blur-xl border-b border-white/5">
+            <header className="relative z-40 bg-stone-950/80 backdrop-blur-xl border-b border-white/5">
                 <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
                     <Link
                         href="/"

@@ -4,6 +4,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Activity, Scale, Wrench, Gauge, ArrowRight, Bike } from 'lucide-react';
+import { useClerk, useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import { haptic } from '@/lib/haptics';
 
 const tools = [
@@ -39,7 +41,7 @@ const tools = [
         subtitle: 'Start a New Build',
         description: 'The core builder. Validate compatibility across thousands of parts and standards.',
         icon: Wrench,
-        href: '/builder',
+        href: '/builder?new=true',
         gradient: 'from-amber-500/20 to-orange-500/20',
         border: 'group-hover:border-amber-500/50',
         text: 'group-hover:text-amber-400',
@@ -62,6 +64,9 @@ const tools = [
 ];
 
 export const DashboardGrid = () => {
+    const { openSignIn } = useClerk();
+    const { isLoaded, isSignedIn } = useUser();
+    const router = useRouter();
     return (
         <section className="min-h-screen flex flex-col justify-center py-20 px-4 relative overflow-hidden bg-stone-950">
             {/* Background Elements */}
@@ -155,24 +160,16 @@ export const DashboardGrid = () => {
                 {/* My Garage Card */}
                 <Link
                     href="/garage"
-                    className="block group relative mt-6"
-                    onClick={() => haptic('light')}
+                    className="block group relative mt-6 z-20"
                 >
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
-                        className="
-                            relative overflow-hidden p-8 rounded-3xl bg-stone-900/40 backdrop-blur-md border border-white/5
-                            transition-all duration-500 ease-out
-                            group-hover:border-violet-500/50 hover:bg-stone-900/60 hover:scale-[1.01] hover:shadow-2xl
-                        "
+                        className="relative overflow-hidden p-8 rounded-3xl bg-stone-900/40 backdrop-blur-md border border-white/5 transition-all duration-500 ease-out group-hover:border-violet-500/50 hover:bg-stone-900/60 hover:scale-[1.01] hover:shadow-2xl"
                     >
                         {/* Hover Gradient Background */}
-                        <div className="
-                            absolute inset-0 rounded-3xl bg-gradient-to-r from-violet-500/20 via-purple-500/20 to-indigo-500/20
-                            opacity-0 group-hover:opacity-100 transition-opacity duration-500
-                        " />
+                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-violet-500/20 via-purple-500/20 to-indigo-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                         <div className="relative z-10 flex flex-col items-center text-center gap-4">
                             <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-violet-400 group-hover:bg-white/10 transition-colors mb-2">
@@ -191,17 +188,30 @@ export const DashboardGrid = () => {
                                 </p>
                             </div>
 
-                            <div className="
-                                absolute right-8 top-1/2 -translate-y-1/2
-                                p-3 rounded-full border border-white/5 text-stone-500
-                                group-hover:border-white/20 group-hover:text-white transition-all
-                                group-hover:translate-x-1 hidden md:block
-                            ">
+                            <div className="absolute right-8 top-1/2 -translate-y-1/2 p-3 rounded-full border border-white/5 text-stone-500 group-hover:border-white/20 group-hover:text-white transition-all group-hover:translate-x-1 hidden md:block">
                                 <ArrowRight className="w-6 h-6" />
                             </div>
                         </div>
                     </motion.div>
                 </Link>
+
+                {/* Sign In CTA - Show if not signed in OR if Clerk is still loading (fallback) */}
+                {(!isLoaded || !isSignedIn) && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.6 }}
+                        className="mt-8 text-center"
+                    >
+                        <p className="text-stone-500 mb-4">Already have an account?</p>
+                        <button
+                            onClick={() => router.push('/sign-in')}
+                            className="btn-primary px-8 py-3 text-white rounded-xl font-semibold text-lg hover:scale-105 transition-transform"
+                        >
+                            Sign In to CrankSmith
+                        </button>
+                    </motion.div>
+                )}
             </div>
         </section>
     );

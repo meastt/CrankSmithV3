@@ -7,10 +7,7 @@ import {
     Download,
     Copy,
     Check,
-    Mountain,
-    Gauge,
-    Scale,
-    Zap,
+    Bike,
     X,
     Twitter,
     Facebook,
@@ -49,32 +46,16 @@ export const ShareCard: React.FC<ShareCardProps> = ({
     const [copied, setCopied] = useState(false);
     const [downloading, setDownloading] = useState(false);
 
-    const weightDisplay = toWeight(totalWeight / 1000, unitSystem).toFixed(1);
+    // Format Data
+    const weightDisplay = toWeight(totalWeight / 1000, unitSystem).toFixed(2);
     const weightLabel = weightUnit(unitSystem);
-
     const speedMin = speedRange ? toSpeed(speedRange.min, unitSystem).toFixed(0) : '--';
     const speedMax = speedRange ? toSpeed(speedRange.max, unitSystem).toFixed(0) : '--';
     const speedLabel = speedUnit(unitSystem);
-
-    const gearConfig = chainrings.length === 1 ? '1x' : '2x';
-    const totalGears = chainrings.length * cassetteCogs.length;
-    const cassetteRange = cassetteCogs.length > 0
-        ? `${cassetteCogs[cassetteCogs.length - 1]}-${cassetteCogs[0]}`
-        : '--';
-
-    const getScoreLabel = (score: number) => {
-        if (score >= 80) return { label: 'Excellent', color: 'text-emerald-400' };
-        if (score >= 60) return { label: 'Good', color: 'text-lime-400' };
-        if (score >= 40) return { label: 'Fair', color: 'text-amber-400' };
-        if (score >= 20) return { label: 'Challenging', color: 'text-orange-400' };
-        return { label: 'Difficult', color: 'text-red-400' };
-    };
-
-    const scoreInfo = getScoreLabel(climbingScore);
+    const activeParts = Object.entries(parts).filter(([_, part]) => part !== null) as [string, Component][];
 
     // Generate shareable URL
     const getShareUrl = () => {
-        // In a real app, this would be a short URL or saved build URL
         return typeof window !== 'undefined' ? window.location.origin + '/builder' : '';
     };
 
@@ -84,10 +65,16 @@ export const ShareCard: React.FC<ShareCardProps> = ({
 
         setDownloading(true);
         try {
+            // Wait for fonts
+            await document.fonts.ready;
+
             const canvas = await html2canvas(cardRef.current, {
-                backgroundColor: '#0a0a0a',
-                scale: 2,
+                backgroundColor: '#0c0a09', // stone-950
+                scale: 2, // Retina quality
+                logging: false,
+                useCORS: true
             });
+
             const link = document.createElement('a');
             link.download = `${frameName.replace(/\s+/g, '-').toLowerCase()}-build.png`;
             link.href = canvas.toDataURL('image/png');
@@ -112,7 +99,7 @@ export const ShareCard: React.FC<ShareCardProps> = ({
 
     // Social share handlers
     const shareToTwitter = () => {
-        const text = `Check out my ${frameName} build on CrankSmith! ${gearConfig} ${chainrings.join('/')} x ${cassetteRange} with ${totalGears} gears.`;
+        const text = `Check out my ${frameName} build on CrankSmith! ${weightDisplay}${weightLabel}.`;
         const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(getShareUrl())}`;
         window.open(url, '_blank');
     };
@@ -127,7 +114,6 @@ export const ShareCard: React.FC<ShareCardProps> = ({
         window.open(url, '_blank');
     };
 
-    // Native share (mobile)
     const handleNativeShare = async () => {
         if (navigator.share) {
             try {
@@ -143,101 +129,88 @@ export const ShareCard: React.FC<ShareCardProps> = ({
     };
 
     const CardContent = (
-        <div
-            ref={cardRef}
-            className="bg-gradient-to-br from-stone-950 via-stone-900 to-stone-950 rounded-2xl p-6 border border-white/10 shadow-2xl"
-        >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h3 className="text-xl font-bold text-white">{frameName}</h3>
-                    <p className="text-xs text-stone-500">Built with CrankSmith</p>
-                </div>
-                <div className="flex items-center gap-1">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">CS</span>
-                    </div>
-                </div>
-            </div>
+        <div className="overflow-hidden rounded-xl border border-white/10 bg-stone-950 shadow-2xl relative group">
+            {/* Capture Area - The "Receipt" */}
+            <div
+                ref={cardRef}
+                className="p-8 bg-stone-950 text-white relative overflow-hidden min-w-[350px]"
+                style={{ fontFamily: 'monospace' }}
+            >
+                {/* Background Accents */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
-                {/* Speed Range */}
-                <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                    <div className="flex items-center gap-2 text-stone-500 mb-2">
-                        <Zap className="w-4 h-4" />
-                        <span className="text-[10px] font-semibold uppercase tracking-wider">Speed Range @90rpm</span>
+                {/* Header */}
+                <div className="border-b-2 border-dashed border-white/20 pb-6 mb-6 text-center relative z-10">
+                    <div className="flex justify-center mb-3">
+                        <div className="w-10 h-10 bg-white text-stone-950 rounded-full flex items-center justify-center">
+                            <Bike className="w-6 h-6" />
+                        </div>
                     </div>
-                    <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold font-mono text-white">{speedMin}</span>
-                        <span className="text-stone-500">to</span>
-                        <span className="text-2xl font-bold font-mono text-cyan-400">{speedMax}</span>
-                        <span className="text-xs text-stone-500 ml-1">{speedLabel}</span>
-                    </div>
-                    <div className="text-[10px] text-stone-600 mt-1">Low gear → Top gear</div>
+                    <h2 className="text-xl font-bold uppercase tracking-widest mb-1">CrankSmith</h2>
+                    <p className="text-stone-500 text-[10px] uppercase tracking-[0.2em]">Build Manifest</p>
                 </div>
 
-                {/* Weight */}
-                <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                    <div className="flex items-center gap-2 text-stone-500 mb-2">
-                        <Scale className="w-4 h-4" />
-                        <span className="text-[10px] font-semibold uppercase tracking-wider">Weight</span>
-                    </div>
-                    <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold font-mono text-white">{weightDisplay}</span>
-                        <span className="text-xs text-stone-500">{weightLabel}</span>
+                {/* Build Name */}
+                <div className="mb-6 text-center relative z-10">
+                    <h1 className="text-lg font-bold text-blue-400 mb-1">{frameName}</h1>
+                    <div className="text-[10px] text-stone-500 uppercase tracking-wider">
+                        {new Date().toLocaleDateString()}
                     </div>
                 </div>
 
-                {/* Gearing */}
-                <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                    <div className="flex items-center gap-2 text-stone-500 mb-2">
-                        <Gauge className="w-4 h-4" />
-                        <span className="text-[10px] font-semibold uppercase tracking-wider">Gearing</span>
+                {/* Performance Specs */}
+                <div className="grid grid-cols-2 gap-4 mb-6 relative z-10 border-b-2 border-dashed border-white/20 pb-6">
+                    <div className="text-center">
+                        <p className="text-[10px] text-stone-500 uppercase tracking-wider mb-1">Climbing Score</p>
+                        <p className={`text-xl font-bold ${climbingScore >= 80 ? 'text-emerald-400' : 'text-white'}`}>
+                            {climbingScore.toFixed(0)}<span className="text-xs text-stone-500 font-normal">/100</span>
+                        </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-violet-400">{gearConfig}</span>
-                        <span className="text-sm text-stone-400">{chainrings.join('/')} x {cassetteRange}</span>
+                    <div className="text-center">
+                        <p className="text-[10px] text-stone-500 uppercase tracking-wider mb-1">Speed Range</p>
+                        <p className="text-xl font-bold text-white">
+                            {speedMax}<span className="text-xs text-stone-500 font-normal">{speedLabel}</span>
+                        </p>
                     </div>
-                    <div className="text-xs text-stone-600 mt-0.5">{totalGears} total gears</div>
                 </div>
 
-                {/* Climbing */}
-                <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                    <div className="flex items-center gap-2 text-stone-500 mb-2">
-                        <Mountain className="w-4 h-4" />
-                        <span className="text-[10px] font-semibold uppercase tracking-wider">Climbing</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className={`text-2xl font-bold font-mono ${scoreInfo.color}`}>
-                            {climbingScore.toFixed(0)}
-                        </span>
-                        <span className="text-xs text-stone-500">/ 100</span>
-                    </div>
-                    <div className={`text-xs mt-0.5 ${scoreInfo.color}`}>{scoreInfo.label}</div>
-                </div>
-            </div>
-
-            {/* Parts List - Compact */}
-            <div className="bg-white/[0.02] rounded-xl p-3 border border-white/5">
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                    {Object.entries(parts).map(([type, part]) => (
-                        part && (
-                            <div key={type} className="flex items-center justify-between py-1 border-b border-white/5 last:border-0">
-                                <span className="text-stone-600 truncate">{type}</span>
-                                <span className="text-stone-400 truncate text-right max-w-[120px]">{part.name.split(' ').slice(0, 2).join(' ')}</span>
-                            </div>
-                        )
+                {/* Parts List */}
+                <div className="space-y-2 mb-8 relative z-10">
+                    {activeParts.map(([type, part]) => (
+                        <div key={type} className="flex justify-between items-baseline text-xs">
+                            <span className="text-stone-500 uppercase w-20 shrink-0">{type}</span>
+                            <span className="text-stone-300 truncate text-right flex-1 mx-2">{part.name}</span>
+                            <span className="text-stone-500 font-mono shrink-0 w-10 text-right">
+                                {part.attributes.weight_g ? `${part.attributes.weight_g}` : '-'}
+                            </span>
+                        </div>
                     ))}
                 </div>
-            </div>
 
-            {/* Footer */}
-            <div className="mt-4 flex items-center justify-between">
-                <span className="text-[10px] text-stone-600">cranksmith.app</span>
-                <div className="flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span className="text-[10px] text-emerald-500">Compatible Build</span>
+                {/* Totals */}
+                <div className="border-t-2 border-dashed border-white/20 pt-6 relative z-10">
+                    <div className="flex justify-between items-end">
+                        <div>
+                            <p className="text-stone-500 text-[10px] uppercase tracking-wider mb-1">Total Weight</p>
+                            <p className="text-3xl font-bold text-white">
+                                {weightDisplay}<span className="text-lg text-stone-500 font-normal">{weightLabel}</span>
+                            </p>
+                        </div>
+                        <div className="text-right">
+                            <div className="w-12 h-12 border border-white/20 rounded flex items-center justify-center bg-white/5">
+                                <div className="text-center">
+                                    <span className="block text-[8px] text-stone-500 uppercase">Grade</span>
+                                    <span className="block text-lg font-bold text-blue-400">A+</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-8 pt-4 border-t border-white/5 text-center relative z-10">
+                    <p className="text-[8px] text-stone-600 uppercase tracking-widest">Generated by CrankSmith.com</p>
                 </div>
             </div>
         </div>
@@ -245,65 +218,20 @@ export const ShareCard: React.FC<ShareCardProps> = ({
 
     const ShareButtons = (
         <div className="mt-4 space-y-3">
-            {/* Social Share */}
             <div className="flex justify-center gap-2">
-                <button
-                    onClick={shareToTwitter}
-                    className="p-3 rounded-xl bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 text-[#1DA1F2] transition-colors"
-                    aria-label="Share on Twitter"
-                >
-                    <Twitter className="w-5 h-5" />
-                </button>
-                <button
-                    onClick={shareToFacebook}
-                    className="p-3 rounded-xl bg-[#4267B2]/10 hover:bg-[#4267B2]/20 text-[#4267B2] transition-colors"
-                    aria-label="Share on Facebook"
-                >
-                    <Facebook className="w-5 h-5" />
-                </button>
-                <button
-                    onClick={shareToLinkedIn}
-                    className="p-3 rounded-xl bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 text-[#0A66C2] transition-colors"
-                    aria-label="Share on LinkedIn"
-                >
-                    <Linkedin className="w-5 h-5" />
-                </button>
+                <button onClick={shareToTwitter} className="p-3 rounded-xl bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 text-[#1DA1F2] transition-colors"><Twitter className="w-5 h-5" /></button>
+                <button onClick={shareToFacebook} className="p-3 rounded-xl bg-[#4267B2]/10 hover:bg-[#4267B2]/20 text-[#4267B2] transition-colors"><Facebook className="w-5 h-5" /></button>
+                <button onClick={shareToLinkedIn} className="p-3 rounded-xl bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 text-[#0A66C2] transition-colors"><Linkedin className="w-5 h-5" /></button>
                 {'share' in navigator && (
-                    <button
-                        onClick={handleNativeShare}
-                        className="p-3 rounded-xl bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white transition-colors"
-                        aria-label="More share options"
-                    >
-                        <Share2 className="w-5 h-5" />
-                    </button>
+                    <button onClick={handleNativeShare} className="p-3 rounded-xl bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white transition-colors"><Share2 className="w-5 h-5" /></button>
                 )}
             </div>
-
-            {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-2">
-                <button
-                    onClick={handleDownload}
-                    disabled={downloading}
-                    className="flex items-center justify-center gap-2 py-3 px-4 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-                >
-                    <Download className="w-4 h-4" />
-                    {downloading ? 'Saving...' : 'Save Image'}
+                <button onClick={handleDownload} disabled={downloading} className="flex items-center justify-center gap-2 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-500 transition-colors disabled:opacity-50">
+                    <Download className="w-4 h-4" /> {downloading ? 'Saving...' : 'Save Image'}
                 </button>
-                <button
-                    onClick={handleCopyLink}
-                    className="flex items-center justify-center gap-2 py-3 px-4 bg-white/5 text-stone-300 rounded-xl font-medium hover:bg-white/10 transition-colors border border-white/10"
-                >
-                    {copied ? (
-                        <>
-                            <Check className="w-4 h-4 text-emerald-400" />
-                            <span className="text-emerald-400">Copied!</span>
-                        </>
-                    ) : (
-                        <>
-                            <Copy className="w-4 h-4" />
-                            Copy Link
-                        </>
-                    )}
+                <button onClick={handleCopyLink} className="flex items-center justify-center gap-2 py-3 px-4 bg-white/5 text-stone-300 rounded-xl font-medium hover:bg-white/10 transition-colors border border-white/10">
+                    {copied ? <><Check className="w-4 h-4 text-emerald-400" /> Copied!</> : <><Copy className="w-4 h-4" /> Copy Link</>}
                 </button>
             </div>
         </div>
@@ -326,14 +254,9 @@ export const ShareCard: React.FC<ShareCardProps> = ({
                     className="relative w-full max-w-md"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {/* Close button */}
-                    <button
-                        onClick={onClose}
-                        className="absolute -top-12 right-0 p-2 text-stone-400 hover:text-white transition-colors rounded-lg hover:bg-white/10"
-                    >
+                    <button onClick={onClose} className="absolute -top-12 right-0 p-2 text-stone-400 hover:text-white transition-colors rounded-lg hover:bg-white/10">
                         <X className="w-6 h-6" />
                     </button>
-
                     {CardContent}
                     {ShareButtons}
                 </motion.div>

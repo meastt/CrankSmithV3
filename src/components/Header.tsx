@@ -1,14 +1,15 @@
 'use client';
 
-import { UserButton, SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
+import { UserButton, SignedIn, SignedOut, SignInButton, useClerk } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Wrench, Activity, Gauge, Scale } from 'lucide-react';
+import { Menu, X, Wrench, Activity, Gauge, Scale, Bike } from 'lucide-react';
 import { useSettingsStore } from '@/store/settingsStore';
 
 const navLinks = [
     { href: '/builder', label: 'Builder', icon: Wrench },
+    { href: '/garage', label: 'Garage', icon: Bike },
     { href: '/performance', label: 'Drivetrain', icon: Activity },
     { href: '/tire-pressure', label: 'Tire Pressure', icon: Gauge },
     { href: '/weight', label: 'Scale', icon: Scale },
@@ -18,6 +19,7 @@ export function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const { unitSystem, toggleUnitSystem } = useSettingsStore();
+    const { openSignIn } = useClerk();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -46,7 +48,6 @@ export function Header() {
                     ? 'bg-stone-950/90 backdrop-blur-xl border-b border-white/5'
                     : 'bg-transparent'
                     }`}
-                style={{ paddingTop: 'env(safe-area-inset-top, 20px)' }}
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6">
                     <div className="flex justify-between items-center h-16 md:h-18">
@@ -128,6 +129,17 @@ export function Header() {
                                     }}
                                 />
                             </SignedIn>
+                            <SignedOut>
+                                <button
+                                    onClick={() => {
+                                        setIsMenuOpen(false);
+                                        openSignIn();
+                                    }}
+                                    className="btn-primary px-4 py-1.5 text-white rounded-lg font-medium text-xs"
+                                >
+                                    Sign In
+                                </button>
+                            </SignedOut>
                             <button
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                                 className="p-2 -mr-2 text-stone-400 hover:text-stone-100 transition-colors"
@@ -169,7 +181,7 @@ export function Header() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.3, delay: 0.1 }}
-                            className="relative h-full flex flex-col pt-20 px-6"
+                            className="relative h-full flex flex-col pt-40 px-6"
                         >
                             <div className="space-y-1">
                                 {navLinks.map((link, index) => (
@@ -234,7 +246,9 @@ export function Header() {
             </AnimatePresence>
 
             {/* Spacer to prevent content from going under fixed header */}
-            <div className="h-16 md:h-18" />
+            <div className="pt-safe">
+                <div className="h-16 md:h-18" />
+            </div>
         </>
     );
 }

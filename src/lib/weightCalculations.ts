@@ -140,7 +140,7 @@ export function calculateBuildWeight(
     }
 
     // Add finishing kit
-    const finishingKitWeight = finishingKit.total;
+    const finishingKitWeight = finishingKit?.total || FINISHING_KIT_WEIGHTS.Gravel.total;
     breakdown.push({
         label: 'Finishing Kit',
         weight: finishingKitWeight,
