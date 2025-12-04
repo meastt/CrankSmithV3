@@ -41,6 +41,8 @@ interface BuildState {
     // Actions
     setPart: (key: keyof BuildParts, component: AnyComponent) => void;
     removePart: (key: keyof BuildParts) => void;
+    setBuild: (parts: Partial<BuildParts>) => void;
+    loadTemplate: (parts: Partial<BuildParts>) => void;
     clearBuild: () => void;
     validateBuild: () => void;
 }
@@ -81,6 +83,23 @@ export const useBuildStore = create<BuildState>((set, get) => ({
             return { parts: newParts, totalWeight: newWeight };
         });
         get().validateBuild();
+    },
+
+    setBuild: (parts) => {
+        set((state) => {
+            const newParts = { ...state.parts, ...parts };
+            // Recalculate weight
+            const newWeight = Object.values(newParts).reduce((total, part) => {
+                return total + (part ? (part as any).weightGrams || 0 : 0);
+            }, 0);
+            return { parts: newParts, totalWeight: newWeight };
+        });
+        get().validateBuild();
+    },
+
+    loadTemplate: (parts) => {
+        // Same as setBuild for now, but semantically distinct for future use (e.g. tracking template usage)
+        get().setBuild(parts);
     },
 
     removePart: (key) => {

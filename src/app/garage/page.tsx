@@ -53,7 +53,7 @@ export default function GaragePage() {
     const loadBuild = (build: SavedBuild) => {
         try {
             const parts = JSON.parse(build.parts);
-            setBuild(parts);
+            setBuild(parts as any);
             router.push('/builder');
         } catch (e) {
             console.error("Failed to parse build parts", e);
@@ -139,8 +139,8 @@ export default function GaragePage() {
                                             <button
                                                 onClick={() => {
                                                     // @ts-ignore - JSON import typing
-                                                    const parts = template.parts as Record<string, Component>;
-                                                    loadTemplate(parts);
+                                                    const parts = template.parts;
+                                                    loadTemplate(parts as any);
                                                     router.push('/builder');
                                                 }}
                                                 className="w-full py-2 bg-white/5 hover:bg-blue-600 hover:text-white text-blue-400 rounded-lg font-medium transition-colors flex items-center justify-center"
@@ -243,9 +243,9 @@ export default function GaragePage() {
                                             <p className="text-sm text-gray-400 mb-4 line-clamp-2">{template.description}</p>
                                             <button
                                                 onClick={() => {
-                                                    // @ts-ignore
-                                                    const parts = template.parts as Record<string, Component>;
-                                                    loadTemplate(parts);
+                                                    // @ts-ignore - JSON import typing
+                                                    const parts = template.parts;
+                                                    loadTemplate(parts as any);
                                                     router.push('/builder');
                                                 }}
                                                 className="w-full py-2 bg-white/5 hover:bg-blue-600 hover:text-white text-blue-400 rounded-lg font-medium transition-colors flex items-center justify-center"
