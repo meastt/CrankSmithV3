@@ -5,7 +5,7 @@ import { useBuildStore } from '@/store/buildStore';
 import { AlertTriangle, Trash2, Save, Download, Package } from 'lucide-react';
 
 export const BuildSummary: React.FC = () => {
-    const { parts, removePart, validationErrors } = useBuildStore();
+    const { parts, removePart, validationResults } = useBuildStore();
 
     const totalWeight = Object.values(parts).reduce((sum, part) => sum + (part?.attributes?.weight_g || 0), 0);
     const partsCount = Object.values(parts).filter(Boolean).length;
@@ -155,17 +155,17 @@ export const BuildSummary: React.FC = () => {
                 </div>
 
                 {/* Validation Errors */}
-                {validationErrors.length > 0 && (
+                {validationResults.filter(r => !r.valid).length > 0 && (
                     <div className="mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4">
                         <div className="flex items-center gap-2 text-red-400 mb-2">
                             <AlertTriangle className="w-4 h-4" />
                             <span className="font-semibold text-sm">Compatibility Issues</span>
                         </div>
                         <ul className="space-y-1.5">
-                            {validationErrors.map((error, idx) => (
+                            {validationResults.filter(r => !r.valid).map((result, idx) => (
                                 <li key={idx} className="text-xs text-red-300/80 flex items-start gap-2">
                                     <span className="w-1 h-1 bg-red-400 rounded-full mt-1.5 shrink-0" />
-                                    {error}
+                                    {result.message}
                                 </li>
                             ))}
                         </ul>
