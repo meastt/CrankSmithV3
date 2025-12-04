@@ -180,9 +180,9 @@ export const ShareCard: React.FC<ShareCardProps> = ({
                     {activeParts.map(([type, part]) => (
                         <div key={type} className="flex justify-between items-baseline text-xs">
                             <span className="text-stone-500 uppercase w-20 shrink-0">{type}</span>
-                            <span className="text-stone-300 truncate text-right flex-1 mx-2">{part.name}</span>
+                            <span className="text-stone-300 truncate text-right flex-1 mx-2">{(part as any).name}</span>
                             <span className="text-stone-500 font-mono shrink-0 w-10 text-right">
-                                {part.attributes.weight_g ? `${part.attributes.weight_g}` : '-'}
+                                {(part as any).attributes?.weight_g ? `${(part as any).attributes.weight_g}` : '-'}
                             </span>
                         </div>
                     ))}

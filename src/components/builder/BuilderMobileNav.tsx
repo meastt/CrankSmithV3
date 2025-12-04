@@ -11,7 +11,7 @@ export const BuilderMobileNav: React.FC = () => {
     const { parts } = useBuildStore();
     const [activeModal, setActiveModal] = useState<'summary' | 'performance' | null>(null);
 
-    const totalWeight = Object.values(parts).reduce((sum, part) => sum + (part?.attributes?.weight_g || 0), 0);
+    const totalWeight = Object.values(parts).reduce((sum, part) => sum + ((part as any)?.attributes?.weight_g || 0), 0);
     const partsCount = Object.values(parts).filter(Boolean).length;
 
     const handleSave = async () => {

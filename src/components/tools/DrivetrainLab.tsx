@@ -298,10 +298,10 @@ export const DrivetrainLab = () => {
             const cassetteRange = String(parts.Cassette.attributes?.range || '11-28');
 
             // Parse Tire
-            const tireSize = parts.Tire ? parseInt(String(parts.Tire.attributes?.width || '28')) : 28;
+            const tireSize = parts.TireRear ? parseInt(String((parts.TireRear as any).attributes?.width || '28')) : 28;
 
             // Parse Wheel
-            const wheelSize = parts.Wheel ? (String(parts.Wheel.interfaces?.diameter) === '650b' ? 584 : 622) : 622;
+            const wheelSize = parts.WheelRear ? (String((parts.WheelRear as any).interfaces?.diameter) === '650b' ? 584 : 622) : 622;
 
             if (chainrings.length > 0) {
                 setSetupA({
@@ -354,7 +354,7 @@ export const DrivetrainLab = () => {
     // Build Weight Calculation
     const buildWeight = useMemo(() => {
         if (viewMode === 'build' && Object.keys(parts).length > 0) {
-            return calculateBuildWeight(parts);
+            return calculateBuildWeight(parts as Record<string, any>);
         }
         return null;
     }, [parts, viewMode]);

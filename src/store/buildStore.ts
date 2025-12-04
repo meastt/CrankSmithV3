@@ -37,6 +37,7 @@ interface BuildState {
     parts: BuildParts;
     validationResults: ValidationResult[];
     totalWeight: number;
+    cadence: number;
 
     // Actions
     setPart: (key: keyof BuildParts, component: AnyComponent) => void;
@@ -45,6 +46,7 @@ interface BuildState {
     loadTemplate: (parts: Partial<BuildParts>) => void;
     clearBuild: () => void;
     validateBuild: () => void;
+    setCadence: (cadence: number) => void;
 }
 
 export const useBuildStore = create<BuildState>((set, get) => ({
@@ -70,6 +72,7 @@ export const useBuildStore = create<BuildState>((set, get) => ({
     },
     validationResults: [],
     totalWeight: 0,
+    cadence: 90,
 
     setPart: (key, component) => {
         set((state) => {
@@ -180,5 +183,9 @@ export const useBuildStore = create<BuildState>((set, get) => ({
         // Filter out successful validations if we only want to show issues?
         // Or keep all? Let's keep all for the "Scorecard".
         set({ validationResults: results });
+    },
+
+    setCadence: (cadence: number) => {
+        set({ cadence });
     }
 }));
