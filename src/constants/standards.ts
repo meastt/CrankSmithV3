@@ -92,3 +92,24 @@ export enum CrankSpindleStandard {
     BB30 = 'SP_30MM',       // 30mm
     GXP = 'SP_GXP',         // 24/22mm
 }
+
+export enum SaddleRailStandard {
+    STEEL_7MM = 'RAIL_7MM',
+    CARBON_7X9 = 'RAIL_7X9_OVAL'
+}
+
+export enum PedalSystem {
+    SPD = 'PED_SPD',
+    SPD_SL = 'PED_SPD_SL',
+    LOOK_KEO = 'PED_KEO',
+    SPEEDPLAY = 'PED_SPEEDPLAY',
+    TIME_ATAC = 'PED_TIME',
+    CRANKBROTHERS = 'PED_CB'
+}
+
+export enum PowerMeterLocation {
+    CRANK_ARM = 'PM_CRANK_ARM',
+    SPIDER = 'PM_SPIDER',
+    PEDAL = 'PM_PEDAL',
+    HUB = 'PM_HUB'
+}

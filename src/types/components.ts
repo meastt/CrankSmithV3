@@ -143,3 +143,40 @@ export interface Seatpost extends BaseComponent {
     diameter: number; // 27.2
     setback: number;
 }
+
+// --- SADDLE & PEDALS ---
+
+export interface Saddle extends BaseComponent {
+    width: number;              // 130, 143, 155mm
+    length: number;             // mm
+    railMaterial: 'STEEL' | 'CHROMOLY' | 'TITANIUM' | 'CARBON' | 'HOLLOW_CARBON';
+    railDiameter: string;       // '7mm' or '7x9mm'
+    shape: 'FLAT' | 'CURVED' | 'WAVE';
+    padding: 'MINIMAL' | 'MODERATE' | 'PLUSH';
+    cutout: boolean;
+}
+
+export interface Pedal extends BaseComponent {
+    system: 'ROAD' | 'MTB';
+    platform: 'SPD' | 'SPD_SL' | 'LOOK_KEO' | 'TIME_ATAC' | 'SPEEDPLAY' | 'CRANKBROTHERS';
+    spindle: 'STEEL' | 'CHROMOLY' | 'TITANIUM';
+    bearingType: 'SEALED' | 'CARTRIDGE' | 'BUSHING';
+    stackHeight: number;        // mm from axle to cleat
+    qFactor: number;            // mm lateral stance width
+    float: number;              // degrees
+    tensionAdjustable: boolean;
+}
+
+// --- POWER METER ---
+
+export interface PowerMeter extends BaseComponent {
+    location: 'CRANK_ARM' | 'SPIDER' | 'CHAINRING' | 'PEDAL' | 'HUB' | 'BOTTOM_BRACKET';
+    measurement: 'LEFT_ONLY' | 'DUAL_SIDED' | 'SINGLE_SIDED_DOUBLED';
+    accuracy: number;           // +/- percentage (1.0, 1.5, 2.0)
+    battery: 'CR2032' | 'AAA' | 'RECHARGEABLE' | 'COIN_CELL';
+    batteryLife: number;        // hours
+    connectivity: string[];     // ['ANT_PLUS', 'BLUETOOTH']
+    metrics: string[];          // ['POWER', 'CADENCE', 'BALANCE']
+    compatibleCranks?: string[];
+    waterproofRating: string;   // 'IPX7', etc.
+}

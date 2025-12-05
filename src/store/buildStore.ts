@@ -2,14 +2,14 @@ import { create } from 'zustand';
 import { Validator, ValidationResult } from '../engine/Validator';
 import {
     Frame, Fork, Wheel, Tire, BottomBracket, Crankset,
-    Cassette, RearDerailleur, Shifter, BrakeCaliper,
+    Cassette, RearDerailleur, Shifter, Chain, BrakeCaliper,
     BrakeRotor, Stem, Handlebar, Seatpost
 } from '../types/components';
 
 // Define a union type for all possible components
 export type AnyComponent =
     | Frame | Fork | Wheel | Tire
-    | BottomBracket | Crankset | Cassette | RearDerailleur | Shifter
+    | BottomBracket | Crankset | Cassette | RearDerailleur | Shifter | Chain
     | BrakeCaliper | BrakeRotor | Stem | Handlebar | Seatpost;
 
 interface BuildParts {
