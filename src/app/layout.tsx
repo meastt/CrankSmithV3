@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { DM_Sans, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
@@ -72,6 +73,19 @@ export default function RootLayout({
           </div>
           <Footer />
         </Providers>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-TR57T617HK"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-TR57T617HK');
+          `}
+        </Script>
       </body>
     </html>
   );
