@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { Validator, ValidationResult } from '../engine/Validator';
+import { Validator } from '../lib/validation';
+import { CompatibilityResult } from '../lib/types/compatibility';
 import {
     Frame, Fork, Wheel, Tire, BottomBracket, Crankset,
     Cassette, RearDerailleur, Shifter, Chain, BrakeCaliper,
@@ -33,20 +34,36 @@ interface BuildParts {
     Seatpost: Seatpost | null;
 }
 
+// Factory fork state for Road/Gravel framesets
+interface FactoryForkState {
+    usingFactoryFork: boolean; // true = keeping factory fork, false = using aftermarket
+    factoryForkWeight: number; // Weight of factory fork in grams (to deduct if not using)
+    factoryForkName: string | null; // Name of factory fork for display
+}
+
 interface BuildState {
     parts: BuildParts;
-    validationResults: ValidationResult[];
+    validationResult: CompatibilityResult;
     totalWeight: number;
     cadence: number;
+    selectedFreehubStandard: string | null;
+
+    // Factory fork state
+    factoryFork: FactoryForkState;
 
     // Actions
     setPart: (key: keyof BuildParts, component: AnyComponent) => void;
+    setFreehubStandard: (standard: string | null) => void;
     removePart: (key: keyof BuildParts) => void;
     setBuild: (parts: Partial<BuildParts>) => void;
     loadTemplate: (parts: Partial<BuildParts>) => void;
     clearBuild: () => void;
     validateBuild: () => void;
     setCadence: (cadence: number) => void;
+
+    // Factory fork actions
+    setFactoryForkChoice: (usingFactory: boolean) => void;
+    setFactoryForkInfo: (weight: number, name: string | null) => void;
 }
 
 export const useBuildStore = create<BuildState>((set, get) => ({
@@ -70,18 +87,68 @@ export const useBuildStore = create<BuildState>((set, get) => ({
         Handlebar: null,
         Seatpost: null,
     },
-    validationResults: [],
+    validationResult: { compatible: true, issues: [] } as CompatibilityResult,
     totalWeight: 0,
     cadence: 90,
+    selectedFreehubStandard: null,
+
+    // Factory fork initial state
+    factoryFork: {
+        usingFactoryFork: true, // Default to keeping factory fork
+        factoryForkWeight: 0,
+        factoryForkName: null
+    },
+
+    setFreehubStandard: (standard) => set({ selectedFreehubStandard: standard }),
+
+    setFactoryForkChoice: (usingFactory) => {
+        set((state) => {
+            // Recalculate weight when factory fork choice changes
+            const parts = state.parts;
+            let newWeight = Object.values(parts).reduce((total, part) => {
+                const w = part ? (part as any).weightGrams : 0;
+                return total + (typeof w === 'number' ? w : 0);
+            }, 0);
+
+            // If NOT using factory fork and we have a factory fork weight recorded,
+            // the frameset weight already includes it, so we need to deduct it
+            // (the aftermarket fork weight will be added when they select one)
+            if (!usingFactory && state.factoryFork.factoryForkWeight > 0) {
+                newWeight -= state.factoryFork.factoryForkWeight;
+            }
+
+            return {
+                factoryFork: { ...state.factoryFork, usingFactoryFork: usingFactory },
+                totalWeight: newWeight
+            };
+        });
+    },
+
+    setFactoryForkInfo: (weight, name) => {
+        set((state) => ({
+            factoryFork: {
+                ...state.factoryFork,
+                factoryForkWeight: weight,
+                factoryForkName: name
+            }
+        }));
+    },
 
     setPart: (key, component) => {
         set((state) => {
             const newParts = { ...state.parts, [key]: component };
 
             // Recalculate weight
-            const newWeight = Object.values(newParts).reduce((total, part) => {
-                return total + (part ? part.weightGrams : 0);
+            let newWeight = Object.values(newParts).reduce((total, part) => {
+                const w = part ? (part as any).weightGrams : 0;
+                return total + (typeof w === 'number' ? w : 0);
             }, 0);
+
+            // If NOT using factory fork and we have a factory fork weight,
+            // deduct it from total (frameset weight includes factory fork)
+            if (!state.factoryFork.usingFactoryFork && state.factoryFork.factoryForkWeight > 0) {
+                newWeight -= state.factoryFork.factoryForkWeight;
+            }
 
             return { parts: newParts, totalWeight: newWeight };
         });
@@ -93,7 +160,8 @@ export const useBuildStore = create<BuildState>((set, get) => ({
             const newParts = { ...state.parts, ...parts };
             // Recalculate weight
             const newWeight = Object.values(newParts).reduce((total, part) => {
-                return total + (part ? (part as any).weightGrams || 0 : 0);
+                const w = part ? (part as any).weightGrams : 0;
+                return total + (typeof w === 'number' ? w : 0);
             }, 0);
             return { parts: newParts, totalWeight: newWeight };
         });
@@ -101,7 +169,6 @@ export const useBuildStore = create<BuildState>((set, get) => ({
     },
 
     loadTemplate: (parts) => {
-        // Same as setBuild for now, but semantically distinct for future use (e.g. tracking template usage)
         get().setBuild(parts);
     },
 
@@ -111,7 +178,8 @@ export const useBuildStore = create<BuildState>((set, get) => ({
 
             // Recalculate weight
             const newWeight = Object.values(newParts).reduce((total, part) => {
-                return total + (part ? part.weightGrams : 0);
+                const w = part ? (part as any).weightGrams : 0;
+                return total + (typeof w === 'number' ? w : 0);
             }, 0);
 
             return { parts: newParts, totalWeight: newWeight };
@@ -141,8 +209,14 @@ export const useBuildStore = create<BuildState>((set, get) => ({
                 Handlebar: null,
                 Seatpost: null,
             },
-            validationResults: [],
-            totalWeight: 0
+            validationResult: { compatible: true, issues: [] },
+            totalWeight: 0,
+            selectedFreehubStandard: null,
+            factoryFork: {
+                usingFactoryFork: true,
+                factoryForkWeight: 0,
+                factoryForkName: null
+            }
         });
     },
 
@@ -153,18 +227,15 @@ export const useBuildStore = create<BuildState>((set, get) => ({
         const buildData = {
             frame: parts.Frame || undefined,
             fork: parts.Fork || undefined,
-            wheels: [parts.WheelFront, parts.WheelRear].filter((w): w is Wheel => w !== null),
-            tires: [parts.TireFront, parts.TireRear].filter((t): t is Tire => t !== null),
+            wheels: [parts.WheelFront, parts.WheelRear].filter(Boolean),
+            tires: [parts.TireFront, parts.TireRear].filter(Boolean),
             bottomBracket: parts.BottomBracket || undefined,
             crankset: parts.Crankset || undefined,
             cassette: parts.Cassette || undefined,
             rearDerailleur: parts.RearDerailleur || undefined,
             shifter: parts.Shifter || undefined,
-            brakes: {
-                levers: parts.Shifter || undefined, // Assuming Shifter acts as lever for now
-                calipers: [parts.BrakeCaliperFront, parts.BrakeCaliperRear].filter((c): c is BrakeCaliper => c !== null),
-                rotors: [parts.BrakeRotorFront, parts.BrakeRotorRear].filter((r): r is BrakeRotor => r !== null),
-            },
+            chain: undefined, // Add if in store
+            // Brakes and Cockpit need mapping if detailed validation is enabled
             cockpit: {
                 stem: parts.Stem || undefined,
                 handlebar: parts.Handlebar || undefined,
@@ -172,17 +243,8 @@ export const useBuildStore = create<BuildState>((set, get) => ({
             }
         };
 
-        const start = performance.now();
-        const results = Validator.validateBuild(buildData);
-        const end = performance.now();
-
-        if (process.env.NODE_ENV === 'development') {
-            console.log(`Validation took ${(end - start).toFixed(2)}ms`);
-        }
-
-        // Filter out successful validations if we only want to show issues?
-        // Or keep all? Let's keep all for the "Scorecard".
-        set({ validationResults: results });
+        const result = Validator.validateBuild(buildData);
+        set({ validationResult: result });
     },
 
     setCadence: (cadence: number) => {

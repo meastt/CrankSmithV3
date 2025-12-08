@@ -11,9 +11,9 @@ import {
     X,
     Twitter,
     Facebook,
-    Linkedin,
+
 } from 'lucide-react';
-import { Component } from '@/lib/validation';
+import { Component } from '@/lib/types/compatibility';
 import html2canvas from 'html2canvas';
 import { toSpeed, speedUnit, toWeight, weightUnit } from '@/lib/unitConversions';
 
@@ -72,7 +72,31 @@ export const ShareCard: React.FC<ShareCardProps> = ({
                 backgroundColor: '#0c0a09', // stone-950
                 scale: 2, // Retina quality
                 logging: false,
-                useCORS: true
+                useCORS: true,
+                onclone: (clonedDoc, element) => {
+                    // Convert lab/oklab colors to rgb for html2canvas compatibility
+                    // We need to get styles from the ORIGINAL elements, not the clone
+                    const originalElements = cardRef.current!.querySelectorAll('*');
+                    const clonedElements = element.querySelectorAll('*');
+
+                    clonedElements.forEach((clonedEl, index) => {
+                        if (index >= originalElements.length) return;
+
+                        const originalEl = originalElements[index];
+                        const computed = window.getComputedStyle(originalEl);
+                        const htmlElement = clonedEl as HTMLElement;
+
+                        // Convert color properties that might use lab()
+                        const colorProps = ['color', 'backgroundColor', 'borderColor', 'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor'];
+                        colorProps.forEach((prop) => {
+                            const value = computed.getPropertyValue(prop);
+                            if (value && value !== '' && value !== 'transparent') {
+                                // Apply computed color as inline style (already converted to rgb by browser)
+                                htmlElement.style.setProperty(prop, value, 'important');
+                            }
+                        });
+                    });
+                }
             });
 
             const link = document.createElement('a');
@@ -109,10 +133,7 @@ export const ShareCard: React.FC<ShareCardProps> = ({
         window.open(url, '_blank');
     };
 
-    const shareToLinkedIn = () => {
-        const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(getShareUrl())}`;
-        window.open(url, '_blank');
-    };
+
 
     const handleNativeShare = async () => {
         if (navigator.share) {
@@ -221,7 +242,6 @@ export const ShareCard: React.FC<ShareCardProps> = ({
             <div className="flex justify-center gap-2">
                 <button onClick={shareToTwitter} className="p-3 rounded-xl bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 text-[#1DA1F2] transition-colors"><Twitter className="w-5 h-5" /></button>
                 <button onClick={shareToFacebook} className="p-3 rounded-xl bg-[#4267B2]/10 hover:bg-[#4267B2]/20 text-[#4267B2] transition-colors"><Facebook className="w-5 h-5" /></button>
-                <button onClick={shareToLinkedIn} className="p-3 rounded-xl bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 text-[#0A66C2] transition-colors"><Linkedin className="w-5 h-5" /></button>
                 {'share' in navigator && (
                     <button onClick={handleNativeShare} className="p-3 rounded-xl bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white transition-colors"><Share2 className="w-5 h-5" /></button>
                 )}

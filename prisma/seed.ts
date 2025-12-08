@@ -302,6 +302,20 @@ async function main() {
             interfaces: JSON.stringify({ frame_shell: 'T47_Internal_86mm', crank_spindle: 'DUB_28.99mm' }), // Requires fit kit for DUB
             attributes: JSON.stringify({ weight: 110, note: 'Requires Fit Kit #2 for DUB' }),
         },
+        {
+            id: 'chris-king-t47-24i',
+            type: 'BottomBracket',
+            name: 'Chris King T47 24i (Internal)',
+            interfaces: JSON.stringify({ frame_shell: 'T47_Internal_86mm', crank_spindle: 'Hollowtech_II_24mm' }),
+            attributes: JSON.stringify({ weight: 110, note: 'Ceramic Bearings' }),
+        },
+        {
+            id: 'wheels-mfg-t47-internal-30mm',
+            type: 'BottomBracket',
+            name: 'Wheels Mfg T47 Internal 30mm',
+            interfaces: JSON.stringify({ frame_shell: 'T47_Internal_86mm', crank_spindle: '30mm' }),
+            attributes: JSON.stringify({ weight: 98 }),
+        },
 
         // --- WHEELS ---
         {

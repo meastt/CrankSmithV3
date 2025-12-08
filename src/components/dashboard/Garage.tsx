@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useBuildStore } from '@/store/buildStore';
 import { useRouter } from 'next/navigation';
-import { Component } from '@/lib/validation';
+import { Component } from '@/lib/types/compatibility';
 import { Loader2, Bike, Calendar } from 'lucide-react';
 
 interface SavedBuild {

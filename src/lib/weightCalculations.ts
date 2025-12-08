@@ -6,7 +6,7 @@
  * 2. Adding category-specific "finishing kit" weights for parts not in the builder
  */
 
-import { Component } from './validation';
+import type { Component } from './types/compatibility';
 
 // Finishing kit weights by category (in grams)
 // These represent typical weights for parts not included in the builder

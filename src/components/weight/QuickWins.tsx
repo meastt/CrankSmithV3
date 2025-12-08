@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Zap, TrendingDown, DollarSign, Plus, Loader2, ArrowLeft } from 'lucide-react';
 import type { BaselineBuild } from '@/types/weight';
-import type { Component } from '@/lib/validation';
+import { Component } from '@/lib/types/compatibility';
 import { getCostPerGramRating, getCostPerGramColor } from '@/types/weight';
 import { findQuickWins, type QuickWin } from '@/lib/quickWins';
 import { upgradeOptionToUpgrade } from '@/lib/upgradeSearch';
@@ -137,32 +137,29 @@ export function QuickWins({ baseline, onBack }: QuickWinsProps) {
             <div className="flex gap-2 mb-6">
                 <button
                     onClick={() => setSelectedFilter('all')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                        selectedFilter === 'all'
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-stone-900 text-stone-400 hover:text-white'
-                    }`}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${selectedFilter === 'all'
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-stone-900 text-stone-400 hover:text-white'
+                        }`}
                 >
                     All ({quickWins.length})
                 </button>
                 <button
                     onClick={() => setSelectedFilter('rotating')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-                        selectedFilter === 'rotating'
-                            ? 'bg-amber-500 text-white'
-                            : 'bg-stone-900 text-stone-400 hover:text-white'
-                    }`}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${selectedFilter === 'rotating'
+                        ? 'bg-amber-500 text-white'
+                        : 'bg-stone-900 text-stone-400 hover:text-white'
+                        }`}
                 >
                     <Zap className="w-4 h-4" />
                     Rotating Weight
                 </button>
                 <button
                     onClick={() => setSelectedFilter('unicorn')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                        selectedFilter === 'unicorn'
-                            ? 'bg-purple-500 text-white'
-                            : 'bg-stone-900 text-stone-400 hover:text-white'
-                    }`}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${selectedFilter === 'unicorn'
+                        ? 'bg-purple-500 text-white'
+                        : 'bg-stone-900 text-stone-400 hover:text-white'
+                        }`}
                 >
                     🦄 Unicorn Deals
                 </button>
@@ -181,8 +178,8 @@ export function QuickWins({ baseline, onBack }: QuickWinsProps) {
                         {selectedFilter === 'unicorn'
                             ? 'No unicorn deals available'
                             : selectedFilter === 'rotating'
-                            ? 'No rotating weight upgrades found'
-                            : 'Your build may already be optimized!'}
+                                ? 'No rotating weight upgrades found'
+                                : 'Your build may already be optimized!'}
                     </p>
                 </div>
             ) : (
@@ -193,7 +190,7 @@ export function QuickWins({ baseline, onBack }: QuickWinsProps) {
 
                         return (
                             <motion.div
-                                key={quickWin.component.id}
+                                key={`${quickWin.component.id}-${index}`}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}

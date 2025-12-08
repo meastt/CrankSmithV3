@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Component } from '@/lib/validation';
+import { Component } from '@/lib/types/compatibility';
 import { Save, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Component } from '@/lib/validation';
+import { Component } from '@/lib/types/compatibility';
 import { Save, Plus, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const COMPONENT_TYPES = [

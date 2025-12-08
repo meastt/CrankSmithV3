@@ -3,7 +3,7 @@
  */
 
 import type { BaselineBuild, WeightComponent } from '@/types/weight';
-import type { Component } from '@/lib/validation';
+import type { Component } from '@/lib/types/compatibility';
 import { COST_PER_GRAM_THRESHOLDS } from '@/types/weight';
 import { findUpgradeOptions, type UpgradeOption } from './upgradeSearch';
 

@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { Trash2, Edit3, Bike, ArrowRight, Settings } from 'lucide-react';
 import { useUser, SignInButton } from '@clerk/nextjs';
 import templates from '@/data/templates.json';
-import { Component } from '@/lib/validation';
+import { Component } from '@/lib/types/compatibility';
 
 interface SavedBuild {
     id: string;

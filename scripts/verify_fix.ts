@@ -1,51 +1,57 @@
 
-import { validateDrivetrain, Component } from '../src/lib/validation';
+import { Validator } from '../src/lib/validation';
+import { Component } from '../src/lib/types/compatibility';
 
 // Mock Components
 const axsShifter: Component = {
-    id: 'axs-shifter',
-    type: 'Shifter',
-    name: 'SRAM Red AXS Shifter',
-    interfaces: { protocol: 'AXS', speeds: 12 },
-    attributes: { electronic: true }
+    id: 'shifter1', type: 'Shifter', name: 'SRAM Force AXS',
+    specs: { speeds: '12', actuation: 'Electronic' },
+    compatibility_tags: { protocol: ['AXS'], speed: ['12'] }
+} as any;
+
+const axsDerailleur: Component = {
+    id: 'rd1', type: 'RearDerailleur', name: 'SRAM X01 Eagle AXS',
+    specs: { speeds: '12', max_cog_capacity: '52', actuation: 'Electronic' },
+    compatibility_tags: { protocol: ['AXS'], speed: ['12'] }
+} as any;
+
+const cassette1052: Component = {
+    id: 'cass1', type: 'Cassette', name: 'SRAM XG-1295',
+    specs: { speeds: '12', largest_cog: '52', freehub_body: 'XD' },
+    compatibility_tags: {}
+} as any;
+
+const chain: Component = {
+    id: 'chain1', type: 'Chain', name: 'SRAM Eagle Chain',
+    specs: { speeds: '12' },
+    compatibility_tags: {}
+} as any;
+
+const crank: Component = {
+    id: 'crank1', type: 'Crankset', name: 'SRAM Force 1',
+    specs: { speeds: '12', spindle_type: 'DUB' },
+    compatibility_tags: {}
+} as any;
+
+
+console.log('--- Verifying Mullet Drivetrain Fix ---');
+
+const buildData = {
+    shifter: axsShifter,
+    rearDerailleur: axsDerailleur,
+    cassette: cassette1052,
+    chain: chain,
+    crankset: crank,
+    wheels: [],
+    tires: [],
+    frame: undefined
 };
 
-const di2RD: Component = {
-    id: 'di2-rd',
-    type: 'RearDerailleur',
-    name: 'Shimano Dura-Ace Di2 RD',
-    interfaces: { protocol: 'Di2_12s_Wireless', speeds: 12 },
-    attributes: { electronic: true }
-};
+const result = Validator.validateBuild(buildData);
 
-const mechRD: Component = {
-    id: 'mech-rd',
-    type: 'RearDerailleur',
-    name: 'Shimano Ultegra Mechanical RD',
-    interfaces: { cable_pull: 'Shimano_Road_11s', speeds: 11 },
-    attributes: { electronic: false }
-};
-
-const axsRD: Component = {
-    id: 'axs-rd',
-    type: 'RearDerailleur',
-    name: 'SRAM Red AXS RD',
-    interfaces: { protocol: 'AXS', speeds: 12 },
-    attributes: { electronic: true }
-};
-
-// Test Cases
-console.log('--- TEST 1: AXS Shifter + Di2 RD (Should FAIL) ---');
-const test1 = validateDrivetrain(axsShifter, di2RD, { id: 'cassette', type: 'Cassette', name: 'Cassette', interfaces: { speeds: 12 }, attributes: {} } as Component);
-console.log(`Compatible: ${test1.compatible}`);
-console.log(`Reasons: ${test1.reasons.join(', ')}`);
-
-console.log('\n--- TEST 2: AXS Shifter + Mechanical RD (Should FAIL) ---');
-const test2 = validateDrivetrain(axsShifter, mechRD, { id: 'cassette', type: 'Cassette', name: 'Cassette', interfaces: { speeds: 11 }, attributes: {} } as Component);
-console.log(`Compatible: ${test2.compatible}`);
-console.log(`Reasons: ${test2.reasons.join(', ')}`);
-
-console.log('\n--- TEST 3: AXS Shifter + AXS RD (Should PASS) ---');
-const test3 = validateDrivetrain(axsShifter, axsRD, { id: 'cassette', type: 'Cassette', name: 'Cassette', interfaces: { speeds: 12 }, attributes: {} } as Component);
-console.log(`Compatible: ${test3.compatible}`);
-console.log(`Reasons: ${test3.reasons.join(', ')}`);
+if (result.compatible) {
+    console.log('[PASS] Drivetrain is compatible.');
+} else {
+    console.log('[FAIL] Issues found:');
+    result.issues.forEach(i => console.log(` - ${i.message}`));
+}

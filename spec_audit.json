@@ -1,0 +1,1301 @@
+{
+  "Frame": [
+    {
+      "id": "3t-exploro-ltd",
+      "name": "3T Exploro LTD",
+      "raw_attributes": {
+        "category": "Gravel",
+        "material": "Carbon",
+        "weight": 990,
+        "max_tire": 54,
+        "sizes": [
+          {
+            "size": "54cm",
+            "weight_g": 990
+          }
+        ]
+      },
+      "raw_interfaces": {
+        "bottom_bracket_shell": "BB386EVO_Press-Fit",
+        "rear_axle": "12x142mm",
+        "seatpost_diameter": "Proprietary Aero",
+        "brake_mount": "Flat_Mount",
+        "udh": false,
+        "steerer_tube": "1_1/8",
+        "wheel_size": [
+          "700c",
+          "650b"
+        ]
+      }
+    },
+    {
+      "id": "3t-exploro-racemax-carbon",
+      "name": "3T Exploro RaceMax Carbon",
+      "raw_attributes": {
+        "category": "Gravel",
+        "material": "Carbon",
+        "weight": 1100,
+        "max_tire": 61,
+        "sizes": [
+          {
+            "size": "54cm",
+            "weight_g": 1100
+          }
+        ]
+      },
+      "raw_interfaces": {
+        "bottom_bracket_shell": "BB386EVO_Press-Fit",
+        "rear_axle": "12x142mm",
+        "seatpost_diameter": "Proprietary Aero",
+        "brake_mount": "Flat_Mount",
+        "udh": false,
+        "steerer_tube": "1_1/8",
+        "wheel_size": [
+          "700c",
+          "650b"
+        ]
+      }
+    },
+    {
+      "id": "3t-exploro-racemax-m",
+      "name": "3T Exploro RaceMax (M)",
+      "raw_attributes": {
+        "category": "GRAVEL",
+        "material": "CARBON",
+        "size": "M",
+        "max_tire": 42,
+        "weight": 1100,
+        "price": 3200,
+        "udh": true
+      },
+      "raw_interfaces": {
+        "frame_type": "GRAVEL",
+        "wheel_size": "700c",
+        "bb_shell": "BB386",
+        "rear_axle": "TA_12_142",
+        "seatpost_diameter": "Integrated",
+        "brake_mount": "FLAT_MOUNT",
+        "steerer_tube": "TAPERED"
+      }
+    },
+    {
+      "id": "3t-exploro-ultra-carbon",
+      "name": "3T Exploro Ultra Carbon",
+      "raw_attributes": {
+        "category": "Gravel",
+        "material": "Carbon",
+        "weight": 1130,
+        "max_tire": 61,
+        "sizes": [
+          {
+            "size": "54cm",
+            "weight_g": 1130
+          }
+        ]
+      },
+      "raw_interfaces": {
+        "bottom_bracket_shell": "BB386EVO_Press-Fit",
+        "rear_axle": "12x142mm",
+        "seatpost_diameter": "27.2mm",
+        "brake_mount": "Direct_Mount_160mm",
+        "udh": false,
+        "steerer_tube": "1_1/8",
+        "wheel_size": [
+          "700c",
+          "650b"
+        ]
+      }
+    },
+    {
+      "id": "allied-able-gen-2-2025",
+      "name": "Allied Able Gen 2 2025",
+      "raw_attributes": {
+        "category": "Gravel",
+        "material": "Carbon",
+        "weight": 950,
+        "max_tire": 57,
+        "sizes": [
+          {
+            "size": "56cm",
+            "weight_g": 950
+          }
+        ]
+      },
+      "raw_interfaces": {
+        "bottom_bracket_shell": "BSA_Threaded",
+        "rear_axle": "12x142mm",
+        "seatpost_diameter": "Proprietary ST03",
+        "brake_mount": "Flat_Mount",
+        "udh": true,
+        "steerer_tube": "1_1/8",
+        "wheel_size": "700c"
+      }
+    }
+  ],
+  "Fork": [
+    {
+      "id": "3t-fundi-integrale",
+      "name": "3T Fundi Integrale",
+      "raw_attributes": {
+        "material": "CARBON",
+        "axle_to_crown": 360,
+        "rake": 49,
+        "max_tire": "700x30mm",
+        "suspension_type": "RIGID",
+        "weight": 410,
+        "price": 450
+      },
+      "raw_interfaces": {
+        "axle_standard": "TA_12_100",
+        "steerer": "TAPERED",
+        "brake_mount": "FLAT_MOUNT"
+      }
+    },
+    {
+      "id": "3t-fundi-team",
+      "name": "3T Fundi Team",
+      "raw_attributes": {
+        "material": "CARBON",
+        "axle_to_crown": 355,
+        "rake": 49,
+        "max_tire": "700x30mm",
+        "suspension_type": "RIGID",
+        "weight": 400,
+        "price": 400
+      },
+      "raw_interfaces": {
+        "axle_standard": "TA_12_100",
+        "steerer": "TAPERED",
+        "brake_mount": "FLAT_MOUNT"
+      }
+    },
+    {
+      "id": "columbus-futura-cross",
+      "name": "Columbus Futura Cross+",
+      "raw_attributes": {
+        "material": "CARBON",
+        "axle_to_crown": 380,
+        "rake": 47,
+        "max_tire": "700x45mm",
+        "suspension_type": "RIGID",
+        "weight": 535,
+        "price": 425
+      },
+      "raw_interfaces": {
+        "axle_standard": "TA_12_100",
+        "steerer": "TAPERED",
+        "brake_mount": "FLAT_MOUNT"
+      }
+    },
+    {
+      "id": "columbus-futura-gravel",
+      "name": "Columbus Futura Gravel",
+      "raw_attributes": {
+        "material": "CARBON",
+        "axle_to_crown": 380,
+        "rake": 47,
+        "max_tire": "700x40mm",
+        "suspension_type": "RIGID",
+        "weight": 450,
+        "price": 375
+      },
+      "raw_interfaces": {
+        "axle_standard": "TA_12_100",
+        "steerer": "TAPERED",
+        "brake_mount": "FLAT_MOUNT"
+      }
+    },
+    {
+      "id": "enve-adventure",
+      "name": "ENVE Adventure",
+      "raw_attributes": {
+        "material": "CARBON",
+        "axle_to_crown": 395,
+        "rake": 55,
+        "max_tire": "700x50mm",
+        "suspension_type": "RIGID",
+        "weight": 575,
+        "price": 650
+      },
+      "raw_interfaces": {
+        "axle_standard": "TA_12_100",
+        "steerer": "TAPERED",
+        "brake_mount": "FLAT_MOUNT"
+      }
+    }
+  ],
+  "Wheel": [
+    {
+      "id": "bontrager-aeolus-elite-50-700c",
+      "name": "Bontrager Aeolus Elite 50 700c",
+      "raw_attributes": {
+        "material": "Carbon",
+        "weight": 1400,
+        "rim_depth": 50,
+        "internal_width": 21,
+        "external_width": 28
+      },
+      "raw_interfaces": {
+        "diameter": "700c",
+        "brake_type": "Disc",
+        "brake_mount": "Centerlock",
+        "front_axle": "12x100mm",
+        "rear_axle": "12x142mm",
+        "freehub": [
+          "Shimano HG",
+          "SRAM XDR"
+        ]
+      }
+    },
+    {
+      "id": "bontrager-aeolus-pro-37-700c",
+      "name": "Bontrager Aeolus Pro 37 700c",
+      "raw_attributes": {
+        "material": "Carbon",
+        "weight": 1300,
+        "rim_depth": 37,
+        "internal_width": 23,
+        "external_width": 30
+      },
+      "raw_interfaces": {
+        "diameter": "700c",
+        "brake_type": "Disc",
+        "brake_mount": "Centerlock",
+        "front_axle": "12x100mm",
+        "rear_axle": "12x142mm",
+        "freehub": [
+          "Shimano HG",
+          "SRAM XDR"
+        ]
+      }
+    },
+    {
+      "id": "bontrager-aeolus-rsl-37",
+      "name": "Bontrager Aeolus RSL 37",
+      "raw_attributes": {
+        "category": "ROAD",
+        "material": "CARBON",
+        "rim_depth": "37mm",
+        "internal_width": 21,
+        "tubeless_ready": true,
+        "weight": 1285,
+        "price": 2600
+      },
+      "raw_interfaces": {
+        "position": "SET",
+        "diameter": "700c",
+        "axle_standard": "TA_12_100",
+        "brake_interface": "DISC_CENTERLOCK",
+        "freehub": "HG_11"
+      }
+    },
+    {
+      "id": "bontrager-aeolus-rsl-51",
+      "name": "Bontrager Aeolus RSL 51",
+      "raw_attributes": {
+        "category": "ROAD",
+        "material": "CARBON",
+        "rim_depth": "51mm",
+        "internal_width": 21,
+        "tubeless_ready": true,
+        "weight": 1395,
+        "price": 2700
+      },
+      "raw_interfaces": {
+        "position": "SET",
+        "diameter": "700c",
+        "axle_standard": "TA_12_100",
+        "brake_interface": "DISC_CENTERLOCK",
+        "freehub": "HG_11"
+      }
+    },
+    {
+      "id": "bontrager-gr-elite",
+      "name": "Bontrager GR Elite",
+      "raw_attributes": {
+        "category": "GRAVEL",
+        "material": "ALUMINUM",
+        "rim_depth": "23mm",
+        "internal_width": 23,
+        "tubeless_ready": true,
+        "weight": 1890,
+        "price": 450
+      },
+      "raw_interfaces": {
+        "position": "SET",
+        "diameter": "700c",
+        "axle_standard": "TA_12_100",
+        "brake_interface": "DISC_CENTERLOCK",
+        "freehub": "HG_11"
+      }
+    }
+  ],
+  "Tire": [
+    {
+      "id": "bontrager-r3-hard-case-lite-tlr-700x28c",
+      "name": "Bontrager R3 Hard-Case Lite TLR 700x28c",
+      "raw_attributes": {
+        "size_label": "700x28c",
+        "weight": 300,
+        "tpi": 170,
+        "color": "Black",
+        "purpose": "Road"
+      },
+      "raw_interfaces": {
+        "diameter": "700c",
+        "width": 28,
+        "tubeless": true
+      }
+    },
+    {
+      "id": "challenge-gravel-grinder-700x50c",
+      "name": "Challenge Gravel Grinder 700x50c",
+      "raw_attributes": {
+        "size_label": "700x50c",
+        "weight": 480,
+        "tpi": 120,
+        "purpose": "Gravel"
+      },
+      "raw_interfaces": {
+        "diameter": "700c",
+        "width": 50,
+        "tubeless": true
+      }
+    },
+    {
+      "id": "continental-gp5000-s-tr-25mm",
+      "name": "Continental GP5000 S TR 25mm",
+      "raw_attributes": {
+        "width": 25,
+        "weight": 250,
+        "price": 80,
+        "tubeless_ready": true,
+        "compound": "RACE"
+      },
+      "raw_interfaces": {
+        "diameter": "700c",
+        "tire_type": "ROAD"
+      }
+    },
+    {
+      "id": "continental-gp5000-s-tr-28mm",
+      "name": "Continental GP5000 S TR 28mm",
+      "raw_attributes": {
+        "width": 28,
+        "weight": 275,
+        "price": 80,
+        "tubeless_ready": true,
+        "compound": "RACE"
+      },
+      "raw_interfaces": {
+        "diameter": "700c",
+        "tire_type": "ROAD"
+      }
+    },
+    {
+      "id": "continental-gp5000-s-tr-30mm",
+      "name": "Continental GP5000 S TR 30mm",
+      "raw_attributes": {
+        "width": 30,
+        "weight": 295,
+        "price": 80,
+        "tubeless_ready": true,
+        "compound": "RACE"
+      },
+      "raw_interfaces": {
+        "diameter": "700c",
+        "tire_type": "ROAD"
+      }
+    }
+  ],
+  "BottomBracket": [
+    {
+      "id": "ceramic-speed-bb386-shimano",
+      "name": "CeramicSpeed BB386 Shimano",
+      "raw_attributes": {
+        "weight": 62,
+        "note": "Ceramic bearings, coated races"
+      },
+      "raw_interfaces": {
+        "frame_shell": "BB386EVO_Press-Fit",
+        "crank_spindle": "Hollowtech_II_24mm"
+      }
+    },
+    {
+      "id": "ceramic-speed-bb386-sram-dub",
+      "name": "CeramicSpeed BB386 SRAM DUB",
+      "raw_attributes": {
+        "weight": 65,
+        "note": "Ceramic bearings, coated races"
+      },
+      "raw_interfaces": {
+        "frame_shell": "BB386EVO_Press-Fit",
+        "crank_spindle": "DUB_28.99mm"
+      }
+    },
+    {
+      "id": "ceramic-speed-bb86-shimano",
+      "name": "CeramicSpeed BB86 Shimano",
+      "raw_attributes": {
+        "weight": 59,
+        "note": "Ceramic bearings, coated races"
+      },
+      "raw_interfaces": {
+        "frame_shell": "PF86_Press-Fit",
+        "crank_spindle": "Hollowtech_II_24mm"
+      }
+    },
+    {
+      "id": "ceramic-speed-bb86-sram-dub",
+      "name": "CeramicSpeed BB86 SRAM DUB",
+      "raw_attributes": {
+        "weight": 62,
+        "note": "Ceramic bearings, coated races"
+      },
+      "raw_interfaces": {
+        "frame_shell": "PF86_Press-Fit",
+        "crank_spindle": "DUB_28.99mm"
+      }
+    },
+    {
+      "id": "ceramicspeed-bbright-dub",
+      "name": "CeramicSpeed BBright SRAM DUB",
+      "raw_attributes": {
+        "weight": 78,
+        "bearing_type": "Ceramic"
+      },
+      "raw_interfaces": {
+        "frame_interface": "BBright_79mm",
+        "frame_shell": "BBright_79mm",
+        "crank_interface": "DUB_28.99mm",
+        "crank_spindle": "DUB_28.99mm"
+      }
+    }
+  ],
+  "Crankset": [
+    {
+      "id": "campagnolo-ekar-gt",
+      "name": "Campagnolo Ekar GT",
+      "raw_attributes": {
+        "lengths": [
+          170,
+          172.5,
+          175
+        ],
+        "chainrings": [
+          "36t",
+          "38t",
+          "40t",
+          "42t",
+          "44t"
+        ],
+        "weight": 850
+      },
+      "raw_interfaces": {
+        "spindle": "Ultra-Torque",
+        "speeds": 13,
+        "configuration": "1x"
+      }
+    },
+    {
+      "id": "campagnolo-super-record-wireless",
+      "name": "Campagnolo Super Record Wireless",
+      "raw_attributes": {
+        "lengths": [
+          165,
+          170,
+          172.5,
+          175
+        ],
+        "chainrings": [
+          "45/29",
+          "48/32",
+          "50/34"
+        ],
+        "weight": 585
+      },
+      "raw_interfaces": {
+        "spindle": "Ultra-Torque (Titanium)",
+        "speeds": 12,
+        "configuration": "2x"
+      }
+    },
+    {
+      "id": "fsa-gradient",
+      "name": "FSA Gradient Gravel Crankset",
+      "raw_attributes": {
+        "brand": "FSA",
+        "teeth": "46/30",
+        "weight_g": 620,
+        "arm_length": 172.5
+      },
+      "raw_interfaces": {
+        "bb_interface": "BB386_30mm",
+        "chainring_mount": "Direct Mount"
+      }
+    },
+    {
+      "id": "fsa-kforce-we-abs",
+      "name": "FSA K-Force WE ABS Road Crankset",
+      "raw_attributes": {
+        "brand": "FSA",
+        "teeth": "52/36",
+        "weight_g": 558,
+        "arm_length": 172.5
+      },
+      "raw_interfaces": {
+        "bb_interface": "BB386_30mm",
+        "chainring_mount": "Direct Mount"
+      }
+    },
+    {
+      "id": "fsa-powerbox-carbon",
+      "name": "FSA Powerbox Carbon Road Crankset",
+      "raw_attributes": {
+        "brand": "FSA",
+        "teeth": "52/36",
+        "weight_g": 670,
+        "arm_length": 172.5,
+        "power_meter": true
+      },
+      "raw_interfaces": {
+        "bb_interface": "BB386_30mm",
+        "chainring_mount": "Direct Mount"
+      }
+    }
+  ],
+  "Cassette": [
+    {
+      "id": "campagnolo-ekar-9-36t",
+      "name": "Campagnolo Ekar 9-36t",
+      "raw_attributes": {
+        "range": "9-36t",
+        "cog_list": [
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          16,
+          18,
+          20,
+          23,
+          27,
+          31,
+          36
+        ],
+        "weight": 340
+      },
+      "raw_interfaces": {
+        "freehub_mount": "Campagnolo N3W",
+        "speeds": 13
+      }
+    },
+    {
+      "id": "campagnolo-ekar-ekar-gt-9-42t",
+      "name": "Campagnolo Ekar / Ekar GT 9-42t",
+      "raw_attributes": {
+        "range": "9-42t",
+        "cog_list": [
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          16,
+          18,
+          21,
+          25,
+          30,
+          36,
+          42
+        ],
+        "weight": 390
+      },
+      "raw_interfaces": {
+        "freehub_mount": "Campagnolo N3W",
+        "speeds": 13
+      }
+    },
+    {
+      "id": "campagnolo-ekar-gt-10-48t",
+      "name": "Campagnolo Ekar GT 10-48t",
+      "raw_attributes": {
+        "range": "10-48t",
+        "cog_list": [
+          10,
+          11,
+          12,
+          13,
+          14,
+          16,
+          18,
+          21,
+          25,
+          30,
+          36,
+          42,
+          48
+        ],
+        "weight": 435
+      },
+      "raw_interfaces": {
+        "freehub_mount": "Campagnolo N3W",
+        "speeds": 13
+      }
+    },
+    {
+      "id": "campagnolo-super-record-wireless-10-29t",
+      "name": "Campagnolo Super Record Wireless 10-29t",
+      "raw_attributes": {
+        "range": "10-29t",
+        "cog_list": [
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          18,
+          20,
+          23,
+          26,
+          29
+        ],
+        "weight": 210
+      },
+      "raw_interfaces": {
+        "freehub_mount": "Campagnolo N3W",
+        "speeds": 12
+      }
+    },
+    {
+      "id": "shimano-105-r7100-12sp-11-30",
+      "name": "Shimano 105 R7100 12sp 11-30",
+      "raw_attributes": {
+        "speeds": 12,
+        "range": "11-30",
+        "freehub_standard": "HG_12",
+        "weight": 333,
+        "price": 80
+      },
+      "raw_interfaces": {
+        "speeds": 12,
+        "freehub_standard": "HG_12"
+      }
+    }
+  ],
+  "RearDerailleur": [
+    {
+      "id": "campagnolo-chorus-12",
+      "name": "Campagnolo Chorus 12",
+      "raw_attributes": {
+        "speeds": 12,
+        "electronic": false,
+        "max_cog": 34,
+        "clutch": false,
+        "weight": 220
+      },
+      "raw_interfaces": {
+        "protocol": "Campagnolo_12s_Mech",
+        "attachment": "Standard_Mount"
+      }
+    },
+    {
+      "id": "campagnolo-ekar",
+      "name": "Campagnolo Ekar",
+      "raw_attributes": {
+        "speeds": 13,
+        "electronic": false,
+        "max_cog": 44,
+        "clutch": true,
+        "weight": 275
+      },
+      "raw_interfaces": {
+        "protocol": "Campagnolo_Ekar_13s",
+        "attachment": "Standard_Mount"
+      }
+    },
+    {
+      "id": "campagnolo-super-record-wireless-13",
+      "name": "Campagnolo Super Record Wireless 13",
+      "raw_attributes": {
+        "speeds": 13,
+        "electronic": true,
+        "max_cog": 33,
+        "clutch": false,
+        "weight": 295
+      },
+      "raw_interfaces": {
+        "protocol": "Campagnolo_Wireless_13s",
+        "attachment": "Standard_Mount"
+      }
+    },
+    {
+      "id": "l-twoo-ae-wireless-electronic",
+      "name": "L-Twoo Ae Wireless Electronic",
+      "raw_attributes": {
+        "speeds": 13,
+        "electronic": true,
+        "max_cog": 52,
+        "clutch": true,
+        "weight": 286
+      },
+      "raw_interfaces": {
+        "protocol": "L-Twoo_Wireless_(App_Configurable)",
+        "attachment": "Standard_Mount"
+      }
+    },
+    {
+      "id": "l-twoo-ax13-mechanical",
+      "name": "L-Twoo AX13 Mechanical",
+      "raw_attributes": {
+        "speeds": 13,
+        "electronic": false,
+        "max_cog": 52,
+        "clutch": true,
+        "weight": 295
+      },
+      "raw_interfaces": {
+        "protocol": "L-Twoo_13s_Mech",
+        "attachment": "Standard_Mount"
+      }
+    }
+  ],
+  "Shifter": [
+    {
+      "id": "campagnolo-chorus-12-mechanical",
+      "name": "Campagnolo Chorus 12 Mechanical",
+      "raw_attributes": {
+        "speeds": 12,
+        "electronic": false,
+        "weight": 503
+      },
+      "raw_interfaces": {
+        "protocol": "Campagnolo_12s_Mech",
+        "type": "Drop Bar"
+      }
+    },
+    {
+      "id": "campagnolo-ekar-gt-ergopower",
+      "name": "Campagnolo Ekar GT Ergopower",
+      "raw_attributes": {
+        "speeds": 13,
+        "electronic": false,
+        "weight": 420
+      },
+      "raw_interfaces": {
+        "protocol": "Campagnolo_Ekar_13s",
+        "type": "Drop Bar"
+      }
+    },
+    {
+      "id": "campagnolo-record-12-mech",
+      "name": "Campagnolo Record 12 Mechanical",
+      "raw_attributes": {
+        "brand": "Campagnolo",
+        "electronic": false,
+        "weight_g": 345
+      },
+      "raw_interfaces": {
+        "speeds": 12,
+        "actuation": "Cable",
+        "bar_type": "Drop",
+        "pull_ratio": "Campagnolo"
+      }
+    },
+    {
+      "id": "campagnolo-super-record-13-wireless",
+      "name": "Campagnolo Super Record 13 Wireless",
+      "raw_attributes": {
+        "speeds": 13,
+        "electronic": true,
+        "weight": 355
+      },
+      "raw_interfaces": {
+        "protocol": "Campagnolo_Wireless_13s",
+        "type": "Drop Bar"
+      }
+    },
+    {
+      "id": "ltwoo-ax13-shifters",
+      "name": "L-Twoo AX13 Mechanical Road Shifters",
+      "raw_attributes": {
+        "brand": "L-Twoo",
+        "electronic": false,
+        "weight_g": 420
+      },
+      "raw_interfaces": {
+        "speeds": 13,
+        "actuation": "Cable",
+        "bar_type": "Drop"
+      }
+    }
+  ],
+  "Chain": [
+    {
+      "id": "campagnolo-chorus-12-speed",
+      "name": "Campagnolo Chorus 12-Speed",
+      "raw_attributes": {
+        "weight": 233,
+        "color": "Silver"
+      },
+      "raw_interfaces": {
+        "speeds": 12,
+        "compatibility": "Road"
+      }
+    },
+    {
+      "id": "campagnolo-ekar-13-speed",
+      "name": "Campagnolo Ekar 13-Speed",
+      "raw_attributes": {
+        "weight": 256,
+        "color": "Silver"
+      },
+      "raw_interfaces": {
+        "speeds": 13,
+        "compatibility": "Gravel"
+      }
+    },
+    {
+      "id": "campagnolo-record-11-speed",
+      "name": "Campagnolo Record 11-Speed",
+      "raw_attributes": {
+        "weight": 220,
+        "color": "Silver"
+      },
+      "raw_interfaces": {
+        "speeds": 11,
+        "compatibility": "Road"
+      }
+    },
+    {
+      "id": "campagnolo-super-record-12-speed",
+      "name": "Campagnolo Super Record 12-Speed",
+      "raw_attributes": {
+        "weight": 228,
+        "color": "Silver"
+      },
+      "raw_interfaces": {
+        "speeds": 12,
+        "compatibility": "Road"
+      }
+    },
+    {
+      "id": "fsa-k-force-light-11-speed",
+      "name": "FSA K-Force Light 11-Speed",
+      "raw_attributes": {
+        "weight": 246,
+        "color": "Neutral"
+      },
+      "raw_interfaces": {
+        "speeds": 11,
+        "compatibility": "Road/MTB"
+      }
+    }
+  ],
+  "BrakeCaliper": [
+    {
+      "id": "campagnolo-ekar-gt-front",
+      "name": "Campagnolo Ekar GT FRONT",
+      "raw_attributes": {
+        "position": "FRONT",
+        "mount": "FLAT_MOUNT",
+        "fluid": "MINERAL",
+        "piston_count": 2,
+        "weight": 120,
+        "price": 200
+      },
+      "raw_interfaces": {
+        "mount": "FLAT_MOUNT",
+        "fluid_type": "MINERAL",
+        "piston_count": 2
+      }
+    },
+    {
+      "id": "campagnolo-ekar-gt-rear",
+      "name": "Campagnolo Ekar GT REAR",
+      "raw_attributes": {
+        "position": "REAR",
+        "mount": "FLAT_MOUNT",
+        "fluid": "MINERAL",
+        "piston_count": 2,
+        "weight": 110,
+        "price": 200
+      },
+      "raw_interfaces": {
+        "mount": "FLAT_MOUNT",
+        "fluid_type": "MINERAL",
+        "piston_count": 2
+      }
+    },
+    {
+      "id": "campagnolo-super-record-wireless-front",
+      "name": "Campagnolo Super Record Wireless FRONT",
+      "raw_attributes": {
+        "position": "FRONT",
+        "mount": "FLAT_MOUNT",
+        "fluid": "MINERAL",
+        "piston_count": 2,
+        "weight": 118,
+        "price": 300
+      },
+      "raw_interfaces": {
+        "mount": "FLAT_MOUNT",
+        "fluid_type": "MINERAL",
+        "piston_count": 2
+      }
+    },
+    {
+      "id": "campagnolo-super-record-wireless-rear",
+      "name": "Campagnolo Super Record Wireless REAR",
+      "raw_attributes": {
+        "position": "REAR",
+        "mount": "FLAT_MOUNT",
+        "fluid": "MINERAL",
+        "piston_count": 2,
+        "weight": 101,
+        "price": 300
+      },
+      "raw_interfaces": {
+        "mount": "FLAT_MOUNT",
+        "fluid_type": "MINERAL",
+        "piston_count": 2
+      }
+    },
+    {
+      "id": "hope-tech-4-e4-front",
+      "name": "Hope Tech 4 E4 FRONT",
+      "raw_attributes": {
+        "position": "FRONT",
+        "mount": "POST_MOUNT",
+        "fluid": "DOT",
+        "piston_count": 4,
+        "weight": 301,
+        "price": 240
+      },
+      "raw_interfaces": {
+        "mount": "POST_MOUNT",
+        "fluid_type": "DOT",
+        "piston_count": 4
+      }
+    }
+  ],
+  "BrakeRotor": [
+    {
+      "id": "galfer-disc-wave-160mm-6bolt",
+      "name": "Galfer Disc Wave 160mm",
+      "raw_attributes": {
+        "size": 160,
+        "mount": "6BOLT",
+        "weight": 115,
+        "price": 43
+      },
+      "raw_interfaces": {
+        "mount": "6BOLT",
+        "rotor_size": 160
+      }
+    },
+    {
+      "id": "galfer-disc-wave-160mm-centerlock",
+      "name": "Galfer Disc Wave 160mm",
+      "raw_attributes": {
+        "size": 160,
+        "mount": "CENTERLOCK",
+        "weight": 120,
+        "price": 43
+      },
+      "raw_interfaces": {
+        "mount": "CENTERLOCK",
+        "rotor_size": 160
+      }
+    },
+    {
+      "id": "galfer-disc-wave-180mm-6bolt",
+      "name": "Galfer Disc Wave 180mm",
+      "raw_attributes": {
+        "size": 180,
+        "mount": "6BOLT",
+        "weight": 140,
+        "price": 45
+      },
+      "raw_interfaces": {
+        "mount": "6BOLT",
+        "rotor_size": 180
+      }
+    },
+    {
+      "id": "galfer-disc-wave-180mm-centerlock",
+      "name": "Galfer Disc Wave 180mm",
+      "raw_attributes": {
+        "size": 180,
+        "mount": "CENTERLOCK",
+        "weight": 145,
+        "price": 45
+      },
+      "raw_interfaces": {
+        "mount": "CENTERLOCK",
+        "rotor_size": 180
+      }
+    },
+    {
+      "id": "galfer-disc-wave-203mm-6bolt",
+      "name": "Galfer Disc Wave 203mm",
+      "raw_attributes": {
+        "size": 203,
+        "mount": "6BOLT",
+        "weight": 170,
+        "price": 50
+      },
+      "raw_interfaces": {
+        "mount": "6BOLT",
+        "rotor_size": 203
+      }
+    }
+  ],
+  "Stem": [
+    {
+      "id": "controltech-one-pro",
+      "name": "Controltech One Pro",
+      "raw_attributes": {
+        "brand": "Controltech",
+        "length": 100,
+        "angle": -6,
+        "weight_g": 135,
+        "material": "Aluminum"
+      },
+      "raw_interfaces": {
+        "clamp": 31.8,
+        "steerer": "1-1/8"
+      }
+    },
+    {
+      "id": "deda-zero100-road",
+      "name": "Deda Elementi Zero100 Road",
+      "raw_attributes": {
+        "brand": "Deda",
+        "length": 110,
+        "angle": -8,
+        "weight_g": 125,
+        "material": "Aluminum"
+      },
+      "raw_interfaces": {
+        "clamp": 31.7,
+        "steerer": "1-1/8"
+      }
+    },
+    {
+      "id": "easton-ea70",
+      "name": "Easton EA70",
+      "raw_attributes": {
+        "material": "Alloy",
+        "length": "100mm",
+        "angle": "+/-7 deg",
+        "weight": 132
+      },
+      "raw_interfaces": {
+        "clamp_diameter": "31.8mm",
+        "steerer_clamp": "1_1/8"
+      }
+    },
+    {
+      "id": "easton-haven",
+      "name": "Easton Haven",
+      "raw_attributes": {
+        "material": "Alloy",
+        "length": "50mm",
+        "angle": "0 deg",
+        "weight": 140
+      },
+      "raw_interfaces": {
+        "clamp_diameter": "35mm",
+        "steerer_clamp": "1_1/8"
+      }
+    },
+    {
+      "id": "enve-road-stem",
+      "name": "ENVE Road Stem Carbon",
+      "raw_attributes": {
+        "material": "Carbon",
+        "length": "100mm",
+        "angle": "-6",
+        "weight": 125
+      },
+      "raw_interfaces": {
+        "clamp_diameter": "31.8mm",
+        "steerer_clamp": "1_1/8"
+      }
+    }
+  ],
+  "Handlebar": [
+    {
+      "id": "controltech-gravel-carbon",
+      "name": "Controltech Gravel Carbon",
+      "raw_attributes": {
+        "brand": "Controltech",
+        "width": 44,
+        "drop": 115,
+        "reach": 70,
+        "weight_g": 230,
+        "material": "Carbon"
+      },
+      "raw_interfaces": {
+        "clamp": 31.8,
+        "bar_type": "Drop"
+      }
+    },
+    {
+      "id": "deda-gravel-carbon",
+      "name": "Deda Elementi Gravel Carbon",
+      "raw_attributes": {
+        "brand": "Deda",
+        "width": 44,
+        "drop": 120,
+        "reach": 75,
+        "weight_g": 235,
+        "material": "Carbon"
+      },
+      "raw_interfaces": {
+        "clamp": 31.7,
+        "bar_type": "Drop"
+      }
+    },
+    {
+      "id": "deda-superzero-road",
+      "name": "Deda Elementi Superzero Road",
+      "raw_attributes": {
+        "brand": "Deda",
+        "width": 42,
+        "drop": 135,
+        "reach": 80,
+        "weight_g": 195,
+        "material": "Carbon"
+      },
+      "raw_interfaces": {
+        "clamp": 31.7,
+        "bar_type": "Drop"
+      }
+    },
+    {
+      "id": "easton-ec70-ax",
+      "name": "Easton EC70 AX",
+      "raw_attributes": {
+        "material": "Carbon",
+        "width": "720mm",
+        "weight": 225,
+        "type": "Flat"
+      },
+      "raw_interfaces": {
+        "clamp_diameter": "31.8mm"
+      }
+    },
+    {
+      "id": "easton-ec90-slx",
+      "name": "Easton EC90 SLX",
+      "raw_attributes": {
+        "material": "Carbon",
+        "width": "42cm",
+        "weight": 195,
+        "type": "Drop"
+      },
+      "raw_interfaces": {
+        "clamp_diameter": "31.8mm"
+      }
+    }
+  ],
+  "Seatpost": [
+    {
+      "id": "easton-ec90-sl-272-0mm",
+      "name": "Easton EC90 SL 27.2mm 0mm",
+      "raw_attributes": {
+        "diameter": 27.2,
+        "setback": 0,
+        "material": "CARBON",
+        "dropper": false,
+        "travel": null,
+        "weight": 189,
+        "price": 180
+      },
+      "raw_interfaces": {
+        "diameter": 27.2,
+        "dropper": false,
+        "travel": null
+      }
+    },
+    {
+      "id": "easton-ec90-sl-272-20mm",
+      "name": "Easton EC90 SL 27.2mm 20mm",
+      "raw_attributes": {
+        "diameter": 27.2,
+        "setback": 20,
+        "material": "CARBON",
+        "dropper": false,
+        "travel": null,
+        "weight": 200,
+        "price": 180
+      },
+      "raw_interfaces": {
+        "diameter": 27.2,
+        "dropper": false,
+        "travel": null
+      }
+    },
+    {
+      "id": "enve-carbon-272-0mm",
+      "name": "ENVE Carbon 27.2mm 0mm",
+      "raw_attributes": {
+        "diameter": 27.2,
+        "setback": 0,
+        "material": "CARBON",
+        "dropper": false,
+        "travel": null,
+        "weight": 168,
+        "price": 325
+      },
+      "raw_interfaces": {
+        "diameter": 27.2,
+        "dropper": false,
+        "travel": null
+      }
+    },
+    {
+      "id": "enve-carbon-272-25mm",
+      "name": "ENVE Carbon 27.2mm 25mm",
+      "raw_attributes": {
+        "diameter": 27.2,
+        "setback": 25,
+        "material": "CARBON",
+        "dropper": false,
+        "travel": null,
+        "weight": 182,
+        "price": 325
+      },
+      "raw_interfaces": {
+        "diameter": 27.2,
+        "dropper": false,
+        "travel": null
+      }
+    },
+    {
+      "id": "enve-carbon-316-0mm",
+      "name": "ENVE Carbon 31.6mm 0mm",
+      "raw_attributes": {
+        "diameter": 31.6,
+        "setback": 0,
+        "material": "CARBON",
+        "dropper": false,
+        "travel": null,
+        "weight": 204,
+        "price": 325
+      },
+      "raw_interfaces": {
+        "diameter": 31.6,
+        "dropper": false,
+        "travel": null
+      }
+    }
+  ]
+}

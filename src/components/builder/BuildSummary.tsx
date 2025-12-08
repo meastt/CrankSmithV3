@@ -5,7 +5,7 @@ import { useBuildStore } from '@/store/buildStore';
 import { AlertTriangle, Trash2, Save, Download, Package } from 'lucide-react';
 
 export const BuildSummary: React.FC = () => {
-    const { parts, removePart, validationResults } = useBuildStore();
+    const { parts, removePart, validationResult } = useBuildStore();
 
     const totalWeight = Object.values(parts).reduce((sum, part) => sum + ((part as any)?.attributes?.weight_g || 0), 0);
     const partsCount = Object.values(parts).filter(Boolean).length;
@@ -94,6 +94,8 @@ export const BuildSummary: React.FC = () => {
     };
 
     const extras = getExtras();
+    const issues = validationResult?.issues || [];
+    const errors = issues.filter(r => r.severity === 'ERROR');
 
     return (
         <div className="flex flex-col h-full">
@@ -108,15 +110,6 @@ export const BuildSummary: React.FC = () => {
                         <Package className="w-4 h-4 text-stone-600" />
                     </div>
                 </div>
-
-                {/* Weight display */}
-                <div className="flex items-baseline justify-between bg-white/[0.02] rounded-xl p-4 border border-white/5">
-                    <span className="text-xs font-medium text-stone-500 uppercase tracking-wider">Total Weight</span>
-                    <div className="text-right">
-                        <span className="text-2xl font-bold text-stone-100 font-mono">{totalWeight.toLocaleString()}</span>
-                        <span className="text-sm text-stone-500 ml-1">g</span>
-                    </div>
-                </div>
             </div>
 
             {/* Parts List */}
@@ -125,11 +118,10 @@ export const BuildSummary: React.FC = () => {
                     {(Object.entries(parts) as [keyof typeof parts, typeof parts[keyof typeof parts]][]).map(([type, component]) => (
                         <div
                             key={type}
-                            className={`group rounded-xl border transition-all ${
-                                component
-                                    ? 'bg-white/[0.02] border-white/5 hover:border-white/10'
-                                    : 'border-dashed border-white/5'
-                            } p-3`}
+                            className={`group rounded-xl border transition-all ${component
+                                ? 'bg-white/[0.02] border-white/5 hover:border-white/10'
+                                : 'border-dashed border-white/5'
+                                } p-3`}
                         >
                             <div className="flex justify-between items-start gap-2">
                                 <div className="min-w-0 flex-1">
@@ -159,14 +151,14 @@ export const BuildSummary: React.FC = () => {
                 </div>
 
                 {/* Validation Errors */}
-                {validationResults.filter(r => !r.valid).length > 0 && (
+                {errors.length > 0 && (
                     <div className="mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4">
                         <div className="flex items-center gap-2 text-red-400 mb-2">
                             <AlertTriangle className="w-4 h-4" />
                             <span className="font-semibold text-sm">Compatibility Issues</span>
                         </div>
                         <ul className="space-y-1.5">
-                            {validationResults.filter(r => !r.valid).map((result, idx) => (
+                            {errors.map((result, idx) => (
                                 <li key={idx} className="text-xs text-red-300/80 flex items-start gap-2">
                                     <span className="w-1 h-1 bg-red-400 rounded-full mt-1.5 shrink-0" />
                                     {result.message}

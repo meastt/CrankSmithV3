@@ -1,12 +1,18 @@
-import { Component } from "@/lib/validation";
+import { Component } from "@/lib/types/compatibility";
 
 // Helper to create a standard component
 const createStandard = (type: string, name: string, interfaces: Record<string, any>, attributes: Record<string, any> = {}): Component => ({
-    id: name.toLowerCase().replace(/\s+/g, '-'),
+    id: `std-${type.toLowerCase()}-${name.toLowerCase().replace(/\s+/g, '-')}`,
     type,
     name,
     interfaces,
     attributes,
+    // Add defaults for required fields
+    price: 0,
+    weightGrams: 0,
+    image: '',
+    specs: {},
+    compatibility_tags: {}
 });
 
 export const STANDARDS: Record<string, Component> = {

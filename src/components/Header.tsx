@@ -6,9 +6,10 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Wrench, Activity, Gauge, Scale, Bike } from 'lucide-react';
 import { useSettingsStore } from '@/store/settingsStore';
+import { DevBanner } from './DevBanner';
 
 const navLinks = [
-    { href: '/builder', label: 'Builder', icon: Wrench },
+    { href: '/builder?new=true', label: 'Builder', icon: Wrench },
     { href: '/garage', label: 'Garage', icon: Bike },
     { href: '/performance', label: 'Drivetrain', icon: Activity },
     { href: '/tire-pressure', label: 'Tire Pressure', icon: Gauge },
@@ -49,6 +50,7 @@ export function Header() {
                     : 'bg-transparent'
                     }`}
             >
+                <DevBanner />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6">
                     <div className="flex justify-between items-center h-16 md:h-18">
                         {/* Logo */}

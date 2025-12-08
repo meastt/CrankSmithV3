@@ -135,6 +135,19 @@ export const MOCK_SHIFTERS: Shifter[] = [
         weightGrams: 400,
         price: 300,
         image: 'ultegra.jpg'
+    },
+    {
+        id: 'shifter_dura_ace_mech',
+        brand: 'Shimano',
+        model: 'Dura-Ace ST-R9120',
+        speeds: 11,
+        pullRatio: PullRatioID.SHIMANO_ROAD_11,
+        isElectronic: false,
+        position: 'PAIR',
+        brakeFluid: FluidType.MINERAL,
+        weightGrams: 538,
+        price: 500,
+        image: 'shifter_da.jpg'
     }
 ];
 
@@ -180,6 +193,20 @@ export const MOCK_RDS: RearDerailleur[] = [
         weightGrams: 200,
         price: 100,
         image: 'rd_ultegra.jpg'
+    },
+    {
+        id: 'rd_dura_ace_mech',
+        brand: 'Shimano',
+        model: 'Dura-Ace RD-R9100',
+        speeds: 11,
+        pullRatio: PullRatioID.SHIMANO_ROAD_11,
+        maxCog: 30,
+        capacity: 35,
+        isElectronic: false,
+        mountType: 'STD',
+        weightGrams: 158,
+        price: 220,
+        image: 'rd_da.jpg'
     }
 ];
 
@@ -345,6 +372,19 @@ export const MOCK_CRANKS: Crankset[] = [
         weightGrams: 674,
         price: 300,
         image: 'crank_ultegra.jpg'
+    },
+    {
+        id: 'crank_dura_ace',
+        brand: 'Shimano',
+        model: 'Dura-Ace FC-R9100',
+        spindle: CrankSpindleStandard.SHIMANO_24,
+        speeds: 11,
+        chainrings: [52, 36],
+        chainline: 43.5,
+        powerMeter: false,
+        weightGrams: 614,
+        price: 550,
+        image: 'crank_da.jpg'
     }
 ];
 
@@ -383,6 +423,17 @@ export const MOCK_CASSETTES: Cassette[] = [
         weightGrams: 269,
         price: 90,
         image: 'cassette_ultegra.jpg'
+    },
+    {
+        id: 'cassette_dura_ace_11_30',
+        brand: 'Shimano',
+        model: 'Dura-Ace CS-R9100',
+        speeds: 11,
+        range: [11, 30],
+        freehubType: FreehubStandard.HG_11,
+        weightGrams: 211,
+        price: 250,
+        image: 'cassette_da.jpg'
     }
 ];
 
@@ -410,6 +461,17 @@ export const MOCK_CALIPERS: BrakeCaliper[] = [
         weightGrams: 250,
         price: 150,
         image: 'caliper_xt.jpg'
+    },
+    {
+        id: 'caliper_dura_ace',
+        brand: 'Shimano',
+        model: 'Dura-Ace BR-R9170',
+        position: 'PAIR',
+        mount: BrakeMountStandard.DISC_FLAT,
+        fluid: FluidType.MINERAL,
+        weightGrams: 256,
+        price: 300,
+        image: 'caliper_da.jpg'
     }
 ];
 

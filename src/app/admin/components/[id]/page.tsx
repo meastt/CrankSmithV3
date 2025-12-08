@@ -4,6 +4,8 @@ import ComponentForm from '@/components/admin/ComponentForm';
 
 const prisma = new PrismaClient();
 
+import { normalizeComponent } from '@/lib/normalization';
+
 export default async function EditComponentPage({ params }: { params: { id: string } }) {
     const component = await prisma.component.findUnique({
         where: { id: params.id },
@@ -13,12 +15,7 @@ export default async function EditComponentPage({ params }: { params: { id: stri
         return <div>Component not found</div>;
     }
 
-    // Parse JSON fields for the form
-    const parsedComponent = {
-        ...component,
-        interfaces: JSON.parse(component.interfaces as string),
-        attributes: JSON.parse(component.attributes as string),
-    };
+    const normalizedComponent = normalizeComponent(component);
 
-    return <ComponentForm initialData={parsedComponent} />;
+    return <ComponentForm initialData={normalizedComponent} />;
 }

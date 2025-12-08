@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { validateDrivetrain, Component } from '@/lib/validation';
+import { Validator } from '@/lib/validation';
+import { Component } from '@/lib/types/compatibility';
 
 export async function POST(request: Request) {
     try {
@@ -10,7 +11,17 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Shifter, Derailleur, and Cassette are required' }, { status: 400 });
         }
 
-        const result = validateDrivetrain(shifter as Component, derailleur as Component, cassette as Component, crank as Component);
+        const buildData = {
+            shifter,
+            rearDerailleur: derailleur,
+            cassette,
+            crankset: crank,
+            frame: undefined, // Need to make sure required fields are optional in Validator inputs or handle partials
+            wheels: [],
+            tires: []
+        };
+
+        const result = Validator.validateBuild(buildData);
         return NextResponse.json(result);
     } catch (error) {
         return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });

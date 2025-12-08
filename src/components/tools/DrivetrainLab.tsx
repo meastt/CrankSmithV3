@@ -287,21 +287,36 @@ export const DrivetrainLab = () => {
 
         // Priority 2: Active Build in Store
         if (parts.Crankset && parts.Cassette) {
+            // Helper to cast to Component type which has specs
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const crank = parts.Crankset as any;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const cassette = parts.Cassette as any;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const tire = parts.TireRear as any;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const wheel = parts.WheelRear as any;
+
             // Parse Chainrings
             let chainrings: number[] = [];
-            const teethStr = String(parts.Crankset.attributes?.teeth || '').replace(/[^0-9,/]/g, '').replace('/', ',');
-            if (teethStr) {
-                chainrings = teethStr.split(',').map(n => parseInt(n)).filter(n => !isNaN(n));
+            // Use specs.chainrings if available (normalized), otherwise fall back to parsing attributes
+            if (crank.specs?.chainrings && crank.specs.chainrings.length > 0) {
+                chainrings = crank.specs.chainrings;
+            } else {
+                const teethStr = String(crank.attributes?.teeth || '').replace(/[^0-9,/]/g, '').replace('/', ',');
+                if (teethStr) {
+                    chainrings = teethStr.split(',').map(n => parseInt(n)).filter(n => !isNaN(n));
+                }
             }
 
             // Parse Cassette
-            const cassetteRange = String(parts.Cassette.attributes?.range || '11-28');
+            const cassetteRange = cassette.specs?.range || String(cassette.attributes?.range || '11-28');
 
             // Parse Tire
-            const tireSize = parts.TireRear ? parseInt(String((parts.TireRear as any).attributes?.width || '28')) : 28;
+            const tireSize = tire ? parseInt(String(tire.specs?.width || tire.attributes?.width || '28')) : 28;
 
             // Parse Wheel
-            const wheelSize = parts.WheelRear ? (String((parts.WheelRear as any).interfaces?.diameter) === '650b' ? 584 : 622) : 622;
+            const wheelSize = wheel ? (String(wheel.specs?.diameter || wheel.interfaces?.diameter || '700c').includes('650') ? 584 : 622) : 622;
 
             if (chainrings.length > 0) {
                 setSetupA({

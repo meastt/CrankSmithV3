@@ -2,7 +2,7 @@
  * Utilities for finding upgrade options and calculating cost per gram
  */
 
-import type { Component } from '@/lib/validation';
+import type { Component } from '@/lib/types/compatibility';
 import type { WeightComponent, ComponentCategory, Upgrade } from '@/types/weight';
 import { TYPE_TO_CATEGORY_MAP } from './weightConversion';
 

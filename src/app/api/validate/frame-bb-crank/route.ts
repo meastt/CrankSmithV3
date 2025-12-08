@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { validateFrameBBCrank, Component } from '@/lib/validation';
+import { Validator } from '@/lib/validation';
+import { Component } from '@/lib/types/compatibility';
 
 export async function POST(request: Request) {
     try {
@@ -10,7 +11,16 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Frame, BB, and Crank are required' }, { status: 400 });
         }
 
-        const result = validateFrameBBCrank(frame as Component, bb as Component, crank as Component);
+        const buildData = {
+            frame,
+            bottomBracket: bb,
+            crankset: crank,
+            wheels: [],
+            tires: []
+        };
+
+        const result = Validator.validateBuild(buildData);
+        // Return new format
         return NextResponse.json(result);
     } catch (error) {
         return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });

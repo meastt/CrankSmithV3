@@ -2,7 +2,7 @@
  * Utilities to convert between Builder components and Weight Weenies types
  */
 
-import type { Component } from '@/lib/validation';
+import type { Component } from '@/lib/types/compatibility';
 import type { BaselineBuild, WeightComponent, ComponentCategory } from '@/types/weight';
 import { ROTATING_WEIGHT_CATEGORIES } from '@/types/weight';
 

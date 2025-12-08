@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Component } from '@/lib/validation';
+import { Component } from '@/lib/types/compatibility';
 import { Plus, Trash2, Edit, Search } from 'lucide-react';
 import Link from 'next/link';
 

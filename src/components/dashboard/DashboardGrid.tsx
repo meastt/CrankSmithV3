@@ -10,32 +10,6 @@ import { haptic } from '@/lib/haptics';
 
 const tools = [
     {
-        id: 'gear-metrics',
-        title: 'Gear Metrics',
-        subtitle: 'The Drivetrain Lab',
-        description: 'Analyze ratios, speed, and climbing capability. The ultimate reality check for your drivetrain.',
-        icon: Activity,
-        href: '/performance',
-        gradient: 'from-cyan-500/20 to-blue-500/20',
-        border: 'group-hover:border-cyan-500/50',
-        text: 'group-hover:text-cyan-400',
-        iconColor: 'text-cyan-400',
-        delay: 0.1
-    },
-    {
-        id: 'weight-weenies',
-        title: 'Weight Weenies',
-        subtitle: 'The Scale',
-        description: 'Gamify your gram obsession. Calculate cost-per-gram saved and simulate upgrades.',
-        icon: Scale,
-        href: '/weight',
-        gradient: 'from-emerald-500/20 to-lime-500/20',
-        border: 'group-hover:border-emerald-500/50',
-        text: 'group-hover:text-emerald-400',
-        iconColor: 'text-emerald-400',
-        delay: 0.2
-    },
-    {
         id: 'builder',
         title: 'The Workshop',
         subtitle: 'Start a New Build',
@@ -46,7 +20,20 @@ const tools = [
         border: 'group-hover:border-amber-500/50',
         text: 'group-hover:text-amber-400',
         iconColor: 'text-amber-400',
-        delay: 0.3
+        delay: 0.1
+    },
+    {
+        id: 'gear-metrics',
+        title: 'Gear Metrics',
+        subtitle: 'The Drivetrain Lab',
+        description: 'Analyze ratios, speed, and climbing capability. The ultimate reality check for your drivetrain.',
+        icon: Activity,
+        href: '/performance',
+        gradient: 'from-cyan-500/20 to-blue-500/20',
+        border: 'group-hover:border-cyan-500/50',
+        text: 'group-hover:text-cyan-400',
+        iconColor: 'text-cyan-400',
+        delay: 0.2
     },
     {
         id: 'tire-pressure',
@@ -59,6 +46,19 @@ const tools = [
         border: 'group-hover:border-rose-500/50',
         text: 'group-hover:text-rose-400',
         iconColor: 'text-rose-400',
+        delay: 0.3
+    },
+    {
+        id: 'weight-weenies',
+        title: 'Weight Weenies',
+        subtitle: 'The Scale',
+        description: 'Gamify your gram obsession. Calculate cost-per-gram saved and simulate upgrades.',
+        icon: Scale,
+        href: '/weight',
+        gradient: 'from-emerald-500/20 to-lime-500/20',
+        border: 'group-hover:border-emerald-500/50',
+        text: 'group-hover:text-emerald-400',
+        iconColor: 'text-emerald-400',
         delay: 0.4
     }
 ];
@@ -68,7 +68,7 @@ export const DashboardGrid = () => {
     const { isLoaded, isSignedIn } = useUser();
     const router = useRouter();
     return (
-        <section className="min-h-screen flex flex-col justify-center py-20 px-4 relative overflow-hidden bg-stone-950">
+        <section className="min-h-screen flex flex-col justify-center py-12 px-4 relative overflow-hidden bg-stone-950">
             {/* Background Elements */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-stone-900 via-stone-950 to-stone-950 -z-10" />
 
@@ -85,24 +85,20 @@ export const DashboardGrid = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-center mb-16"
+                    className="text-center mb-10"
                 >
-                    <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
+                    <h1 className="text-4xl md:text-6xl font-bold text-white mb-2 tracking-tight">
                         Crank<span className="text-cyan-400">Smith</span>
                     </h1>
-                    <p className="text-stone-400 text-lg max-w-2xl mx-auto mb-12">
-                        The ultimate toolbox for the modern cyclist. Optimize your build with our professional bicycle compatibility checker, gear ratio calculator, and weight analysis tools.
-                    </p>
-
-                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-wide">
+                    <h2 className="text-xl md:text-2xl font-medium text-stone-300 mb-4 tracking-wide">
                         <span className="text-cyan-400">Forge</span> The Perfect Ride
                     </h2>
-                    <p className="text-stone-500 text-base max-w-3xl mx-auto leading-relaxed">
-                        Whether you're dialing in tire pressure for gravel, calculating gear inches for a mullet drivetrain, or shaving grams for a hill climb, CrankSmith provides the precision engineering data you need to build with confidence.
+                    <p className="text-stone-400 text-base max-w-2xl mx-auto leading-relaxed">
+                        The ultimate toolbox for the modern cyclist. Optimize your build with our professional compatibility checker, gear ratio calculator, and weight analysis tools.
                     </p>
                 </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-3 md:gap-6">
                     {tools.map((tool) => (
                         <Link
                             key={tool.id}
@@ -115,7 +111,7 @@ export const DashboardGrid = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: tool.delay }}
                                 className={`
-                                h-full p-8 rounded-3xl bg-stone-900/40 backdrop-blur-md border border-white/5
+                                h-full p-4 md:p-8 rounded-3xl bg-stone-900/40 backdrop-blur-md border border-white/5
                                 transition-all duration-500 ease-out
                                 ${tool.border} hover:bg-stone-900/60 hover:scale-[1.02] hover:shadow-2xl
                             `}
@@ -127,27 +123,27 @@ export const DashboardGrid = () => {
                             `} />
 
                                 <div className="relative z-10 flex flex-col h-full">
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div className={`p-4 rounded-2xl bg-white/5 border border-white/10 ${tool.iconColor} group-hover:bg-white/10 transition-colors`}>
-                                            <tool.icon className="w-8 h-8" />
+                                    <div className="flex justify-between items-start mb-4 md:mb-6">
+                                        <div className={`p-3 md:p-4 rounded-2xl bg-white/5 border border-white/10 ${tool.iconColor} group-hover:bg-white/10 transition-colors`}>
+                                            <tool.icon className="w-6 h-6 md:w-8 md:h-8" />
                                         </div>
                                         <div className={`
                                         p-2 rounded-full border border-white/5 text-stone-500
                                         group-hover:border-white/20 group-hover:text-white transition-all
-                                        group-hover:translate-x-1
+                                        group-hover:translate-x-1 hidden sm:block
                                     `}>
-                                            <ArrowRight className="w-5 h-5" />
+                                            <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
                                         </div>
                                     </div>
 
                                     <div className="mt-auto">
-                                        <h3 className="text-sm font-mono font-medium text-stone-400 mb-2 uppercase tracking-wider">
+                                        <h3 className="text-xs md:text-sm font-mono font-medium text-stone-400 mb-1 md:mb-2 uppercase tracking-wider truncate">
                                             {tool.subtitle}
                                         </h3>
-                                        <h2 className={`text-3xl font-bold text-white mb-3 ${tool.text} transition-colors`}>
+                                        <h2 className={`text-xl md:text-3xl font-bold text-white mb-2 md:mb-3 ${tool.text} transition-colors tracking-tight truncate`}>
                                             {tool.title}
                                         </h2>
-                                        <p className="text-stone-300 leading-relaxed group-hover:text-stone-200 transition-colors">
+                                        <p className="text-stone-300 text-xs md:text-base leading-relaxed group-hover:text-stone-200 transition-colors line-clamp-2 md:line-clamp-none">
                                             {tool.description}
                                         </p>
                                     </div>

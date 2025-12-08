@@ -29,11 +29,18 @@ export function BaselineDisplay({ build, onStartUpgrading, onQuickWins }: Baseli
 
                     {/* Weight number */}
                     <div className="relative bg-stone-900/50 border-2 border-emerald-500/30 rounded-3xl px-12 py-8">
-                        <div className="text-7xl md:text-9xl font-mono font-bold text-emerald-500 tracking-tight">
-                            {formatWeight(build.total_weight)}
+                        <div className="text-6xl md:text-8xl font-mono font-bold text-emerald-500 tracking-tight flex items-baseline justify-center gap-4">
+                            <span>
+                                {formatWeightImperial(build.total_weight).lbs}
+                                <span className="text-2xl md:text-4xl ml-2 text-emerald-500/60">lbs</span>
+                            </span>
+                            <span>
+                                {formatWeightImperial(build.total_weight).oz}
+                                <span className="text-2xl md:text-4xl ml-2 text-emerald-500/60">oz</span>
+                            </span>
                         </div>
-                        <div className="text-xl md:text-2xl font-mono text-emerald-500/60 mt-2">
-                            grams
+                        <div className="text-sm md:text-base font-mono text-emerald-500/40 mt-2">
+                            ({formatWeight(build.total_weight)} g)
                         </div>
                     </div>
                 </div>
@@ -122,7 +129,8 @@ export function BaselineDisplay({ build, onStartUpgrading, onQuickWins }: Baseli
             <div className="mt-6 pt-6 border-t border-white/10 flex justify-between items-center">
                 <span className="text-stone-400 font-medium">Total Weight</span>
                 <span className="text-2xl font-mono font-bold text-emerald-500">
-                    {formatWeight(build.total_weight)}g
+                    {formatWeightImperial(build.total_weight).lbs} lbs {formatWeightImperial(build.total_weight).oz} oz
+                    <span className="text-base text-emerald-500/50 ml-2">({formatWeight(build.total_weight)}g)</span>
                 </span>
             </div>
         </div>
@@ -168,6 +176,13 @@ function CategoryRow({ category, index }: { category: CategoryBreakdown; index: 
 // Helper functions
 function formatWeight(grams: number): string {
     return grams.toLocaleString();
+}
+
+function formatWeightImperial(grams: number): { lbs: number; oz: number } {
+    const totalOz = grams * 0.035274;
+    const lbs = Math.floor(totalOz / 16);
+    const oz = Math.round(totalOz % 16);
+    return { lbs, oz };
 }
 
 function getCategoryBreakdowns(build: BaselineBuild): CategoryBreakdown[] {

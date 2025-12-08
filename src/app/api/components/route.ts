@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { Component } from '@/lib/types/compatibility';
+import { normalizeComponent } from '@/lib/normalization';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
@@ -12,12 +14,8 @@ export async function GET(request: Request) {
             where: type ? { type } : undefined,
         });
 
-        // Parse JSON strings back to objects
-        const parsedComponents = components.map(c => ({
-            ...c,
-            interfaces: JSON.parse(c.interfaces as string),
-            attributes: c.attributes ? JSON.parse(c.attributes as string) : {},
-        }));
+        // Parse JSON and map to new structure
+        const parsedComponents: Component[] = components.map(c => normalizeComponent(c));
 
         return NextResponse.json(parsedComponents);
     } catch (error) {
