@@ -97,7 +97,7 @@ async function main() {
     } else {
         result.issues.forEach(issue => {
             const emoji = issue.severity === 'ERROR' ? '❌' : issue.severity === 'WARNING' ? '⚠️' : 'ℹ️';
-            console.log(`  ${emoji} [${issue.severity}] ${issue.category}: ${issue.message}`);
+            console.log(`  ${emoji} [${issue.severity}] ${issue.message}`);
         });
     }
 
