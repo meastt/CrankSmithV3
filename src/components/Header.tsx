@@ -111,11 +111,11 @@ export function Header() {
                                     />
                                 </SignedIn>
                                 <SignedOut>
-                                    <SignInButton mode="modal">
+                                    <Link href="/sign-in">
                                         <button className="btn-primary px-5 py-2 text-white rounded-lg font-medium text-sm">
                                             Sign In
                                         </button>
-                                    </SignInButton>
+                                    </Link>
                                 </SignedOut>
                             </div>
                         </nav>
@@ -132,15 +132,13 @@ export function Header() {
                                 />
                             </SignedIn>
                             <SignedOut>
-                                <button
-                                    onClick={() => {
-                                        setIsMenuOpen(false);
-                                        openSignIn();
-                                    }}
-                                    className="btn-primary px-4 py-1.5 text-white rounded-lg font-medium text-xs"
+                                <Link
+                                    href="/sign-in"
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="btn-primary px-4 py-1.5 text-white rounded-lg font-medium text-xs flex items-center justify-center"
                                 >
                                     Sign In
-                                </button>
+                                </Link>
                             </SignedOut>
                             <button
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -228,14 +226,13 @@ export function Header() {
                                 className="mt-auto pb-12"
                             >
                                 <SignedOut>
-                                    <SignInButton mode="modal">
+                                    <Link href="/sign-in" onClick={() => setIsMenuOpen(false)}>
                                         <button
-                                            onClick={() => setIsMenuOpen(false)}
                                             className="w-full btn-primary py-4 text-white rounded-xl font-semibold text-lg"
                                         >
                                             Sign In
                                         </button>
-                                    </SignInButton>
+                                    </Link>
                                 </SignedOut>
 
                                 <p className="text-center text-stone-600 text-sm mt-6">
