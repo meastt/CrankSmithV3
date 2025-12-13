@@ -87,9 +87,9 @@ export default function WeightPage() {
                     </Link>
                     <div className="flex items-center gap-2">
                         <Scale className="w-5 h-5 text-emerald-500" />
-                        <span className="text-sm font-bold text-emerald-500 uppercase tracking-wider">
+                        <h1 className="text-sm font-bold text-emerald-500 uppercase tracking-wider margin-0">
                             The Scale
-                        </span>
+                        </h1>
                     </div>
                 </div>
             </header>
@@ -111,7 +111,7 @@ export default function WeightPage() {
                 />
             )}
 
-            <main className="px-4 py-12">
+            <div className="px-4 py-12">
                 {viewMode === 'landing' && (
                     <LandingView
                         onImport={handleImportFromBuilder}
@@ -142,7 +142,7 @@ export default function WeightPage() {
                         onBack={() => setViewMode('baseline')}
                     />
                 )}
-            </main>
+            </div>
         </div>
     );
 }

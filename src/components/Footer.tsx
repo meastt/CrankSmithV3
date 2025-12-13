@@ -27,6 +27,10 @@ export function Footer() {
             <p className="text-sm text-stone-600">
               © {new Date().getFullYear()} All rights reserved.
             </p>
+            <div className="mt-2 text-xs text-stone-600 flex flex-col gap-1">
+              <span>St. George, UT</span>
+              <a href="tel:4355550101" className="hover:text-primary transition-colors">435-555-0101</a>
+            </div>
           </div>
 
           {/* Navigation */}

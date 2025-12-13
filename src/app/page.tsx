@@ -1,9 +1,11 @@
+
 import { DashboardGrid } from "@/components/dashboard/DashboardGrid";
 
 export default function Home() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
+    "@id": "https://cranksmith.com/#app",
     "name": "CrankSmith",
     "applicationCategory": "DesignApplication",
     "operatingSystem": "Web",
@@ -18,6 +20,11 @@ export default function Home() {
       "ratingValue": "4.8",
       "ratingCount": "127"
     },
+    "sameAs": [
+      "https://www.instagram.com/cranksmith",
+      "https://twitter.com/cranksmith",
+      "https://github.com/cranksmith"
+    ],
     "featureList": [
       "Bicycle part compatibility validation",
       "Real-time gear ratio calculations",
@@ -31,7 +38,13 @@ export default function Home() {
     "url": "https://cranksmith.com",
     "author": {
       "@type": "Organization",
-      "name": "CrankSmith Team"
+      "@id": "https://cranksmith.com/#identity",
+      "name": "CrankSmith Team",
+      "url": "https://cranksmith.com",
+      "sameAs": [
+        "https://www.instagram.com/cranksmith",
+        "https://twitter.com/cranksmith"
+      ]
     }
   };
 
@@ -41,9 +54,9 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
-      <main className="min-h-screen bg-stone-950 relative">
+      <div className="min-h-screen bg-stone-950 relative">
         <DashboardGrid />
-      </main>
+      </div>
     </>
   );
 }

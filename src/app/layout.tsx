@@ -29,7 +29,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "CrankSmith | The Ultimate Bicycle Builder & Compatibility Tool",
+  title: "Bike Builder & Parts Compatibility | CrankSmith",
   description: "Build your dream bike with confidence. Check part compatibility, calculate gear ratios, optimize tire pressure, and estimate weight. The precision tool for serious cyclists.",
   keywords: ["bike compatibility checker", "bicycle gear ratio calculator", "bike builder tool", "bike weight calculator", "drivetrain compatibility", "tire pressure calculator", "cycling tool", "bike part compatibility"],
   authors: [{ name: "CrankSmith Team" }],
@@ -68,9 +68,9 @@ export default function RootLayout({
           <ServiceWorkerRegister />
           <OfflineIndicator />
           <Header />
-          <div className="flex-grow">
+          <main className="flex-grow">
             {children}
-          </div>
+          </main>
           <Footer />
         </Providers>
         <Script
