@@ -2,6 +2,14 @@
 
 _Date: March 26, 2026_
 
+> **Status update (repo checkpoint): April 2026**
+>
+> This document now includes a progress snapshot based on implemented web-app code.
+> Legend:
+> - ✅ Completed in current codebase
+> - 🟡 Partially implemented / beta
+> - ⏳ Not implemented yet
+
 Scope: **Web app only** (excluding iOS/Android app wrappers). This report audits the four core tools:
 1. **Workshop** (`/builder`)
 2. **Gearing** (`/performance` / Drivetrain Lab)
@@ -305,20 +313,37 @@ These are the highest leverage improvements because they connect all four tools 
 ## Prioritized Implementation Roadmap
 
 ### Phase 1 (2–4 weeks): Trust and correctness
-- Fix position-aware tire/wheel validation logic in Workshop.
-- Remove hardcoded top-speed assumptions in Gearing quick stats.
-- Add clear model caveats + confidence labels in Gearing and Tire Pressure.
-- Replace TODO placeholder outputs in build complete/share summaries.
+- ✅ Fix position-aware tire/wheel validation logic in Workshop.
+- ✅ Remove hardcoded top-speed assumptions in Gearing quick stats.
+- ✅ Add clear model caveats + confidence labels in Gearing and Tire Pressure.
+- ✅ Replace TODO placeholder outputs in build complete/share summaries.
 
 ### Phase 2 (4–8 weeks): Better decision quality
-- Add cassette libraries and discipline-specific pressure guardrails.
-- Add budget optimizer in The Scale.
-- Introduce cross-tool data propagation from current build to pressure/gearing defaults.
+- 🟡 Add cassette libraries and discipline-specific pressure guardrails.
+  - Status: synthetic fallback warning + known cassette set implemented; library depth can still expand.
+  - Status: discipline pressure bounds/warnings implemented; event-pressure presets added.
+- ✅ Add budget optimizer in The Scale.
+- ✅ Introduce cross-tool data propagation from current build to pressure/gearing defaults.
 
 ### Phase 3 (8–16 weeks): Product moat
-- Unified what-if engine across all 4 tools.
-- Course-aware/event-aware recommendations.
-- Verified weight and setup feedback loops to improve prediction accuracy over time.
+- 🟡 Unified what-if engine across all 4 tools.
+  - Status: shared what-if hooks exist in Builder, Drivetrain Lab, Tire Pressure, and Quick Wins.
+  - Remaining: fully unified single-source model and deeper consequence propagation.
+- 🟡 Course-aware/event-aware recommendations.
+  - Status: course-aware advisor exists (beta) in Gearing; event pressure sets added in Tire Pressure.
+  - Remaining: GPX/course depth, recommendation confidence, and production hardening.
+- 🟡 Verified weight and setup feedback loops to improve prediction accuracy over time.
+  - Status: ride-feedback capture + verification flow exists in Tire Pressure.
+  - Remaining: broader cross-tool verification and persistence pipeline.
+
+### Additional completed items beyond original phase bullets
+- ✅ The Scale scenario lifecycle foundation:
+  - Save/load/delete/export scenarios
+  - Scenario compare panel
+  - Scenario mode tagging/filtering (race/training/all-weather/custom)
+- ✅ Baseline reconciliation panel in The Scale (missing categories, estimated missing weight, confidence).
+- ✅ Manual-verification warnings surfaced in Builder UI and validator.
+- ✅ Quick Wins smart value scoring + budget-tier sequence planner.
 
 ---
 
