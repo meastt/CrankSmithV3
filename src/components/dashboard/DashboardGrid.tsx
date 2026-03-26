@@ -17,7 +17,7 @@ const tools = [
         subtitle: 'Start a New Build',
         description: 'The core builder. Validate compatibility across thousands of parts and standards.',
         href: '/builder?new=true',
-        image: '/images/guide-bb-t47-main.jpg',
+        image: '/images/workshop.webp',
         gradient: 'from-amber-500/20 to-orange-500/20',
         border: 'group-hover:border-amber-500/50',
         text: 'group-hover:text-amber-400',
@@ -29,7 +29,7 @@ const tools = [
         subtitle: 'The Drivetrain Lab',
         description: 'Analyze ratios, speed, and climbing capability. The ultimate reality check for your drivetrain.',
         href: '/performance',
-        image: '/images/guide-gearing-range.jpg',
+        image: '/images/gears.webp',
         gradient: 'from-cyan-500/20 to-blue-500/20',
         border: 'group-hover:border-cyan-500/50',
         text: 'group-hover:text-cyan-400',
@@ -41,7 +41,7 @@ const tools = [
         subtitle: 'The Contact Patch',
         description: 'Optimize for speed or grip. Advanced calculations for rim width and casing suppleness.',
         href: '/tire-pressure',
-        image: '/images/guide-gravel-mullet-main.jpg',
+        image: '/images/tirepressure.webp',
         gradient: 'from-rose-500/20 to-pink-500/20',
         border: 'group-hover:border-rose-500/50',
         text: 'group-hover:text-rose-400',
@@ -53,7 +53,7 @@ const tools = [
         subtitle: 'The Scale',
         description: 'Gamify your gram obsession. Calculate cost-per-gram saved and simulate upgrades.',
         href: '/weight',
-        image: '/images/guide-bb-spindle-comparison.jpg',
+        image: '/images/scale.webp',
         gradient: 'from-emerald-500/20 to-lime-500/20',
         border: 'group-hover:border-emerald-500/50',
         text: 'group-hover:text-emerald-400',
@@ -177,7 +177,7 @@ export const DashboardGrid = () => {
                         <div className="relative z-10 flex flex-col items-center text-center gap-4">
                             <div className="relative w-full max-w-lg aspect-[16/9] rounded-2xl overflow-hidden border border-white/10 mb-2">
                                 <Image
-                                    src="/images/schematic-hub.webp"
+                                    src="/images/garage.webp"
                                     alt="Garage tool preview"
                                     fill
                                     className="object-cover group-hover:scale-105 transition-transform duration-500"
