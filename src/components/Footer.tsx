@@ -27,6 +27,17 @@ export function Footer() {
             <p className="text-sm text-stone-600">
               © {new Date().getFullYear()} All rights reserved.
             </p>
+            <p className="text-xs text-stone-600">
+              Made by{" "}
+              <a
+                href="https://techridgeseo.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:text-cyan-300 transition-colors"
+              >
+                Tech Ridge SEO
+              </a>
+            </p>
             <div className="mt-2 text-xs text-stone-600 flex flex-col gap-1">
               <span>St. George, UT</span>
               <a href="tel:4355550101" className="hover:text-primary transition-colors">435-555-0101</a>
