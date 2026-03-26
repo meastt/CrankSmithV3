@@ -16,6 +16,7 @@ import {
 import { Component } from '@/lib/types/compatibility';
 import html2canvas from 'html2canvas';
 import { toSpeed, speedUnit, toWeight, weightUnit } from '@/lib/unitConversions';
+import { trackEvent } from '@/lib/analytics';
 
 interface ShareCardProps {
     frameName: string;
@@ -56,7 +57,18 @@ export const ShareCard: React.FC<ShareCardProps> = ({
 
     // Generate shareable URL
     const getShareUrl = () => {
-        return typeof window !== 'undefined' ? window.location.origin + '/builder' : '';
+        if (typeof window === 'undefined') return '';
+
+        const payload = {
+            frameName,
+            totalWeight,
+            climbingScore,
+            speedRange,
+            parts: activeParts.slice(0, 8).map(([type, part]) => ({ type, name: part.name })),
+        };
+
+        const encoded = encodeURIComponent(btoa(JSON.stringify(payload)));
+        return `${window.location.origin}/share?build=${encoded}`;
     };
 
     // Download card as image
@@ -103,6 +115,7 @@ export const ShareCard: React.FC<ShareCardProps> = ({
             link.download = `${frameName.replace(/\s+/g, '-').toLowerCase()}-build.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
+            trackEvent('build_share_image_download', { frame_name: frameName });
         } catch (err) {
             console.error('Failed to download:', err);
         } finally {
@@ -116,6 +129,7 @@ export const ShareCard: React.FC<ShareCardProps> = ({
             await navigator.clipboard.writeText(getShareUrl());
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
+            trackEvent('build_share_link_copy', { frame_name: frameName });
         } catch (err) {
             console.error('Failed to copy:', err);
         }
@@ -126,11 +140,13 @@ export const ShareCard: React.FC<ShareCardProps> = ({
         const text = `Check out my ${frameName} build on CrankSmith! ${weightDisplay}${weightLabel}.`;
         const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(getShareUrl())}`;
         window.open(url, '_blank');
+        trackEvent('build_share_social', { network: 'x', frame_name: frameName });
     };
 
     const shareToFacebook = () => {
         const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}`;
         window.open(url, '_blank');
+        trackEvent('build_share_social', { network: 'facebook', frame_name: frameName });
     };
 
 
@@ -143,6 +159,7 @@ export const ShareCard: React.FC<ShareCardProps> = ({
                     text: `Check out my ${frameName} build on CrankSmith!`,
                     url: getShareUrl(),
                 });
+                trackEvent('build_share_native', { frame_name: frameName });
             } catch (err) {
                 console.error('Share failed:', err);
             }
@@ -150,48 +167,49 @@ export const ShareCard: React.FC<ShareCardProps> = ({
     };
 
     const CardContent = (
-        <div className="overflow-hidden rounded-xl border border-white/10 bg-stone-950 shadow-2xl relative group">
+        <div className="overflow-hidden rounded-2xl border border-[#1A2338] bg-[#070D1C] shadow-[0_24px_64px_rgba(0,0,0,0.55)] relative group">
             {/* Capture Area - The "Receipt" */}
             <div
                 ref={cardRef}
-                className="p-8 bg-stone-950 text-white relative overflow-hidden min-w-[350px]"
+                className="p-8 bg-[#070D1C] text-white relative overflow-hidden min-w-[350px]"
                 style={{ fontFamily: 'monospace' }}
             >
                 {/* Background Accents */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-72 h-72 bg-cyan-400/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-72 h-72 bg-blue-600/15 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(34,211,238,0.08),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(59,130,246,0.08),transparent_45%)] pointer-events-none" />
 
                 {/* Header */}
-                <div className="border-b-2 border-dashed border-white/20 pb-6 mb-6 text-center relative z-10">
+                <div className="border-b border-[#1C2942] pb-6 mb-6 text-center relative z-10">
                     <div className="flex justify-center mb-3">
-                        <div className="w-10 h-10 bg-white text-stone-950 rounded-full flex items-center justify-center">
-                            <Bike className="w-6 h-6" />
+                        <div className="w-10 h-10 bg-cyan-500/20 text-cyan-300 rounded-lg border border-cyan-400/40 flex items-center justify-center">
+                            <Bike className="w-5 h-5" />
                         </div>
                     </div>
-                    <h2 className="text-xl font-bold uppercase tracking-widest mb-1">CrankSmith</h2>
-                    <p className="text-stone-500 text-[10px] uppercase tracking-[0.2em]">Build Manifest</p>
+                    <h2 className="text-xl font-bold uppercase tracking-widest mb-1 text-slate-100">CrankSmith</h2>
+                    <p className="text-slate-500 text-[10px] uppercase tracking-[0.2em]">Build Manifest</p>
                 </div>
 
                 {/* Build Name */}
                 <div className="mb-6 text-center relative z-10">
-                    <h1 className="text-lg font-bold text-blue-400 mb-1">{frameName}</h1>
-                    <div className="text-[10px] text-stone-500 uppercase tracking-wider">
+                    <h1 className="text-lg font-bold text-cyan-300 mb-1">{frameName}</h1>
+                    <div className="text-[10px] text-slate-500 uppercase tracking-wider">
                         {new Date().toLocaleDateString()}
                     </div>
                 </div>
 
                 {/* Performance Specs */}
-                <div className="grid grid-cols-2 gap-4 mb-6 relative z-10 border-b-2 border-dashed border-white/20 pb-6">
+                <div className="grid grid-cols-2 gap-4 mb-6 relative z-10 border-b border-[#1C2942] pb-6">
                     <div className="text-center">
-                        <p className="text-[10px] text-stone-500 uppercase tracking-wider mb-1">Climbing Score</p>
-                        <p className={`text-xl font-bold ${climbingScore >= 80 ? 'text-emerald-400' : 'text-white'}`}>
-                            {climbingScore.toFixed(0)}<span className="text-xs text-stone-500 font-normal">/100</span>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Climbing Score</p>
+                        <p className={`text-xl font-bold ${climbingScore >= 80 ? 'text-emerald-400' : 'text-slate-100'}`}>
+                            {climbingScore.toFixed(0)}<span className="text-xs text-slate-500 font-normal">/100</span>
                         </p>
                     </div>
                     <div className="text-center">
-                        <p className="text-[10px] text-stone-500 uppercase tracking-wider mb-1">Speed Range</p>
-                        <p className="text-xl font-bold text-white">
-                            {speedMax}<span className="text-xs text-stone-500 font-normal">{speedLabel}</span>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Speed Range</p>
+                        <p className="text-xl font-bold text-slate-100">
+                            {speedMax}<span className="text-xs text-slate-500 font-normal">{speedLabel}</span>
                         </p>
                     </div>
                 </div>
@@ -200,9 +218,9 @@ export const ShareCard: React.FC<ShareCardProps> = ({
                 <div className="space-y-2 mb-8 relative z-10">
                     {activeParts.map(([type, part]) => (
                         <div key={type} className="flex justify-between items-baseline text-xs">
-                            <span className="text-stone-500 uppercase w-20 shrink-0">{type}</span>
-                            <span className="text-stone-300 truncate text-right flex-1 mx-2">{(part as any).name}</span>
-                            <span className="text-stone-500 font-mono shrink-0 w-10 text-right">
+                            <span className="text-slate-500 uppercase w-20 shrink-0">{type}</span>
+                            <span className="text-slate-300 truncate text-right flex-1 mx-2">{(part as any).name}</span>
+                            <span className="text-slate-500 font-mono shrink-0 w-10 text-right">
                                 {(part as any).attributes?.weight_g ? `${(part as any).attributes.weight_g}` : '-'}
                             </span>
                         </div>
@@ -210,19 +228,19 @@ export const ShareCard: React.FC<ShareCardProps> = ({
                 </div>
 
                 {/* Totals */}
-                <div className="border-t-2 border-dashed border-white/20 pt-6 relative z-10">
+                <div className="border-t border-[#1C2942] pt-6 relative z-10">
                     <div className="flex justify-between items-end">
                         <div>
-                            <p className="text-stone-500 text-[10px] uppercase tracking-wider mb-1">Total Weight</p>
-                            <p className="text-3xl font-bold text-white">
-                                {weightDisplay}<span className="text-lg text-stone-500 font-normal">{weightLabel}</span>
+                            <p className="text-slate-500 text-[10px] uppercase tracking-wider mb-1">Total Weight</p>
+                            <p className="text-3xl font-bold text-slate-100">
+                                {weightDisplay}<span className="text-lg text-slate-500 font-normal">{weightLabel}</span>
                             </p>
                         </div>
                         <div className="text-right">
-                            <div className="w-12 h-12 border border-white/20 rounded flex items-center justify-center bg-white/5">
+                            <div className="w-12 h-12 border border-cyan-400/30 rounded-lg flex items-center justify-center bg-cyan-500/10">
                                 <div className="text-center">
-                                    <span className="block text-[8px] text-stone-500 uppercase">Grade</span>
-                                    <span className="block text-lg font-bold text-blue-400">A+</span>
+                                    <span className="block text-[8px] text-slate-500 uppercase">Grade</span>
+                                    <span className="block text-lg font-bold text-cyan-300">A+</span>
                                 </div>
                             </div>
                         </div>
@@ -230,8 +248,8 @@ export const ShareCard: React.FC<ShareCardProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="mt-8 pt-4 border-t border-white/5 text-center relative z-10">
-                    <p className="text-[8px] text-stone-600 uppercase tracking-widest">Generated by CrankSmith.com</p>
+                <div className="mt-8 pt-4 border-t border-[#111A2D] text-center relative z-10">
+                    <p className="text-[8px] text-slate-600 uppercase tracking-widest">Generated by CrankSmith.com</p>
                 </div>
             </div>
         </div>

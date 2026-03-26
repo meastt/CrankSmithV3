@@ -19,7 +19,7 @@ const guides = [
         title: "Gravel Drivetrain & Groupset Configurations", // Updated title
         excerpt: "Technical analysis of 1x vs 2x systems, Mullet drivetrain compatibility (SRAM/Shimano), and gear range optimization.", // Updated excerpt
         category: "Drivetrain",
-        date: "2025-12-04",
+        date: "2026-02-14",
         image: "/images/guide-gravel-mullet-main.jpg" // Added image
     },
     {
@@ -27,7 +27,7 @@ const guides = [
         title: "Bottom Bracket Shells & Bearing Standards", // Updated title
         excerpt: "Comprehensive specification guide for BSA, PF30, T47, and DUB. Shell dimensions, bearing fitment, and creak elimination.", // Updated excerpt
         category: "Standards",
-        date: "2025-12-02",
+        date: "2026-02-10",
         image: "/images/guide-bb-t47-main.jpg" // Added image
     },
     {
@@ -35,7 +35,7 @@ const guides = [
         title: "Disc Brake Mounting Systems & Compatibility", // Updated title
         excerpt: "Standardization of Flat Mount, Post Mount, and IS. Rotor size adaptation logic and caliper compatibility matrices.", // Updated excerpt
         category: "Braking",
-        date: "2025-11-28",
+        date: "2026-02-06",
         image: "/images/guide-brake-mount-main.jpg" // Added image
     },
 ];

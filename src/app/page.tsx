@@ -15,14 +15,9 @@ export default function Home() {
       "price": "0",
       "priceCurrency": "USD"
     },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "ratingCount": "127"
-    },
     "sameAs": [
-      "https://www.instagram.com/cranksmith",
-      "https://twitter.com/cranksmith",
+      "https://www.instagram.com/cranksmithapp",
+      "https://x.com/cranksmithapp",
       "https://github.com/cranksmith"
     ],
     "featureList": [
@@ -42,8 +37,8 @@ export default function Home() {
       "name": "CrankSmith Team",
       "url": "https://cranksmith.com",
       "sameAs": [
-        "https://www.instagram.com/cranksmith",
-        "https://twitter.com/cranksmith"
+        "https://www.instagram.com/cranksmithapp",
+        "https://x.com/cranksmithapp"
       ]
     }
   };

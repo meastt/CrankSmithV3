@@ -11,7 +11,7 @@ const guideData: Record<string, { title: string; description: string; date: stri
     "gravel-groupsets-explained": {
         title: "Gravel Drivetrain & Groupset Configurations",
         description: "1x vs 2x, Mullet drivetrains, and compatibility logic. A technical breakdown of modern gravel gearing ecosystems (SRAM AXS, Shimano GRX).",
-        date: "2025-12-04",
+        date: "2026-02-14",
         category: "Drivetrain",
         keywords: ["gravel bike gearing", "mullet drivetrain", "sram axs mullet", "shimano grx vs sram axs", "1x vs 2x gravel", "bikepacking gear ratio", "bike ranging", "gravel groupset comparison"],
         image: "/images/guide-gravel-mullet-main.jpg"
@@ -19,7 +19,7 @@ const guideData: Record<string, { title: string; description: string; date: stri
     "bottom-bracket-standards": {
         title: "Bottom Bracket Shells & Bearing Standards",
         description: "Engineering breakdown of BSA, PF30, T47 and DUB standards. Solving compatibility issues, preventing creaks, and choosing the right bearings.",
-        date: "2025-12-02",
+        date: "2026-02-10",
         category: "Standards",
         keywords: ["bottom bracket standards", "T47 vs PF30", "BSA threaded bb", "bike creaking fix", "dub crankset compatibility", "bottom bracket replacement guide", "ceramic vs steel bearings"],
         image: "/images/guide-bb-t47-main.jpg"
@@ -27,7 +27,7 @@ const guideData: Record<string, { title: string; description: string; date: stri
     "brake-mount-standards": {
         title: "Disc Brake Mounting Systems & Compatibility",
         description: "Flat Mount vs Post Mount vs IS. Rotor size compatibility, adapter logic explainer, and how to fit disc brake calipers to any frame.",
-        date: "2025-11-28",
+        date: "2026-02-06",
         category: "Braking",
         keywords: ["flat mount vs post mount", "disc brake adapters", "bicycle brake mounts", "160mm rotor adapter", "IS mount to post mount", "gravel bike brake compatibility", "shimano flat mount"],
         image: "/images/guide-brake-mount-main.jpg"
@@ -94,7 +94,7 @@ export default async function GuidePage({ params }: Props) {
                 <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
                     <article className="container mx-auto max-w-3xl">
                         <div className="mb-12 text-center">
-                            <div className="text-blue-400 text-sm font-mono mb-4 uppercase tracking-wider">Drivetrain • 2025-12-04</div>
+                            <div className="text-blue-400 text-sm font-mono mb-4 uppercase tracking-wider">Drivetrain • 2026-02-14</div>
                             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">Gravel Drivetrain & Groupset Configurations</h1>
                             <p className="text-xl text-stone-400 leading-relaxed max-w-2xl mx-auto">1x simplicity vs 2x cadence. The rise of the Mullet. Here is the engineering logic behind your choices.</p>
                         </div>
@@ -203,7 +203,7 @@ export default async function GuidePage({ params }: Props) {
                 <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
                     <article className="container mx-auto max-w-3xl">
                         <div className="mb-12 text-center">
-                            <div className="text-blue-400 text-sm font-mono mb-4 uppercase tracking-wider">Standards • 2025-12-02</div>
+                            <div className="text-blue-400 text-sm font-mono mb-4 uppercase tracking-wider">Standards • 2026-02-10</div>
                             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">Bottom Bracket Shells & Bearing Standards</h1>
                             <p className="text-xl text-stone-400 leading-relaxed max-w-2xl mx-auto">BSA, PF30, T47. Why they exist, why they creak, and how to identify what you need.</p>
                         </div>
@@ -299,7 +299,7 @@ export default async function GuidePage({ params }: Props) {
                 <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
                     <article className="container mx-auto max-w-3xl">
                         <div className="mb-12 text-center">
-                            <div className="text-blue-400 text-sm font-mono mb-4 uppercase tracking-wider">Braking • 2025-11-28</div>
+                            <div className="text-blue-400 text-sm font-mono mb-4 uppercase tracking-wider">Braking • 2026-02-06</div>
                             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">Disc Brake Mounting Systems & Compatibility</h1>
                             <p className="text-xl text-stone-400 leading-relaxed max-w-2xl mx-auto">IS, Post Mount, Flat Mount. How to identify them and the logic of adapters.</p>
                         </div>
