@@ -254,6 +254,11 @@ export const DrivetrainLab = () => {
     const { unitSystem } = useSettingsStore();
     const searchParams = useSearchParams();
     const [viewMode, setViewMode] = useState<'lab' | 'build'>('lab');
+    const [setupA, setSetupA] = useState<Setup>({ ...PRESETS['road-compact'], id: 'setup-a', name: 'Road Compact' });
+    const [setupB, setSetupB] = useState<Setup>({ ...PRESETS['road-semi'], id: 'setup-b', name: 'Road Semi-Compact' });
+    const [cadence, setCadence] = useState(90);
+    const [ftp, setFtp] = useState(250); // Watts
+    const [weight, setWeight] = useState(75); // kg
 
     // Initialize from URL params or Build Store
     const { parts } = useBuildStore();
@@ -331,12 +336,6 @@ export const DrivetrainLab = () => {
         }
     }, [searchParams, parts]);
 
-    const [setupA, setSetupA] = useState<Setup>({ ...PRESETS['road-compact'], id: 'setup-a', name: 'Road Compact' });
-    const [setupB, setSetupB] = useState<Setup>({ ...PRESETS['road-semi'], id: 'setup-b', name: 'Road Semi-Compact' });
-    const [cadence, setCadence] = useState(90);
-    const [ftp, setFtp] = useState(250); // Watts
-    const [weight, setWeight] = useState(75); // kg
-
     // Climbing Calc
     const calculateMaxGrade = (setup: Setup) => {
         // Physics: Power = Speed * (Gravity + Rolling + Drag)
@@ -349,7 +348,7 @@ export const DrivetrainLab = () => {
 
         if (!setup.cassetteRange.includes('-')) return 0;
 
-        const [minCog, maxCog] = setup.cassetteRange.split('-').map(n => parseInt(n));
+        const [, maxCog] = setup.cassetteRange.split('-').map(n => parseInt(n));
         const lowestRatio = Math.min(...setup.chainrings) / maxCog;
         const circ = calculateWheelCircumference(setup.wheelSize, setup.tireSize) / 1000; // meters
 

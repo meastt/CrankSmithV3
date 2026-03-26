@@ -3,10 +3,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Activity, Scale, Wrench, Gauge, ArrowRight, Bike } from 'lucide-react';
-import { useClerk, useUser } from '@clerk/nextjs';
+import Image from 'next/image';
+import { ArrowRight } from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { haptic } from '@/lib/haptics';
+import { trackEvent } from '@/lib/analytics';
 
 const tools = [
     {
@@ -14,12 +16,11 @@ const tools = [
         title: 'The Workshop',
         subtitle: 'Start a New Build',
         description: 'The core builder. Validate compatibility across thousands of parts and standards.',
-        icon: Wrench,
         href: '/builder?new=true',
+        image: '/images/guide-bb-t47-main.jpg',
         gradient: 'from-amber-500/20 to-orange-500/20',
         border: 'group-hover:border-amber-500/50',
         text: 'group-hover:text-amber-400',
-        iconColor: 'text-amber-400',
         delay: 0.1
     },
     {
@@ -27,12 +28,11 @@ const tools = [
         title: 'Gear Metrics',
         subtitle: 'The Drivetrain Lab',
         description: 'Analyze ratios, speed, and climbing capability. The ultimate reality check for your drivetrain.',
-        icon: Activity,
         href: '/performance',
+        image: '/images/guide-gearing-range.jpg',
         gradient: 'from-cyan-500/20 to-blue-500/20',
         border: 'group-hover:border-cyan-500/50',
         text: 'group-hover:text-cyan-400',
-        iconColor: 'text-cyan-400',
         delay: 0.2
     },
     {
@@ -40,12 +40,11 @@ const tools = [
         title: 'Tire Pressure',
         subtitle: 'The Contact Patch',
         description: 'Optimize for speed or grip. Advanced calculations for rim width and casing suppleness.',
-        icon: Gauge,
         href: '/tire-pressure',
+        image: '/images/guide-gravel-mullet-main.jpg',
         gradient: 'from-rose-500/20 to-pink-500/20',
         border: 'group-hover:border-rose-500/50',
         text: 'group-hover:text-rose-400',
-        iconColor: 'text-rose-400',
         delay: 0.3
     },
     {
@@ -53,18 +52,16 @@ const tools = [
         title: 'Weight Weenies',
         subtitle: 'The Scale',
         description: 'Gamify your gram obsession. Calculate cost-per-gram saved and simulate upgrades.',
-        icon: Scale,
         href: '/weight',
+        image: '/images/guide-bb-spindle-comparison.jpg',
         gradient: 'from-emerald-500/20 to-lime-500/20',
         border: 'group-hover:border-emerald-500/50',
         text: 'group-hover:text-emerald-400',
-        iconColor: 'text-emerald-400',
         delay: 0.4
     }
 ];
 
 export const DashboardGrid = () => {
-    const { openSignIn } = useClerk();
     const { isLoaded, isSignedIn } = useUser();
     const router = useRouter();
     return (
@@ -104,7 +101,10 @@ export const DashboardGrid = () => {
                             key={tool.id}
                             href={tool.href}
                             className="block group relative"
-                            onClick={() => haptic('light')}
+                            onClick={() => {
+                                haptic('light');
+                                trackEvent('tool_entry_click', { tool_id: tool.id, destination: tool.href });
+                            }}
                         >
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -123,9 +123,15 @@ export const DashboardGrid = () => {
                             `} />
 
                                 <div className="relative z-10 flex flex-col h-full">
-                                    <div className="flex justify-between items-start mb-4 md:mb-6">
-                                        <div className={`p-3 md:p-4 rounded-2xl bg-white/5 border border-white/10 ${tool.iconColor} group-hover:bg-white/10 transition-colors`}>
-                                            <tool.icon className="w-6 h-6 md:w-8 md:h-8" />
+                                    <div className="flex justify-between items-start mb-4 md:mb-6 gap-3">
+                                        <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-white/10 bg-white/5">
+                                            <Image
+                                                src={tool.image}
+                                                alt={`${tool.title} preview`}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-stone-950/65 via-transparent to-transparent" />
                                         </div>
                                         <div className={`
                                         p-2 rounded-full border border-white/5 text-stone-500
@@ -157,6 +163,7 @@ export const DashboardGrid = () => {
                 <Link
                     href="/garage"
                     className="block group relative mt-6 z-20"
+                    onClick={() => trackEvent('tool_entry_click', { tool_id: 'garage', destination: '/garage' })}
                 >
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -168,8 +175,14 @@ export const DashboardGrid = () => {
                         <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-violet-500/20 via-purple-500/20 to-indigo-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                         <div className="relative z-10 flex flex-col items-center text-center gap-4">
-                            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-violet-400 group-hover:bg-white/10 transition-colors mb-2">
-                                <Bike className="w-8 h-8" />
+                            <div className="relative w-full max-w-lg aspect-[16/9] rounded-2xl overflow-hidden border border-white/10 mb-2">
+                                <Image
+                                    src="/images/schematic-hub.webp"
+                                    alt="Garage tool preview"
+                                    fill
+                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/65 via-transparent to-transparent" />
                             </div>
 
                             <div>

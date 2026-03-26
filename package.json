@@ -8,7 +8,10 @@
     "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "eslint",
+    "lint:gate": "node scripts/lint-gate.mjs",
+    "typecheck": "tsc --noEmit",
     "test": "jest",
+    "ci:check": "npm run typecheck && npm test -- --runInBand && npm run lint:gate",
     "postinstall": "prisma generate"
   },
   "dependencies": {

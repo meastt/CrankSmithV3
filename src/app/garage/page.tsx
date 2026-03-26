@@ -20,15 +20,13 @@ interface SavedBuild {
 export default function GaragePage() {
     // Default to guest view initially to prevent blocking
     const { user, isLoaded } = useUser();
-    const [builds, setBuilds] = useState<SavedBuild[]>([]);
-    const [isLoadingBuilds, setIsLoadingBuilds] = useState(false);
+    const [builds, setBuilds] = useState<SavedBuild[] | null>(null);
     const router = useRouter();
     const { setBuild, loadTemplate } = useBuildStore();
 
     // Only fetch builds if we are definitely logged in
     useEffect(() => {
         if (isLoaded && user) {
-            setIsLoadingBuilds(true);
             fetch('/api/builds')
                 .then(res => {
                     if (res.ok) return res.json();
@@ -39,10 +37,10 @@ export default function GaragePage() {
                 })
                 .catch(err => {
                     console.error("Error fetching builds:", err);
-                })
-                .finally(() => {
-                    setIsLoadingBuilds(false);
+                    setBuilds([]);
                 });
+        } else if (isLoaded && !user) {
+            setBuilds([]);
         }
     }, [isLoaded, user]);
 
@@ -66,7 +64,7 @@ export default function GaragePage() {
         try {
             const res = await fetch(`/api/builds?id=${id}`, { method: 'DELETE' });
             if (res.ok) {
-                setBuilds(prev => prev.filter(b => b.id !== id));
+                setBuilds(prev => (prev ?? []).filter(b => b.id !== id));
             }
         } catch (e) {
             console.error(e);
@@ -75,6 +73,8 @@ export default function GaragePage() {
 
     // Normalize templates just in case of import issues
     const templateList = Array.isArray(templates) ? templates : (templates as any).default || [];
+
+    const isLoadingBuilds = isLoaded && !!user && builds === null;
 
     if (isLoadingBuilds) {
         return (
@@ -153,7 +153,7 @@ export default function GaragePage() {
                             </div>
                         </div>
                     </div>
-                ) : builds.length === 0 ? (
+                ) : (builds ?? []).length === 0 ? (
                     <div className="space-y-12">
                         <div className="text-center py-12 bg-white/5 rounded-2xl border border-white/5 border-dashed">
                             <Bike className="w-12 h-12 text-gray-600 mx-auto mb-4" />
@@ -201,7 +201,7 @@ export default function GaragePage() {
                 ) : (
                     <div className="space-y-12">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {builds.map(build => (
+                            {(builds ?? []).map(build => (
                                 <div key={build.id} className="group bg-gray-900 border border-white/10 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all duration-300">
                                     <div className="h-32 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center relative">
                                         <Bike className="w-12 h-12 text-gray-700 group-hover:text-blue-500/50 transition-colors" />
