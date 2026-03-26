@@ -5,7 +5,8 @@ import {
     getAllGearRatios,
     getSpeedRange,
     parseCassetteRange,
-    calculateWheelCircumference
+    calculateWheelCircumference,
+    getCassetteProgressionMeta
 } from './gearCalculations';
 
 describe('Gear Calculations', () => {
@@ -71,11 +72,21 @@ describe('Gear Calculations', () => {
             expect(range).toEqual([10, 11, 12, 13, 14, 15, 17, 19, 21, 24, 28, 33]);
         });
 
-        it('should fallback to linear interpolation for unknown range', () => {
+        it('should fallback to synthetic interpolation for unknown range', () => {
             const range = parseCassetteRange(100, 10); // Hypothetical giant cassette
-            expect(range).toHaveLength(12);
+            expect(range.length).toBeGreaterThanOrEqual(10);
             expect(range[0]).toBe(10);
-            expect(range[11]).toBe(100);
+            expect(range[range.length - 1]).toBe(100);
+        });
+
+        it('should return metadata for known and synthetic cassettes', () => {
+            const known = getCassetteProgressionMeta(33, 10);
+            const synthetic = getCassetteProgressionMeta(47, 10);
+
+            expect(known.synthetic).toBe(false);
+            expect(known.family).toMatch(/12-speed/i);
+            expect(synthetic.synthetic).toBe(true);
+            expect(synthetic.family).toBe('Synthetic progression');
         });
     });
 });

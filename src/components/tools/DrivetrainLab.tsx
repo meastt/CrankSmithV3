@@ -9,12 +9,14 @@ import {
     calculateSpeed,
     calculateClimbingIndex,
     parseCassetteRange,
-    calculateWheelCircumference
+    calculateWheelCircumference,
+    getCassetteProgressionMeta
 } from '@/lib/gearCalculations';
 import { toSpeed, speedUnit, toWeight, weightUnit, fromWeight } from '@/lib/unitConversions';
 import { calculateBuildWeight, formatWeight } from '@/lib/weightCalculations';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useBuildStore } from '@/store/buildStore';
+import { computeUnifiedWhatIf } from '@/lib/whatIfEngine';
 
 // --- Types ---
 
@@ -259,6 +261,12 @@ export const DrivetrainLab = () => {
     const [cadence, setCadence] = useState(90);
     const [ftp, setFtp] = useState(250); // Watts
     const [weight, setWeight] = useState(75); // kg
+    const [showMethodology, setShowMethodology] = useState(false);
+    const [courseClimbGrade, setCourseClimbGrade] = useState(8);
+    const [courseClimbShare, setCourseClimbShare] = useState(40);
+    const [courseTargetCadence, setCourseTargetCadence] = useState(85);
+    const [eventDistanceKm, setEventDistanceKm] = useState(80);
+    const [eventElevationM, setEventElevationM] = useState(1200);
 
     // Initialize from URL params or Build Store
     const { parts } = useBuildStore();
@@ -365,6 +373,67 @@ export const DrivetrainLab = () => {
     const gradeA = calculateMaxGrade(setupA);
     const gradeB = calculateMaxGrade(setupB);
 
+    const getSmallestCog = (cassetteRange: string): number => {
+        const [minCog, maxCog] = cassetteRange.split('-').map(n => parseInt(n));
+        if (!isNaN(minCog) && !isNaN(maxCog)) {
+            const parsed = parseCassetteRange(maxCog, minCog);
+            if (parsed.length > 0) return Math.min(...parsed);
+        }
+        return 11;
+    };
+
+    const getTopSpeed = (setup: Setup, rpm: number): number => {
+        const smallestCog = getSmallestCog(setup.cassetteRange);
+        const circumference = calculateWheelCircumference(setup.wheelSize, setup.tireSize);
+        return toSpeed(calculateSpeed(Math.max(...setup.chainrings) / smallestCog, circumference, rpm), unitSystem);
+    };
+
+    const isSyntheticCassette = (cassetteRange: string): boolean => {
+        const [small, large] = cassetteRange.split('-').map(n => parseInt(n));
+        if (!small || !large) return true;
+        return getCassetteProgressionMeta(large, small).synthetic;
+    };
+
+    const getCassetteFamily = (cassetteRange: string): string => {
+        const [small, large] = cassetteRange.split('-').map(n => parseInt(n));
+        if (!small || !large) return 'Unknown';
+        return getCassetteProgressionMeta(large, small).family;
+    };
+
+    const getCourseScore = (setup: Setup): number => {
+        const climbWeight = Math.max(0, Math.min(100, courseClimbShare)) / 100;
+        const flatWeight = 1 - climbWeight;
+        const flatSpeed = getTopSpeed(setup, 95);
+        const climbCadence = getCadenceAtGrade(setup, courseClimbGrade);
+        const cadencePenalty = Math.abs(climbCadence - courseTargetCadence) * 0.25;
+        return (flatSpeed * flatWeight) + (climbCadence * 0.08 * climbWeight) - cadencePenalty;
+    };
+
+    const applyEventProfile = () => {
+        const distanceMeters = Math.max(1, eventDistanceKm * 1000);
+        const avgGradePercent = (eventElevationM / distanceMeters) * 100;
+        const inferredClimbShare = Math.max(10, Math.min(85, avgGradePercent * 8));
+        setCourseClimbGrade(Number(Math.max(4, Math.min(14, avgGradePercent * 1.6 + 4)).toFixed(1)));
+        setCourseClimbShare(Number(inferredClimbShare.toFixed(0)));
+    };
+
+    const getCadenceAtGrade = (setup: Setup, gradePercent: number): number => {
+        if (!setup.cassetteRange.includes('-') || gradePercent <= 0) return 0;
+        const [, maxCog] = setup.cassetteRange.split('-').map(n => parseInt(n));
+        if (!maxCog || !isFinite(maxCog)) return 0;
+
+        const easiestRatio = Math.min(...setup.chainrings) / maxCog;
+        const circMeters = calculateWheelCircumference(setup.wheelSize, setup.tireSize) / 1000;
+        if (easiestRatio <= 0 || circMeters <= 0) return 0;
+
+        const wKg = ftp / weight;
+        const gradeDecimal = gradePercent / 100;
+        const speedMs = wKg / (9.81 * gradeDecimal);
+        const cadenceRpm = (speedMs / (easiestRatio * circMeters)) * 60;
+
+        return Math.max(0, cadenceRpm);
+    };
+
     // Build Weight Calculation
     const buildWeight = useMemo(() => {
         if (viewMode === 'build' && Object.keys(parts).length > 0) {
@@ -426,7 +495,7 @@ export const DrivetrainLab = () => {
                             <div className="p-4 bg-white/5 rounded-xl border border-white/5">
                                 <div className="text-xs text-stone-500 uppercase tracking-wider mb-1">Top Speed</div>
                                 <div className="text-3xl font-mono font-bold text-white">
-                                    {toSpeed(calculateSpeed(Math.max(...setupA.chainrings) / 11, 2100, 90), unitSystem).toFixed(1)} <span className="text-sm text-stone-500">{speedUnit(unitSystem)}</span>
+                                    {getTopSpeed(setupA, 90).toFixed(1)} <span className="text-sm text-stone-500">{speedUnit(unitSystem)}</span>
                                 </div>
                                 <div className="text-xs text-stone-400 mt-2">
                                     @ 90 RPM
@@ -472,7 +541,13 @@ export const DrivetrainLab = () => {
                                 <Activity className="w-5 h-5 text-primary" />
                                 Speed Analysis
                             </h3>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => setShowMethodology((v) => !v)}
+                                    className="text-xs px-2 py-1 rounded border border-white/15 text-stone-300 hover:text-white hover:border-white/30"
+                                >
+                                    {showMethodology ? 'Hide calculations' : 'Show calculations'}
+                                </button>
                                 <span className="text-xs text-stone-500 uppercase">Cadence</span>
                                 <input
                                     type="range"
@@ -486,6 +561,32 @@ export const DrivetrainLab = () => {
                         </div>
 
                         <SpeedChart setupA={setupA} setupB={setupB} cadence={cadence} showComparison={viewMode === 'lab'} />
+                        {(isSyntheticCassette(setupA.cassetteRange) || (viewMode === 'lab' && isSyntheticCassette(setupB.cassetteRange))) && (
+                            <p className="text-xs text-amber-300 mt-4">
+                                Synthetic cassette progression: this range is estimated from endpoints and may not match exact production cog steps.
+                            </p>
+                        )}
+                        {!isSyntheticCassette(setupA.cassetteRange) && (
+                            <p className="text-xs text-stone-500 mt-2">
+                                Setup A cassette profile: {getCassetteFamily(setupA.cassetteRange)}.
+                            </p>
+                        )}
+                        {showMethodology && (
+                            <div className="mt-4 p-3 rounded-lg bg-black/20 border border-white/10 text-xs text-stone-400 space-y-2">
+                                <p>
+                                    <span className="text-stone-300 font-medium">Top speed:</span> speed = cadence × gear ratio × wheel circumference.
+                                </p>
+                                <p>
+                                    <span className="text-stone-300 font-medium">Cadence-at-grade:</span> uses FTP/weight and easiest ratio to estimate sustainable cadence at fixed grades.
+                                </p>
+                                <p>
+                                    <span className="text-stone-300 font-medium">Setup A inputs:</span> {setupA.chainrings.join('/')}t • {setupA.cassetteRange} • {Math.round(calculateWheelCircumference(setupA.wheelSize, setupA.tireSize))}mm circumference.
+                                </p>
+                                <p>
+                                    <span className="text-stone-300 font-medium">Model note:</span> comparative tool; excludes wind, rolling resistance, and traction variation.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -501,6 +602,9 @@ export const DrivetrainLab = () => {
                         <TrendingUp className="w-5 h-5 text-emerald-400" />
                         The Climbing Wall
                     </h3>
+                    <p className="text-xs text-stone-500 mb-4">
+                        Comparative estimate using FTP, body mass, and easiest gearing. Real-world grade limits vary with traction, rolling resistance, and pacing.
+                    </p>
 
                     <div className="flex gap-4 mb-6 text-sm">
                         <div>
@@ -559,7 +663,7 @@ export const DrivetrainLab = () => {
                         <div className="p-4 bg-black/20 rounded-lg">
                             <div className="text-xs text-stone-500 mb-1">Top Speed (110rpm)</div>
                             <div className="text-xl font-mono text-white">
-                                {toSpeed(calculateSpeed(Math.max(...setupA.chainrings) / 11, 2100, 110), unitSystem).toFixed(1)} <span className="text-xs text-stone-600">{speedUnit(unitSystem)}</span>
+                                {getTopSpeed(setupA, 110).toFixed(1)} <span className="text-xs text-stone-600">{speedUnit(unitSystem)}</span>
                             </div>
                             <div className="text-xs text-cyan-400 mt-1">Setup A</div>
                         </div>
@@ -567,12 +671,142 @@ export const DrivetrainLab = () => {
                             <div className="p-4 bg-black/20 rounded-lg">
                                 <div className="text-xs text-stone-500 mb-1">Top Speed (110rpm)</div>
                                 <div className="text-xl font-mono text-white">
-                                    {toSpeed(calculateSpeed(Math.max(...setupB.chainrings) / 11, 2100, 110), unitSystem).toFixed(1)} <span className="text-xs text-stone-600">{speedUnit(unitSystem)}</span>
+                                    {getTopSpeed(setupB, 110).toFixed(1)} <span className="text-xs text-stone-600">{speedUnit(unitSystem)}</span>
                                 </div>
                                 <div className="text-xs text-rose-400 mt-1">Setup B</div>
                             </div>
                         )}
                     </div>
+                    {viewMode === 'lab' && (() => {
+                        const delta = computeUnifiedWhatIf({
+                            baseline: setupA,
+                            candidate: setupB,
+                            ftp,
+                            riderWeightKg: weight,
+                            cadenceRpm: 90,
+                            climbGradePercent: 8
+                        });
+                        return (
+                            <div className="mt-4 p-4 bg-black/20 rounded-lg border border-white/10">
+                                <div className="text-xs text-stone-500 mb-2">What-if consequence (Setup A → Setup B)</div>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                                    <div>
+                                        <div className="text-stone-500">Top speed @90rpm</div>
+                                        <div className={`font-mono ${delta.topSpeedDeltaKph >= 0 ? 'text-emerald-300' : 'text-amber-300'}`}>
+                                            {delta.topSpeedDeltaKph >= 0 ? '+' : ''}{toSpeed(delta.topSpeedDeltaKph, unitSystem).toFixed(1)} {speedUnit(unitSystem)}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="text-stone-500">Cadence @8% grade</div>
+                                        <div className={`font-mono ${delta.cadenceDeltaRpmAtGrade >= 0 ? 'text-emerald-300' : 'text-amber-300'}`}>
+                                            {delta.cadenceDeltaRpmAtGrade >= 0 ? '+' : ''}{delta.cadenceDeltaRpmAtGrade.toFixed(0)} rpm
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="text-stone-500">Pressure hint</div>
+                                        <div className={`font-mono ${delta.pressureHintDeltaPct >= 0 ? 'text-amber-300' : 'text-emerald-300'}`}>
+                                            {delta.pressureHintDeltaPct >= 0 ? '+' : ''}{delta.pressureHintDeltaPct.toFixed(1)}% vs Setup A
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })()}
+                    <div className="mt-4 p-4 bg-black/20 rounded-lg">
+                        <div className="text-xs text-stone-500 mb-2">Cadence in easiest gear @ FTP</div>
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                            {[6, 8, 10].map((grade) => (
+                                <div key={grade} className="rounded border border-white/10 bg-stone-900/40 p-2">
+                                    <div className="text-stone-500">{grade}%</div>
+                                    <div className="text-cyan-300 font-mono">{Math.round(getCadenceAtGrade(setupA, grade))} rpm</div>
+                                    {viewMode === 'lab' && (
+                                        <div className="text-rose-300 font-mono">{Math.round(getCadenceAtGrade(setupB, grade))} rpm</div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    {viewMode === 'lab' && (
+                        <div className="mt-4 p-4 bg-black/20 rounded-lg border border-white/10">
+                            <div className="text-xs text-stone-500 mb-3">Course-aware advisor (beta)</div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-3">
+                                <label className="flex flex-col gap-1">
+                                    <span className="text-stone-500">Event distance (km)</span>
+                                    <input
+                                        type="number"
+                                        min={10}
+                                        max={350}
+                                        value={eventDistanceKm}
+                                        onChange={(e) => setEventDistanceKm(Math.max(10, Math.min(350, Number(e.target.value) || 80)))}
+                                        className="bg-stone-900 border border-white/10 rounded px-2 py-1 text-white"
+                                    />
+                                </label>
+                                <label className="flex flex-col gap-1">
+                                    <span className="text-stone-500">Event elevation (m)</span>
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        max={10000}
+                                        value={eventElevationM}
+                                        onChange={(e) => setEventElevationM(Math.max(0, Math.min(10000, Number(e.target.value) || 1200)))}
+                                        className="bg-stone-900 border border-white/10 rounded px-2 py-1 text-white"
+                                    />
+                                </label>
+                            </div>
+                            <button
+                                onClick={applyEventProfile}
+                                className="mb-3 text-xs px-2 py-1 rounded border border-cyan-500/40 text-cyan-200 hover:bg-cyan-500/10"
+                            >
+                                Apply event profile
+                            </button>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs mb-3">
+                                <label className="flex flex-col gap-1">
+                                    <span className="text-stone-500">Climb grade %</span>
+                                    <input
+                                        type="number"
+                                        min={3}
+                                        max={18}
+                                        value={courseClimbGrade}
+                                        onChange={(e) => setCourseClimbGrade(Math.max(3, Math.min(18, Number(e.target.value) || 8)))}
+                                        className="bg-stone-900 border border-white/10 rounded px-2 py-1 text-white"
+                                    />
+                                </label>
+                                <label className="flex flex-col gap-1">
+                                    <span className="text-stone-500">Climb share %</span>
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        max={100}
+                                        value={courseClimbShare}
+                                        onChange={(e) => setCourseClimbShare(Math.max(0, Math.min(100, Number(e.target.value) || 40)))}
+                                        className="bg-stone-900 border border-white/10 rounded px-2 py-1 text-white"
+                                    />
+                                </label>
+                                <label className="flex flex-col gap-1">
+                                    <span className="text-stone-500">Target cadence</span>
+                                    <input
+                                        type="number"
+                                        min={60}
+                                        max={105}
+                                        value={courseTargetCadence}
+                                        onChange={(e) => setCourseTargetCadence(Math.max(60, Math.min(105, Number(e.target.value) || 85)))}
+                                        className="bg-stone-900 border border-white/10 rounded px-2 py-1 text-white"
+                                    />
+                                </label>
+                            </div>
+                            {(() => {
+                                const scoreA = getCourseScore(setupA);
+                                const scoreB = getCourseScore(setupB);
+                                const winner = scoreA >= scoreB ? 'Setup A' : 'Setup B';
+                                return (
+                                    <p className="text-xs text-stone-300">
+                                        Recommended for this profile: <span className="text-emerald-300 font-medium">{winner}</span>
+                                        {' '}({scoreA.toFixed(1)} vs {scoreB.toFixed(1)} score).
+                                    </p>
+                                );
+                            })()}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

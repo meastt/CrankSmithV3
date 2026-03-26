@@ -5,7 +5,7 @@
 import type { BaselineBuild, WeightComponent } from '@/types/weight';
 import type { Component } from '@/lib/types/compatibility';
 import { COST_PER_GRAM_THRESHOLDS } from '@/types/weight';
-import { findUpgradeOptions, type UpgradeOption } from './upgradeSearch';
+import { categoryToType, findUpgradeOptions, type UpgradeOption } from './upgradeSearch';
 
 export interface QuickWin {
     component: WeightComponent; // Current baseline component
@@ -95,10 +95,8 @@ export async function findQuickWins(
 
     // For each component in the baseline
     for (const component of baseline.components) {
-        // Get the component type to fetch alternatives
-        const type = Object.entries(allComponentsMap).find(([_, comps]) =>
-            comps.some((c) => c.id === component.id)
-        )?.[0];
+        // Use canonical category mapping instead of ID lookup inference.
+        const type = categoryToType(component.category);
 
         if (!type) continue;
 
@@ -172,4 +170,76 @@ export function filterQuickWins(
     }
 
     return filtered;
+}
+
+/**
+ * Budget optimizer: maximize grams saved under a budget cap.
+ * Uses 0/1 knapsack over quick-win items (one item per category in current quick-wins list).
+ */
+export function optimizeQuickWinsForBudget(
+    quickWins: QuickWin[],
+    budgetDollars: number
+): {
+    selected: QuickWin[];
+    totalCost: number;
+    totalWeightSaved: number;
+    avgCostPerGram: number;
+} {
+    const budget = Math.max(0, Math.round(budgetDollars));
+    if (budget === 0 || quickWins.length === 0) {
+        return { selected: [], totalCost: 0, totalWeightSaved: 0, avgCostPerGram: 0 };
+    }
+
+    // Safety: ensure at most one option per category reaches the optimizer.
+    const byCategory = new Map<string, QuickWin>();
+    for (const win of quickWins) {
+        const key = win.component.category;
+        const existing = byCategory.get(key);
+        if (!existing || win.score > existing.score) {
+            byCategory.set(key, win);
+        }
+    }
+    const candidates = Array.from(byCategory.values());
+
+    const n = candidates.length;
+    const dp: number[][] = Array.from({ length: n + 1 }, () => Array(budget + 1).fill(0));
+    const keep: boolean[][] = Array.from({ length: n + 1 }, () => Array(budget + 1).fill(false));
+
+    for (let i = 1; i <= n; i += 1) {
+        const item = candidates[i - 1];
+        const cost = Math.max(0, Math.round(item.upgrade.cost_added));
+        const value = Math.max(0, Math.round(item.upgrade.weight_saved));
+
+        for (let b = 0; b <= budget; b += 1) {
+            const skip = dp[i - 1][b];
+            let take = -1;
+
+            if (cost <= b) {
+                take = dp[i - 1][b - cost] + value;
+            }
+
+            if (take > skip) {
+                dp[i][b] = take;
+                keep[i][b] = true;
+            } else {
+                dp[i][b] = skip;
+            }
+        }
+    }
+
+    const selected: QuickWin[] = [];
+    let b = budget;
+    for (let i = n; i >= 1; i -= 1) {
+        if (!keep[i][b]) continue;
+        const item = candidates[i - 1];
+        selected.push(item);
+        b -= Math.max(0, Math.round(item.upgrade.cost_added));
+    }
+
+    selected.reverse();
+    const totalCost = selected.reduce((sum, qw) => sum + Math.max(0, qw.upgrade.cost_added), 0);
+    const totalWeightSaved = selected.reduce((sum, qw) => sum + Math.max(0, qw.upgrade.weight_saved), 0);
+    const avgCostPerGram = totalWeightSaved > 0 ? totalCost / totalWeightSaved : 0;
+
+    return { selected, totalCost, totalWeightSaved, avgCostPerGram };
 }
