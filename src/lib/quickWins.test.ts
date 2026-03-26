@@ -34,6 +34,7 @@ function makeQuickWin(
             is_upgrade: true,
         },
         score,
+        marginalGainScore: score,
         reason: 'test',
     };
 }

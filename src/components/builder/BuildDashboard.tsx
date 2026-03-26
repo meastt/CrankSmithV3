@@ -14,6 +14,12 @@ export const BuildDashboard: React.FC = () => {
     const issues = validationResult?.issues || [];
     const errors = issues.filter(r => r.severity === 'ERROR');
     const warnings = issues.filter(r => r.severity === 'WARNING');
+    const manualVerificationWarnings = warnings.filter((w) =>
+        w.message.toLowerCase().includes('manual verification')
+    );
+    const standardWarnings = warnings.filter((w) =>
+        !w.message.toLowerCase().includes('manual verification')
+    );
     const isCompatible = validationResult?.compatible ?? true;
 
     // Calculate Score (Simple heuristic for now)
@@ -55,6 +61,18 @@ export const BuildDashboard: React.FC = () => {
                 <span className={`text-sm font-medium ${statusColor}`}>{statusText}</span>
             </div>
 
+            {manualVerificationWarnings.length > 0 && (
+                <div className="p-3 rounded-lg mb-4 border border-blue-500/20 bg-blue-500/10 text-blue-200">
+                    <div className="flex items-center gap-2 text-sm font-medium mb-1">
+                        <Info className="w-4 h-4" />
+                        Manual verification recommended
+                    </div>
+                    <p className="text-xs text-blue-100/80">
+                        {manualVerificationWarnings.length} check{manualVerificationWarnings.length > 1 ? 's' : ''} need manufacturer spec confirmation.
+                    </p>
+                </div>
+            )}
+
             {/* Issues List */}
             <div className="space-y-2 mb-4">
                 {errors.map((err, idx) => (
@@ -63,9 +81,15 @@ export const BuildDashboard: React.FC = () => {
                         <span>{err.message}</span>
                     </div>
                 ))}
-                {warnings.map((warn, idx) => (
+                {standardWarnings.map((warn, idx) => (
                     <div key={`warn-${idx}`} className="flex items-start gap-2 text-sm text-amber-400 bg-amber-500/5 p-2 rounded">
                         <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                        <span>{warn.message}</span>
+                    </div>
+                ))}
+                {manualVerificationWarnings.map((warn, idx) => (
+                    <div key={`manual-${idx}`} className="flex items-start gap-2 text-sm text-blue-300 bg-blue-500/5 p-2 rounded border border-blue-500/10">
+                        <Info className="w-4 h-4 mt-0.5 shrink-0" />
                         <span>{warn.message}</span>
                     </div>
                 ))}

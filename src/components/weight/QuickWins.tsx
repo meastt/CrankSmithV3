@@ -19,6 +19,8 @@ interface QuickWinsProps {
     onBack: () => void;
 }
 
+const SEQUENCE_BUDGETS: Array<500 | 1000 | 2000> = [500, 1000, 2000];
+
 export function QuickWins({ baseline, onBack }: QuickWinsProps) {
     const [quickWins, setQuickWins] = useState<QuickWin[]>([]);
     const [loading, setLoading] = useState(true);
@@ -28,11 +30,7 @@ export function QuickWins({ baseline, onBack }: QuickWinsProps) {
     const { addUpgrade } = useWeightStore();
     const { parts } = useBuildStore();
 
-    useEffect(() => {
-        loadQuickWins();
-    }, [baseline]);
-
-    const loadQuickWins = async () => {
+    const loadQuickWins = React.useCallback(async () => {
         setLoading(true);
 
         try {
@@ -64,7 +62,11 @@ export function QuickWins({ baseline, onBack }: QuickWinsProps) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [baseline]);
+
+    useEffect(() => {
+        loadQuickWins();
+    }, [loadQuickWins]);
 
     const handleAddUpgrade = (quickWin: QuickWin) => {
         haptic('medium');
@@ -88,6 +90,26 @@ export function QuickWins({ baseline, onBack }: QuickWinsProps) {
     const totalCostAdded = filteredWins.reduce((sum, qw) => sum + qw.upgrade.cost_added, 0);
     const avgCostPerGram = totalWeightSaved > 0 ? totalCostAdded / totalWeightSaved : 0;
     const budgetPlan = optimizeQuickWinsForBudget(filteredWins, budgetTarget);
+    const upgradeSequence = React.useMemo(() => {
+        const seenUpgradeKeys = new Set<string>();
+
+        return SEQUENCE_BUDGETS.map((budget) => {
+            const plan = optimizeQuickWinsForBudget(filteredWins, budget);
+            const newlyUnlocked = plan.selected.filter((selection) => {
+                const key = `${selection.component.id}:${selection.upgrade.component.id}`;
+                if (seenUpgradeKeys.has(key)) return false;
+                seenUpgradeKeys.add(key);
+                return true;
+            });
+
+            return {
+                budget,
+                totalWeightSaved: plan.totalWeightSaved,
+                totalCost: plan.totalCost,
+                newlyUnlocked,
+            };
+        });
+    }, [filteredWins]);
 
     const crossToolDelta = React.useMemo(() => {
         const tireQuickWin = filteredWins.find((w) => w.component.category === 'tires');
@@ -246,6 +268,39 @@ export function QuickWins({ baseline, onBack }: QuickWinsProps) {
                 </div>
             )}
 
+            {/* Upgrade Sequence Planner */}
+            {!loading && filteredWins.length > 0 && (
+                <div className="mb-6 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+                    <h2 className="text-base font-semibold text-emerald-300 mb-2">Upgrade Sequence Planner</h2>
+                    <p className="text-xs text-stone-400 mb-3">
+                        Suggested upgrade order by budget windows so each spend tier adds clear value.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {upgradeSequence.map((step) => (
+                            <div key={step.budget} className="rounded-lg border border-white/10 bg-black/20 p-3">
+                                <div className="text-xs text-stone-500">Under ${step.budget.toLocaleString()}</div>
+                                <div className="text-sm font-mono text-emerald-300">-{Math.round(step.totalWeightSaved).toLocaleString()}g</div>
+                                <div className="text-xs text-stone-500 mb-2">${Math.round(step.totalCost).toLocaleString()} planned</div>
+                                {step.newlyUnlocked.length === 0 ? (
+                                    <p className="text-[11px] text-stone-500">No new upgrades unlocked at this tier.</p>
+                                ) : (
+                                    <ul className="space-y-1">
+                                        {step.newlyUnlocked.slice(0, 3).map((selection, idx) => (
+                                            <li key={`${selection.component.id}-${idx}`} className="text-[11px] text-stone-300">
+                                                • {selection.component.category}: {selection.upgrade.component.name}
+                                            </li>
+                                        ))}
+                                        {step.newlyUnlocked.length > 3 && (
+                                            <li className="text-[11px] text-stone-500">+{step.newlyUnlocked.length - 3} more</li>
+                                        )}
+                                    </ul>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Quick Wins List */}
             {loading ? (
                 <div className="flex flex-col items-center justify-center py-20">
@@ -324,6 +379,12 @@ export function QuickWins({ baseline, onBack }: QuickWinsProps) {
 
                                         {/* Stats */}
                                         <div className="flex flex-wrap items-center gap-4">
+                                            <div className="flex items-center gap-2 px-3 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
+                                                <span className="text-[11px] text-cyan-300 uppercase tracking-wide">Smart Value</span>
+                                                <span className="text-sm font-mono font-bold text-cyan-200">
+                                                    {quickWin.marginalGainScore.toFixed(0)}/100
+                                                </span>
+                                            </div>
                                             {/* Weight Saved */}
                                             <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
                                                 <TrendingDown className="w-4 h-4 text-emerald-400" />

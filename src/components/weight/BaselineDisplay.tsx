@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap, Target, TrendingDown } from 'lucide-react';
-import type { BaselineBuild, CategoryBreakdown } from '@/types/weight';
+import type { BaselineBuild, CategoryBreakdown, ComponentCategory } from '@/types/weight';
 import { CATEGORY_GROUPS, ROTATING_WEIGHT_CATEGORIES } from '@/types/weight';
 
 interface BaselineDisplayProps {
@@ -14,6 +14,7 @@ export function BaselineDisplay({ build, onStartUpgrading, onQuickWins }: Baseli
     const categoryBreakdowns = getCategoryBreakdowns(build);
     const rotatingWeightTotal = getRotatingWeightTotal(build);
     const rotatingWeightPercent = (rotatingWeightTotal / build.total_weight) * 100;
+    const reconciliation = getWeightReconciliation(build);
 
     return (
         <div className="max-w-7xl mx-auto">
@@ -125,6 +126,46 @@ export function BaselineDisplay({ build, onStartUpgrading, onQuickWins }: Baseli
                 ))}
             </motion.div>
 
+            {/* Reconciliation Panel */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 }}
+                className="mt-6 p-4 rounded-2xl border border-white/10 bg-stone-900/40"
+            >
+                <h3 className="text-sm uppercase tracking-wider font-semibold text-stone-300 mb-3">
+                    Baseline Reconciliation
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                    <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+                        <div className="text-stone-500 text-xs">Measured baseline</div>
+                        <div className="font-mono text-emerald-300">{formatWeight(build.total_weight)}g</div>
+                    </div>
+                    <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+                        <div className="text-stone-500 text-xs">Estimated missing coverage</div>
+                        <div className="font-mono text-amber-300">+{formatWeight(reconciliation.estimatedMissingWeight)}g</div>
+                    </div>
+                    <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+                        <div className="text-stone-500 text-xs">Confidence</div>
+                        <div className={`font-mono ${
+                            reconciliation.confidence === 'High'
+                                ? 'text-emerald-300'
+                                : reconciliation.confidence === 'Medium'
+                                    ? 'text-amber-300'
+                                    : 'text-red-300'
+                        }`}>
+                            {reconciliation.confidence} ({reconciliation.coveragePct}% coverage)
+                        </div>
+                    </div>
+                </div>
+                {reconciliation.missingCategories.length > 0 && (
+                    <p className="text-xs text-stone-400 mt-3">
+                        Missing categories: {reconciliation.missingCategories.slice(0, 6).join(', ')}
+                        {reconciliation.missingCategories.length > 6 ? ` +${reconciliation.missingCategories.length - 6} more` : ''}.
+                    </p>
+                )}
+            </motion.div>
+
             {/* Total */}
             <div className="mt-6 pt-6 border-t border-white/10 flex justify-between items-center">
                 <span className="text-stone-400 font-medium">Total Weight</span>
@@ -216,4 +257,72 @@ function getRotatingWeightTotal(build: BaselineBuild): number {
     return build.components
         .filter((c) => ROTATING_WEIGHT_CATEGORIES.includes(c.category))
         .reduce((sum, c) => sum + c.weight, 0);
+}
+
+const BASELINE_EXPECTED_CATEGORIES: ComponentCategory[] = [
+    'frame',
+    'fork',
+    'wheels',
+    'tires',
+    'crankset',
+    'bottom_bracket',
+    'cassette',
+    'chain',
+    'derailleur',
+    'shifter',
+    'brakes',
+    'rotors',
+    'handlebars',
+    'stem',
+    'seatpost',
+    'saddle',
+    'pedals',
+];
+
+const MISSING_WEIGHT_ESTIMATE: Record<ComponentCategory, number> = {
+    frame: 1200,
+    fork: 450,
+    wheels: 1700,
+    tires: 900,
+    cassette: 350,
+    chain: 260,
+    crankset: 650,
+    bottom_bracket: 95,
+    derailleur: 280,
+    shifter: 430,
+    brakes: 320,
+    rotors: 260,
+    handlebars: 260,
+    stem: 140,
+    seatpost: 220,
+    saddle: 220,
+    pedals: 300,
+    tubes: 220,
+    accessories: 250,
+};
+
+function getWeightReconciliation(build: BaselineBuild): {
+    missingCategories: string[];
+    estimatedMissingWeight: number;
+    confidence: 'High' | 'Medium' | 'Low';
+    coveragePct: number;
+} {
+    const present = new Set(build.components.map((c) => c.category));
+    const missing = BASELINE_EXPECTED_CATEGORIES.filter((category) => !present.has(category));
+    const estimatedMissingWeight = missing.reduce((sum, category) => sum + (MISSING_WEIGHT_ESTIMATE[category] || 0), 0);
+    const coverageRatio = (BASELINE_EXPECTED_CATEGORIES.length - missing.length) / BASELINE_EXPECTED_CATEGORIES.length;
+    const coveragePct = Math.round(coverageRatio * 100);
+
+    const confidence: 'High' | 'Medium' | 'Low' = coveragePct >= 90
+        ? 'High'
+        : coveragePct >= 75
+            ? 'Medium'
+            : 'Low';
+
+    return {
+        missingCategories: missing.map((category) => category.replace('_', ' ')),
+        estimatedMissingWeight,
+        confidence,
+        coveragePct,
+    };
 }

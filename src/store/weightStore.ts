@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { BaselineBuild, TargetBuild, Upgrade, WeightComponent, ComponentCategory } from '@/types/weight';
+import type { BaselineBuild, TargetBuild, Upgrade, ComponentCategory } from '@/types/weight';
 
 type ViewMode = 'landing' | 'baseline' | 'upgrading' | 'quickwins';
 
@@ -19,6 +19,7 @@ interface WeightState {
     addUpgrade: (upgrade: Upgrade) => void;
     removeUpgrade: (category: ComponentCategory) => void;
     clearUpgrades: () => void;
+    setTarget: (target: TargetBuild | null) => void;
     reset: () => void;
 }
 
@@ -112,6 +113,10 @@ export const useWeightStore = create<WeightState>((set, get) => ({
 
     clearUpgrades: () => {
         set({ target: null });
+    },
+
+    setTarget: (target) => {
+        set({ target });
     },
 
     reset: () => {

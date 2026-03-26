@@ -61,6 +61,17 @@ export interface TargetBuild {
     avg_cost_per_gram: number;
 }
 
+export interface SavedWeightScenario {
+    id: string;
+    name: string;
+    createdAt: string;
+    mode: ScenarioMode;
+    baseline: BaselineBuild;
+    target: TargetBuild;
+}
+
+export type ScenarioMode = 'race' | 'training' | 'all-weather' | 'custom';
+
 export interface CategoryBreakdown {
     category: ComponentCategory;
     display_name: string;
