@@ -5,6 +5,29 @@
 const RIM_DIAMETER_700C = 622; // mm (standard road/gravel rim)
 const RIM_DIAMETER_650B = 584; // mm (650b/27.5" rim)
 
+const CASSETTE_LIBRARY: Record<string, { cogs: number[]; family: string }> = {
+    // 11-speed road/gravel
+    '11-25': { cogs: [11, 12, 13, 14, 15, 16, 17, 19, 21, 23, 25], family: 'Road 11-speed' },
+    '11-28': { cogs: [11, 12, 13, 14, 15, 17, 19, 21, 23, 25, 28], family: 'Road 11-speed' },
+    '11-30': { cogs: [11, 12, 13, 14, 15, 17, 19, 21, 23, 26, 30], family: 'Road 11-speed' },
+    '11-32': { cogs: [11, 12, 13, 14, 15, 17, 19, 21, 24, 28, 32], family: 'Road/Gravel 11-speed' },
+    '11-34': { cogs: [11, 12, 13, 14, 15, 17, 19, 21, 24, 28, 34], family: 'Road/Gravel 11-speed' },
+
+    // 12-speed road/gravel
+    '10-28': { cogs: [10, 11, 12, 13, 14, 15, 16, 17, 19, 21, 24, 28], family: 'Road 12-speed' },
+    '10-30': { cogs: [10, 11, 12, 13, 14, 15, 17, 19, 21, 24, 27, 30], family: 'Road 12-speed' },
+    '10-33': { cogs: [10, 11, 12, 13, 14, 15, 17, 19, 21, 24, 28, 33], family: 'Road 12-speed' },
+    '10-36': { cogs: [10, 11, 12, 13, 15, 17, 19, 21, 24, 28, 32, 36], family: 'Road 12-speed' },
+    '10-44': { cogs: [10, 11, 13, 15, 17, 19, 21, 24, 28, 32, 38, 44], family: 'Gravel 12-speed' },
+    '10-45': { cogs: [10, 12, 14, 16, 18, 21, 24, 28, 32, 36, 40, 45], family: 'MTB/Gravel 12-speed' },
+    '10-50': { cogs: [10, 12, 14, 16, 18, 21, 24, 28, 32, 36, 42, 50], family: 'MTB 12-speed' },
+    '10-51': { cogs: [10, 12, 14, 16, 18, 21, 24, 28, 33, 39, 45, 51], family: 'MTB 12-speed' },
+    '10-52': { cogs: [10, 12, 14, 16, 18, 21, 24, 28, 33, 39, 45, 52], family: 'MTB 12-speed' },
+    '9-45': { cogs: [9, 10, 11, 13, 15, 17, 20, 23, 27, 31, 36, 45], family: 'Road/Gravel 12-speed' },
+    '9-46': { cogs: [9, 10, 11, 13, 15, 17, 20, 24, 28, 33, 39, 46], family: 'Road/Gravel 12-speed' },
+    '9-52': { cogs: [9, 10, 11, 13, 15, 18, 21, 24, 28, 34, 42, 52], family: 'MTB 12-speed' },
+};
+
 /**
  * Calculate gear ratio (chainring teeth / cog teeth)
  */
@@ -124,34 +147,32 @@ export function getSpeedRange(
  * e.g., "10-33" with known increments
  */
 export function parseCassetteRange(largestCog: number, smallestCog: number = 10): number[] {
-    // Common 11-speed cassette progressions
-    const common11Speed: Record<string, number[]> = {
-        '11-28': [11, 12, 13, 14, 15, 17, 19, 21, 23, 25, 28],
-        '11-30': [11, 12, 13, 14, 15, 17, 19, 21, 23, 26, 30],
-        '11-32': [11, 12, 13, 14, 15, 17, 19, 21, 24, 28, 32],
-        '11-34': [11, 12, 13, 14, 15, 17, 19, 21, 24, 28, 34],
-    };
+    return getCassetteProgressionMeta(largestCog, smallestCog).cogs;
+}
 
-    const common12Speed: Record<string, number[]> = {
-        '10-28': [10, 11, 12, 13, 14, 15, 16, 17, 19, 21, 24, 28],
-        '10-30': [10, 11, 12, 13, 14, 15, 17, 19, 21, 24, 27, 30],
-        '10-33': [10, 11, 12, 13, 14, 15, 17, 19, 21, 24, 28, 33],
-        '10-36': [10, 11, 12, 13, 15, 17, 19, 21, 24, 28, 32, 36],
-        '10-50': [10, 12, 14, 16, 18, 21, 24, 28, 32, 36, 42, 50],
-        '10-51': [10, 12, 14, 16, 18, 21, 24, 28, 33, 39, 45, 51],
-        '10-52': [10, 12, 14, 16, 18, 21, 24, 28, 33, 39, 45, 52],
-    };
-
+export function getCassetteProgressionMeta(
+    largestCog: number,
+    smallestCog: number = 10
+): { cogs: number[]; synthetic: boolean; family: string } {
     const key = `${smallestCog}-${largestCog}`;
+    const known = CASSETTE_LIBRARY[key];
+    if (known) {
+        return { cogs: known.cogs, synthetic: false, family: known.family };
+    }
 
-    // Try to find in common progressions
-    if (common12Speed[key]) return common12Speed[key];
-    if (common11Speed[key]) return common11Speed[key];
+    // Fallback: create smooth geometric-ish progression.
+    const numCogs = largestCog - smallestCog > 24 ? 12 : 11;
+    const span = largestCog / smallestCog;
+    const cogs = Array.from({ length: numCogs }, (_, i) => {
+        const t = i / (numCogs - 1);
+        const value = smallestCog * Math.pow(span, t);
+        return Math.round(value);
+    });
+    cogs[0] = smallestCog;
+    cogs[cogs.length - 1] = largestCog;
 
-    // Fallback: create linear progression
-    const numCogs = 12; // Assume 12-speed
-    const increment = (largestCog - smallestCog) / (numCogs - 1);
-    return Array.from({ length: numCogs }, (_, i) => Math.round(smallestCog + increment * i));
+    const deduped = [...new Set(cogs)].sort((a, b) => a - b);
+    return { cogs: deduped, synthetic: true, family: 'Synthetic progression' };
 }
 
 /**

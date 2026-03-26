@@ -310,9 +310,29 @@ function validateRollingChassis(build: any, issues: ValidationIssue[]) {
         }
     }
 
+    const getPosition = (component: any): 'front' | 'rear' | 'set' | 'unknown' => {
+        const raw = component?.specs?.position || component?.interfaces?.position || component?.position || '';
+        const normalized = String(raw).toLowerCase();
+        if (normalized.includes('front')) return 'front';
+        if (normalized.includes('rear')) return 'rear';
+        if (normalized.includes('set') || normalized.includes('pair')) return 'set';
+        return 'unknown';
+    };
+
+    const getWheelForTire = (tire: any): any => {
+        const tirePosition = getPosition(tire);
+        if (tirePosition === 'front') {
+            return wheels.find((w: any) => getPosition(w) === 'front') || wheels.find((w: any) => getPosition(w) === 'set') || wheels[0];
+        }
+        if (tirePosition === 'rear') {
+            return wheels.find((w: any) => getPosition(w) === 'rear') || wheels.find((w: any) => getPosition(w) === 'set') || wheels[0];
+        }
+        return wheels.find((w: any) => getPosition(w) === 'set') || wheels[0];
+    };
+
     // 4. Tires
     tires.forEach((tire: any) => {
-        const relevantWheel = wheels[0];
+        const relevantWheel = getWheelForTire(tire);
         if (relevantWheel) {
             if (!isCompatibleValue(tire.specs?.diameter, relevantWheel.specs?.diameter)) {
                 addIssue(issues, tire.id, `Tire diameter (${tire.specs?.diameter}) does not match wheel (${relevantWheel.specs?.diameter})`, 'ERROR', relevantWheel.id);

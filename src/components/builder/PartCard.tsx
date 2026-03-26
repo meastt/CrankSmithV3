@@ -10,6 +10,8 @@ interface PartCardProps {
     isSelected: boolean;
     isIncompatible?: boolean;
     incompatibilityReason?: string;
+    compatibilityConfidence?: 'High' | 'Medium' | 'Low';
+    compatibilityReason?: string;
 }
 
 export const PartCard: React.FC<PartCardProps> = ({
@@ -17,7 +19,9 @@ export const PartCard: React.FC<PartCardProps> = ({
     onSelect,
     isSelected,
     isIncompatible = false,
-    incompatibilityReason
+    incompatibilityReason,
+    compatibilityConfidence,
+    compatibilityReason
 }) => {
     const handleSelect = () => {
         // haptic('medium');
@@ -454,6 +458,22 @@ export const PartCard: React.FC<PartCardProps> = ({
                         </div>
                     )}
                 </div>
+                {!isIncompatible && compatibilityConfidence && (
+                    <div className={`inline-flex items-center text-[10px] px-2 py-1 rounded border mb-2 ${
+                        compatibilityConfidence === 'High'
+                            ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25'
+                            : compatibilityConfidence === 'Medium'
+                                ? 'bg-amber-500/10 text-amber-300 border-amber-500/25'
+                                : 'bg-red-500/10 text-red-300 border-red-500/25'
+                    }`} title={compatibilityReason}>
+                        Match confidence: {compatibilityConfidence}
+                    </div>
+                )}
+                {!isIncompatible && compatibilityReason && (
+                    <p className="text-[11px] text-stone-500 mb-3">
+                        {compatibilityReason}
+                    </p>
+                )}
 
                 {/* Specs Grid */}
                 {specs.length > 0 && (
@@ -480,4 +500,3 @@ export const PartCard: React.FC<PartCardProps> = ({
         </div>
     );
 };
-

@@ -6,11 +6,13 @@ import { Zap, TrendingDown, DollarSign, Plus, Loader2, ArrowLeft } from 'lucide-
 import type { BaselineBuild } from '@/types/weight';
 import { Component } from '@/lib/types/compatibility';
 import { getCostPerGramRating, getCostPerGramColor } from '@/types/weight';
-import { findQuickWins, type QuickWin } from '@/lib/quickWins';
+import { findQuickWins, optimizeQuickWinsForBudget, type QuickWin } from '@/lib/quickWins';
 import { upgradeOptionToUpgrade } from '@/lib/upgradeSearch';
 import { useWeightStore } from '@/store/weightStore';
+import { useBuildStore } from '@/store/buildStore';
 import { haptic } from '@/lib/haptics';
 import { categoryToType } from '@/lib/upgradeSearch';
+import { computeUnifiedWhatIf } from '@/lib/whatIfEngine';
 
 interface QuickWinsProps {
     baseline: BaselineBuild;
@@ -21,8 +23,10 @@ export function QuickWins({ baseline, onBack }: QuickWinsProps) {
     const [quickWins, setQuickWins] = useState<QuickWin[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedFilter, setSelectedFilter] = useState<'all' | 'rotating' | 'unicorn'>('all');
+    const [budgetTarget, setBudgetTarget] = useState<500 | 1000 | 2000>(1000);
 
     const { addUpgrade } = useWeightStore();
+    const { parts } = useBuildStore();
 
     useEffect(() => {
         loadQuickWins();
@@ -83,6 +87,36 @@ export function QuickWins({ baseline, onBack }: QuickWinsProps) {
     const totalWeightSaved = filteredWins.reduce((sum, qw) => sum + qw.upgrade.weight_saved, 0);
     const totalCostAdded = filteredWins.reduce((sum, qw) => sum + qw.upgrade.cost_added, 0);
     const avgCostPerGram = totalWeightSaved > 0 ? totalCostAdded / totalWeightSaved : 0;
+    const budgetPlan = optimizeQuickWinsForBudget(filteredWins, budgetTarget);
+
+    const crossToolDelta = React.useMemo(() => {
+        const tireQuickWin = filteredWins.find((w) => w.component.category === 'tires');
+        if (!tireQuickWin) return null;
+
+        const extractMm = (label: string): number | null => {
+            const m = label.match(/(\d{2})\s?mm/i);
+            return m ? Number(m[1]) : null;
+        };
+        const baseWidth = extractMm(tireQuickWin.component.name);
+        const newWidth = extractMm(tireQuickWin.upgrade.component.name);
+        const crank = parts.Crankset as { specs?: { chainrings?: unknown[] } } | undefined;
+        const cassette = parts.Cassette as { specs?: { range?: string }, attributes?: { range?: string } } | undefined;
+        const wheelRear = parts.WheelRear as { specs?: { diameter?: string } } | undefined;
+        if (!baseWidth || !newWidth || !crank || !cassette) return null;
+
+        const chainrings: number[] = Array.isArray(crank.specs?.chainrings)
+            ? crank.specs.chainrings.map((n) => Number(n)).filter((n: number) => !isNaN(n))
+            : [50, 34];
+        const cassetteRange = String(cassette.specs?.range || cassette.attributes?.range || '11-34');
+        const wheelSize = String(wheelRear?.specs?.diameter || '').includes('650') ? 584 : 622;
+
+        return computeUnifiedWhatIf({
+            baseline: { chainrings, cassetteRange, tireSize: baseWidth, wheelSize },
+            candidate: { chainrings, cassetteRange, tireSize: newWidth, wheelSize },
+            ftp: 250,
+            riderWeightKg: 75
+        });
+    }, [filteredWins, parts]);
 
     return (
         <div className="max-w-5xl mx-auto">
@@ -164,6 +198,53 @@ export function QuickWins({ baseline, onBack }: QuickWinsProps) {
                     🦄 Unicorn Deals
                 </button>
             </div>
+
+            {/* Budget Optimizer */}
+            {!loading && filteredWins.length > 0 && (
+                <div className="mb-6 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                        <h2 className="text-base font-semibold text-cyan-300">Budget Optimizer</h2>
+                        <div className="flex gap-2">
+                            {[500, 1000, 2000].map((budget) => (
+                                <button
+                                    key={budget}
+                                    onClick={() => setBudgetTarget(budget as 500 | 1000 | 2000)}
+                                    className={`px-3 py-1.5 text-xs rounded-md border transition-colors ${
+                                        budgetTarget === budget
+                                            ? 'bg-cyan-500/20 border-cyan-400/40 text-cyan-200'
+                                            : 'bg-stone-900/60 border-white/10 text-stone-300 hover:text-white'
+                                    }`}
+                                >
+                                    ${budget.toLocaleString()}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    <p className="text-xs text-stone-400 mb-3">
+                        Best projected grams saved within budget using current quick-win options.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="rounded-lg bg-black/20 border border-white/10 p-3">
+                            <div className="text-xs text-stone-500">Projected Savings</div>
+                            <div className="text-lg font-mono text-emerald-400">-{budgetPlan.totalWeightSaved.toLocaleString()}g</div>
+                        </div>
+                        <div className="rounded-lg bg-black/20 border border-white/10 p-3">
+                            <div className="text-xs text-stone-500">Projected Spend</div>
+                            <div className="text-lg font-mono text-red-400">${Math.round(budgetPlan.totalCost).toLocaleString()}</div>
+                        </div>
+                        <div className="rounded-lg bg-black/20 border border-white/10 p-3">
+                            <div className="text-xs text-stone-500">Mix Efficiency</div>
+                            <div className="text-lg font-mono text-cyan-300">${budgetPlan.avgCostPerGram.toFixed(2)}/g</div>
+                        </div>
+                    </div>
+                    {crossToolDelta && (
+                        <div className="mt-3 text-[11px] text-stone-300">
+                            Cross-tool delta from tire quick-win: {crossToolDelta.topSpeedDeltaKph >= 0 ? '+' : ''}{crossToolDelta.topSpeedDeltaKph.toFixed(1)} km/h top speed,
+                            {' '}{crossToolDelta.cadenceDeltaRpmAtGrade >= 0 ? '+' : ''}{crossToolDelta.cadenceDeltaRpmAtGrade.toFixed(0)} rpm @8%, pressure hint {crossToolDelta.pressureHintDeltaPct.toFixed(1)}%.
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Quick Wins List */}
             {loading ? (

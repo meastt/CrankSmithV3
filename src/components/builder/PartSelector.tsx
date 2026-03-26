@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { BuildDashboard } from './BuildDashboard';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
@@ -22,6 +23,8 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FrameType } from '@/constants/standards';
+import { parseCassetteRange, getAllGearRatios, calculateSpeed, calculateWheelCircumference } from '@/lib/gearCalculations';
+import { computeUnifiedWhatIf } from '@/lib/whatIfEngine';
 
 // Build sequence - the logical order for building a bike
 const BUILD_SEQUENCE = [
@@ -244,6 +247,60 @@ function getIncompatibilityReason(component: AnyComponent, parts: any, activeTyp
     return null;
 }
 
+function getCompatibilitySignal(
+    component: AnyComponent,
+    parts: any,
+    activeType: string
+): { confidence: 'High' | 'Medium' | 'Low'; reason: string } {
+    const c = component as any;
+    if (activeType === 'Cassette') {
+        const wheelFreehub = String(parts.WheelRear?.specs?.freehub_body || parts.WheelRear?.interfaces?.freehub || '').trim();
+        const cassetteFreehub = String(c.specs?.freehub_body || c.interfaces?.freehub_mount || c.attributes?.freehub_mount || '').trim();
+        if (wheelFreehub && cassetteFreehub) {
+            return { confidence: 'High', reason: 'Direct freehub spec available on wheel and cassette.' };
+        }
+        if (wheelFreehub || cassetteFreehub) {
+            return { confidence: 'Medium', reason: 'Partial freehub data found; confirm exact cassette standard.' };
+        }
+        return { confidence: 'Low', reason: 'Missing freehub specs. Manual fit verification recommended.' };
+    }
+    if (activeType === 'BottomBracket') {
+        const frameShell = String(parts.Frame?.specs?.bb_shell || parts.Frame?.attributes?.bottom_bracket_shell || '').trim();
+        const bbShell = String(c.specs?.bb_shell || c.attributes?.frame_shell || '').trim();
+        const spindle = String(c.specs?.spindle_interface || c.specs?.spindle_type || c.attributes?.spindle_interface || '').trim();
+        if (frameShell && bbShell && spindle) {
+            return { confidence: 'High', reason: 'Frame shell and spindle interfaces are explicitly defined.' };
+        }
+        if (frameShell || bbShell || spindle) {
+            return { confidence: 'Medium', reason: 'Some shell/spindle specs are missing; validate manufacturer chart.' };
+        }
+        return { confidence: 'Low', reason: 'Insufficient shell/spindle detail to trust auto-match alone.' };
+    }
+    if (activeType === 'Tire') {
+        const tireWidth = c.specs?.width || c.attributes?.width || c.interfaces?.width;
+        const tireSize = String(c.specs?.diameter || c.attributes?.diameter || c.specs?.size_label || '');
+        if (tireWidth && tireSize) {
+            return { confidence: 'High', reason: 'Tire width and diameter are both specified.' };
+        }
+        if (tireWidth || tireSize) {
+            return { confidence: 'Medium', reason: 'Partial tire sizing data; re-check diameter/clearance manually.' };
+        }
+        return { confidence: 'Low', reason: 'Limited tire metadata; fit may vary by casing and rim.' };
+    }
+    if (activeType === 'Fork' || activeType === 'Wheel') {
+        const size = String(c.specs?.wheel_size || c.interfaces?.wheel_size || c.attributes?.wheel_size || c.specs?.diameter || '');
+        const axle = String(c.specs?.front_axle || c.attributes?.axle_standard || c.interfaces?.axle_standard || '');
+        if (size && axle) {
+            return { confidence: 'High', reason: 'Wheel size and axle standard are both explicitly defined.' };
+        }
+        if (size || axle) {
+            return { confidence: 'Medium', reason: 'Partial size/axle data found; double-check standard details.' };
+        }
+        return { confidence: 'Low', reason: 'Missing size and axle specs; manual verification required.' };
+    }
+    return { confidence: 'Medium', reason: 'Compatibility inferred from available metadata.' };
+}
+
 export const PartSelector: React.FC = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [frameCategory, setFrameCategory] = useState<string | null>(null);
@@ -297,6 +354,82 @@ export const PartSelector: React.FC = () => {
     const searchParams = useSearchParams();
 
     const activeType = BUILD_SEQUENCE[currentStep]?.type || 'Frame';
+    const crankset = parts.Crankset as any;
+    const cassette = parts.Cassette as any;
+    const wheelRear = parts.WheelRear as any;
+    const tireRear = parts.TireRear as any;
+
+    const shareChainrings = React.useMemo(() => {
+        if (!crankset) return [48, 35];
+        if (Array.isArray(crankset.specs?.chainrings) && crankset.specs.chainrings.length > 0) {
+            return crankset.specs.chainrings.map((n: any) => Number(n)).filter((n: number) => !isNaN(n));
+        }
+        const teethSource = String(crankset.attributes?.teeth || crankset.attributes?.chainrings || '');
+        const parsed = teethSource
+            .replace(/[^0-9,/]/g, '')
+            .replace('/', ',')
+            .split(',')
+            .map((n: string) => parseInt(n))
+            .filter((n: number) => !isNaN(n));
+        return parsed.length > 0 ? parsed : [48, 35];
+    }, [crankset]);
+
+    const shareCassetteCogs = React.useMemo(() => {
+        if (!cassette) return parseCassetteRange(33, 10);
+        if (Array.isArray(cassette.specs?.cog_list) && cassette.specs.cog_list.length > 0) {
+            const parsed = cassette.specs.cog_list.map((n: any) => Number(n)).filter((n: number) => !isNaN(n));
+            if (parsed.length > 0) return parsed;
+        }
+        const range = String(cassette.specs?.range || cassette.attributes?.range || '10-33');
+        const match = range.match(/(\d+)-(\d+)/);
+        if (match) {
+            return parseCassetteRange(parseInt(match[2]), parseInt(match[1]));
+        }
+        return parseCassetteRange(33, 10);
+    }, [cassette]);
+
+    const shareWheelSize = React.useMemo(() => {
+        const raw = String(wheelRear?.specs?.diameter || wheelRear?.interfaces?.diameter || '700c').toLowerCase();
+        return raw.includes('650') || raw.includes('27.5') ? 584 : 622;
+    }, [wheelRear]);
+
+    const shareTireWidth = React.useMemo(() => {
+        const raw = tireRear?.specs?.width || tireRear?.attributes?.width || '28';
+        const parsed = parseFloat(String(raw).replace(/[^0-9.]/g, ''));
+        return !isNaN(parsed) && parsed > 0 ? parsed : 28;
+    }, [tireRear]);
+
+    const shareSpeedRange = React.useMemo(() => {
+        const gears = getAllGearRatios(shareChainrings, shareCassetteCogs);
+        if (gears.length === 0) return { min: 0, max: 0 };
+        const circumference = calculateWheelCircumference(shareWheelSize, shareTireWidth);
+        const speeds = gears.map((g) => calculateSpeed(g.ratio, circumference, 90));
+        return { min: Math.min(...speeds), max: Math.max(...speeds) };
+    }, [shareChainrings, shareCassetteCogs, shareWheelSize, shareTireWidth]);
+
+    const shareClimbingScore = React.useMemo(() => {
+        if (shareChainrings.length === 0 || shareCassetteCogs.length === 0) return 0;
+        const lowestRatio = Math.min(...shareChainrings) / Math.max(...shareCassetteCogs);
+        // Lower ratios are better for climbing; convert to intuitive 0-100 score.
+        const rawScore = 100 - (lowestRatio - 0.7) * 60;
+        return Math.max(0, Math.min(100, rawScore));
+    }, [shareChainrings, shareCassetteCogs]);
+
+    const shareWhatIfDelta = React.useMemo(() => {
+        if (shareChainrings.length === 0 || shareCassetteCogs.length === 0) return null;
+        const smallest = Math.min(...shareCassetteCogs);
+        const largest = Math.max(...shareCassetteCogs);
+        const cassetteRange = `${smallest}-${largest}`;
+        const baselineTire = Number(tireRear?.specs?.width || tireRear?.attributes?.width || 32);
+        const wheelSize = String(wheelRear?.specs?.diameter || '').includes('650') ? 584 : 622;
+
+        return computeUnifiedWhatIf({
+            baseline: { chainrings: shareChainrings, cassetteRange, tireSize: baselineTire, wheelSize },
+            candidate: { chainrings: shareChainrings, cassetteRange, tireSize: baselineTire + 4, wheelSize },
+            ftp: 250,
+            riderWeightKg: 75
+        });
+    }, [shareChainrings, shareCassetteCogs, tireRear, wheelRear]);
 
     // Clear build when starting fresh
     useEffect(() => {
@@ -976,14 +1109,20 @@ export const PartSelector: React.FC = () => {
                                     <ShareCard
                                         frameName={parts.Frame?.name || 'Custom Build'}
                                         parts={parts as unknown as Record<string, any>}
-                                        chainrings={(parts.Crankset?.attributes as any)?.chainrings || [48, 35]}
-                                        cassetteCogs={(parts.Cassette?.attributes as any)?.range || [10, 33]}
+                                        chainrings={shareChainrings}
+                                        cassetteCogs={shareCassetteCogs}
                                         totalWeight={totalWeight}
-                                        climbingScore={85} // TODO: Calculate real score
-                                        speedRange={{ min: 8, max: 45 }} // TODO: Calculate real range
+                                        climbingScore={shareClimbingScore}
+                                        speedRange={shareSpeedRange}
                                         unitSystem={unitSystem}
                                         isModal={false}
                                     />
+                                    {shareWhatIfDelta && (
+                                        <p className="mt-3 text-[11px] text-stone-400">
+                                            Cross-tool what-if (rear tire +4mm): top speed {shareWhatIfDelta.topSpeedDeltaKph >= 0 ? '+' : ''}{shareWhatIfDelta.topSpeedDeltaKph.toFixed(1)} km/h,
+                                            cadence {shareWhatIfDelta.cadenceDeltaRpmAtGrade >= 0 ? '+' : ''}{shareWhatIfDelta.cadenceDeltaRpmAtGrade.toFixed(0)} rpm @8%, pressure hint {shareWhatIfDelta.pressureHintDeltaPct.toFixed(1)}%.
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Save Status Messages */}
@@ -1237,14 +1376,19 @@ export const PartSelector: React.FC = () => {
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {/* Compatible parts first */}
-                                {filteredComponents.map((comp) => (
+                                {filteredComponents.map((comp) => {
+                                    const signal = getCompatibilitySignal(comp, parts, activeType);
+                                    return (
                                     <PartCard
                                         key={comp.id}
                                         component={comp}
                                         isSelected={false}
                                         onSelect={handleSelectPart}
+                                        compatibilityConfidence={signal.confidence}
+                                        compatibilityReason={signal.reason}
                                     />
-                                ))}
+                                    );
+                                })}
                                 {/* Incompatible parts (grayed out) when showIncompatible is true */}
                                 {showIncompatible && components
                                     .filter(c => !filteredComponents.some(fc => fc.id === c.id))

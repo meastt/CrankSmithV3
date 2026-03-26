@@ -4,7 +4,16 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gauge, Info, ChevronDown, Droplets, Mountain, Zap } from 'lucide-react';
 import { useSettingsStore } from '@/store/settingsStore';
+import { useBuildStore } from '@/store/buildStore';
 import { toWeight, weightUnit, fromWeight, toPressure, pressureUnit } from '@/lib/unitConversions';
+import { computeUnifiedWhatIf } from '@/lib/whatIfEngine';
+import {
+    addSetupFeedback,
+    getSetupFeedbackForProfile,
+    verifySetupFeedback,
+    type FeedbackOutcome,
+    type SetupFeedbackEntry
+} from '@/lib/verifiedFeedback';
 
 // --- Types ---
 
@@ -17,7 +26,17 @@ interface PressureResult {
 
 // --- Helper Components ---
 
-const InputField = ({ label, value, onChange, unit, min, max, step = 1 }: any) => (
+interface InputFieldProps {
+    label: string;
+    value: number;
+    onChange: (value: number) => void;
+    unit: string;
+    min: number;
+    max: number;
+    step?: number;
+}
+
+const InputField = ({ label, value, onChange, unit, min, max, step = 1 }: InputFieldProps) => (
     <div className="group">
         <label className="block text-xs font-medium text-stone-500 mb-1.5 uppercase tracking-wider group-hover:text-stone-400 transition-colors">
             {label}
@@ -39,7 +58,14 @@ const InputField = ({ label, value, onChange, unit, min, max, step = 1 }: any) =
     </div>
 );
 
-const Toggle = ({ label, checked, onChange, icon: Icon }: any) => (
+interface ToggleProps {
+    label: string;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+    icon?: React.ComponentType<{ className?: string }>;
+}
+
+const Toggle = ({ label, checked, onChange, icon: Icon }: ToggleProps) => (
     <button
         onClick={() => onChange(!checked)}
         className={`
@@ -65,7 +91,16 @@ const Toggle = ({ label, checked, onChange, icon: Icon }: any) => (
     </button>
 );
 
-const PressureBar = ({ label, value, min, max, color, unit }: any) => {
+interface PressureBarProps {
+    label: string;
+    value: number;
+    min: number;
+    max: number;
+    color: string;
+    unit: string;
+}
+
+const PressureBar = ({ label, value, min, max, color, unit }: PressureBarProps) => {
     // Calculate position of the "recommended" dot within the min-max range
     // But actually, we want to show the range relative to a fixed scale (e.g. 0-100 psi)
     // Let's assume a dynamic scale based on context (Road vs MTB)
@@ -144,7 +179,48 @@ export const TirePressureCalculator = () => {
     const [isTubeless, setIsTubeless] = useState(true);
     const [isWet, setIsWet] = useState(false);
     const [preference, setPreference] = useState(0); // -1 (Grip) to 1 (Speed)
+    const [buildSeedApplied, setBuildSeedApplied] = useState(false);
+    const [showAssumptions, setShowAssumptions] = useState(false);
+    const [feedbackOutcome, setFeedbackOutcome] = useState<FeedbackOutcome>('balanced');
+    const [feedbackSavedCount, setFeedbackSavedCount] = useState(0);
+    const [feedbackEntries, setFeedbackEntries] = useState<SetupFeedbackEntry[]>([]);
+    const [whatIfTireWidth, setWhatIfTireWidth] = useState(32);
     const { unitSystem } = useSettingsStore();
+    const { parts } = useBuildStore();
+    const measuredWidth = tireWidth + (rimWidth - 19) * 0.4;
+
+    useEffect(() => {
+        if (buildSeedApplied) return;
+
+        const tireRear = parts.TireRear as { specs?: { width?: number | string }, attributes?: { width?: number | string }, interfaces?: { width?: number | string } } | undefined;
+        const wheelRear = parts.WheelRear as {
+            specs?: { internal_width?: number | string, diameter?: string },
+            attributes?: { internal_width?: number | string, inner_width?: number | string },
+            interfaces?: { internal_width?: number | string }
+        } | undefined;
+        const frame = parts.Frame as { category?: string, attributes?: { category?: string } } | undefined;
+        const frameCategory = String(frame?.category || frame?.attributes?.category || '').toUpperCase();
+
+        const parsedTireWidth = Number(tireRear?.specs?.width || tireRear?.attributes?.width || tireRear?.interfaces?.width || 0);
+        const parsedRimWidth = Number(
+            wheelRear?.specs?.internal_width ||
+            wheelRear?.attributes?.internal_width ||
+            wheelRear?.interfaces?.internal_width ||
+            wheelRear?.attributes?.inner_width ||
+            0
+        );
+
+        if (parsedTireWidth > 0) setTireWidth(Math.round(parsedTireWidth));
+        if (parsedRimWidth > 0) setRimWidth(Math.round(parsedRimWidth));
+
+        if (frameCategory === 'ROAD') setSurface('road-smooth');
+        if (frameCategory === 'GRAVEL') setSurface('gravel-smooth');
+        if (frameCategory === 'MTB') setSurface('mtb-trail');
+
+        if (parsedTireWidth > 0 || parsedRimWidth > 0 || frameCategory) {
+            setBuildSeedApplied(true);
+        }
+    }, [parts, buildSeedApplied]);
 
     // Calculation Logic
     const result = useMemo((): PressureResult => {
@@ -162,8 +238,6 @@ export const TirePressureCalculator = () => {
 
         // Adjust tire width based on rim width (Rule of thumb: +0.4mm for every 1mm increase in rim width over standard)
         // Standard rim for 25mm tire is ~17mm. 
-        const measuredWidth = tireWidth + (rimWidth - 19) * 0.4;
-
         const calculateBasePsi = (loadLbs: number, widthMm: number) => {
             // Modified Berto formula for modern volume
             // Increased width exponent to 1.5 to better account for volume scaling
@@ -203,9 +277,19 @@ export const TirePressureCalculator = () => {
         frontPsi *= preferenceModifier;
         rearPsi *= preferenceModifier;
 
-        // Safety clamps
-        frontPsi = Math.max(15, Math.min(120, frontPsi));
-        rearPsi = Math.max(15, Math.min(120, rearPsi));
+        const disciplineBounds: Record<SurfaceType, { min: number; max: number }> = {
+            'road-smooth': { min: 45, max: 100 },
+            'road-poor': { min: 38, max: 85 },
+            'gravel-smooth': { min: 24, max: 55 },
+            'gravel-chunky': { min: 20, max: 45 },
+            'mtb-trail': { min: 16, max: 35 },
+            'mtb-enduro': { min: 14, max: 32 }
+        };
+        const bounds = disciplineBounds[surface];
+
+        // Safety clamps (discipline-specific)
+        frontPsi = Math.max(bounds.min, Math.min(bounds.max, frontPsi));
+        rearPsi = Math.max(bounds.min, Math.min(bounds.max, rearPsi));
 
         return {
             front: {
@@ -219,7 +303,84 @@ export const TirePressureCalculator = () => {
                 recommended: rearPsi
             }
         };
-    }, [riderWeight, bikeWeight, tireWidth, rimWidth, surface, isTubeless, isWet, preference]);
+    }, [riderWeight, bikeWeight, tireWidth, rimWidth, measuredWidth, surface, isTubeless, isWet, preference]);
+
+    const confidenceLabel = surface.startsWith('road')
+        ? 'Higher confidence on smoother surfaces'
+        : surface.startsWith('gravel')
+            ? 'Medium confidence on variable gravel surfaces'
+            : 'Medium-to-lower confidence on aggressive MTB terrain';
+    const outOfDistribution = measuredWidth < 22 || measuredWidth > 75;
+    const profileKey = `${surface}:${Math.round(measuredWidth)}:${isTubeless ? 'tubeless' : 'tube'}`;
+
+    useEffect(() => {
+        setWhatIfTireWidth(Math.max(20, Math.round(tireWidth + 4)));
+    }, [tireWidth]);
+
+    useEffect(() => {
+        const entries = getSetupFeedbackForProfile(profileKey);
+        setFeedbackEntries(entries);
+        setFeedbackSavedCount(entries.length);
+    }, [profileKey]);
+
+    const saveRideFeedback = () => {
+        addSetupFeedback(
+            profileKey,
+            {
+                riderWeight,
+                bikeWeight,
+                tireWidth,
+                rimWidth,
+                measuredWidth: Math.round(measuredWidth),
+                surface,
+                isTubeless,
+                isWet,
+                recommendedFrontPsi: Number(result.front.recommended.toFixed(1)),
+                recommendedRearPsi: Number(result.rear.recommended.toFixed(1))
+            },
+            feedbackOutcome
+        );
+        const entries = getSetupFeedbackForProfile(profileKey);
+        setFeedbackEntries(entries);
+        setFeedbackSavedCount(entries.length);
+    };
+
+    const buildWhatIfDelta = useMemo(() => {
+        const crank = parts.Crankset as { specs?: { chainrings?: unknown[] }, attributes?: { teeth?: string } } | undefined;
+        const cassette = parts.Cassette as { specs?: { range?: string }, attributes?: { range?: string } } | undefined;
+        const wheelRear = parts.WheelRear as { specs?: { diameter?: string } } | undefined;
+        if (!crank || !cassette) return null;
+
+        const chainrings: number[] = Array.isArray(crank.specs?.chainrings)
+            ? crank.specs.chainrings.map((n) => Number(n)).filter((n: number) => !isNaN(n))
+            : String(crank.attributes?.teeth || '')
+                .replace(/[^0-9,/]/g, '')
+                .replace('/', ',')
+                .split(',')
+                .map((n: string) => parseInt(n))
+                .filter((n: number) => !isNaN(n));
+
+        if (chainrings.length === 0) return null;
+
+        const cassetteRange = String(cassette.specs?.range || cassette.attributes?.range || '11-34');
+        const wheelSize = String(wheelRear?.specs?.diameter || '').includes('650') ? 584 : 622;
+
+        return computeUnifiedWhatIf({
+            baseline: { chainrings, cassetteRange, tireSize: tireWidth, wheelSize },
+            candidate: { chainrings, cassetteRange, tireSize: whatIfTireWidth, wheelSize },
+            ftp: 250,
+            riderWeightKg: riderWeight + bikeWeight,
+            cadenceRpm: 90,
+            climbGradePercent: 8
+        });
+    }, [parts, tireWidth, whatIfTireWidth, riderWeight, bikeWeight]);
+
+    const markFeedbackVerified = (entryId: string) => {
+        verifySetupFeedback(entryId, 'Verified after ride check');
+        const entries = getSetupFeedbackForProfile(profileKey);
+        setFeedbackEntries(entries);
+        setFeedbackSavedCount(entries.length);
+    };
 
     return (
         <div className="w-full max-w-5xl mx-auto">
@@ -332,6 +493,45 @@ export const TirePressureCalculator = () => {
                                     </div>
                                 </div>
 
+                                {buildSeedApplied && (
+                                    <div className="mb-6 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                                        <p className="text-xs text-emerald-200">
+                                            Pre-filled from your current Workshop build (rear tire, rim width, and discipline). Adjust for conditions and ride feel.
+                                        </p>
+                                    </div>
+                                )}
+
+                                <div className="mb-6 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                                    <p className="text-xs text-blue-200">
+                                        <span className="font-semibold">Model confidence:</span> {confidenceLabel}. Start here, then fine-tune from ride feedback.
+                                    </p>
+                                    <button
+                                        onClick={() => setShowAssumptions((v) => !v)}
+                                        className="mt-2 text-[11px] text-blue-300 hover:text-blue-100 underline underline-offset-2"
+                                    >
+                                        {showAssumptions ? 'Hide model assumptions' : 'Show model assumptions'}
+                                    </button>
+                                </div>
+
+                                {showAssumptions && (
+                                    <div className="mb-6 p-3 rounded-xl bg-white/5 border border-white/10">
+                                        <ul className="text-xs text-stone-300 space-y-1.5 list-disc pl-4">
+                                            <li>Load split uses 45% front / 55% rear.</li>
+                                            <li>Measured tire width is estimated from tire+rims (rim effect adjustment).</li>
+                                            <li>Tubeless applies a pressure reduction before terrain and preference modifiers.</li>
+                                            <li>Surface and preference sliders are comparative multipliers, not lab-calibrated absolutes.</li>
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {outOfDistribution && (
+                                    <div className="mb-6 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                                        <p className="text-xs text-amber-200">
+                                            This tire/rim combo is outside common ranges. Verify tire and rim manufacturer pressure limits before riding.
+                                        </p>
+                                    </div>
+                                )}
+
                                 <div className="space-y-8">
                                     <PressureBar
                                         label="Front Tire"
@@ -350,6 +550,72 @@ export const TirePressureCalculator = () => {
                                         unit={pressureUnit(unitSystem)}
                                     />
                                 </div>
+
+                                <div className="mt-6 p-3 rounded-xl bg-white/5 border border-white/10">
+                                    <div className="text-xs text-stone-400 mb-2">Ride feedback loop (verification pending)</div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <select
+                                            value={feedbackOutcome}
+                                            onChange={(e) => setFeedbackOutcome(e.target.value as FeedbackOutcome)}
+                                            className="bg-stone-900 border border-white/10 rounded px-2 py-1 text-xs text-white"
+                                        >
+                                            <option value="balanced">Felt balanced</option>
+                                            <option value="too_harsh">Too harsh</option>
+                                            <option value="burped">Burped / too low</option>
+                                            <option value="sluggish">Sluggish / too high drag</option>
+                                        </select>
+                                        <button
+                                            onClick={saveRideFeedback}
+                                            className="text-xs px-2 py-1 rounded bg-rose-500/20 border border-rose-500/30 text-rose-200 hover:bg-rose-500/30"
+                                        >
+                                            Save feedback
+                                        </button>
+                                        <span className="text-[11px] text-stone-500">
+                                            {feedbackSavedCount} entries for this profile
+                                        </span>
+                                    </div>
+                                    {feedbackEntries.length > 0 && (
+                                        <div className="mt-3 space-y-1">
+                                            {feedbackEntries.slice(0, 3).map((entry) => (
+                                                <div key={entry.id} className="flex items-center justify-between text-[11px] text-stone-400">
+                                                    <span>
+                                                        {entry.outcome.replace('_', ' ')} • {entry.verificationStatus}
+                                                    </span>
+                                                    {entry.verificationStatus === 'pending' ? (
+                                                        <button
+                                                            onClick={() => markFeedbackVerified(entry.id)}
+                                                            className="text-emerald-300 hover:text-emerald-200 underline"
+                                                        >
+                                                            Mark verified
+                                                        </button>
+                                                    ) : (
+                                                        <span className="text-emerald-400">✓ verified</span>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {buildWhatIfDelta && (
+                                    <div className="mt-3 p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
+                                        <div className="text-xs text-cyan-200 mb-2">Cross-tool what-if (tire {tireWidth}mm → {whatIfTireWidth}mm)</div>
+                                        <div className="grid grid-cols-3 gap-2 text-[11px] text-stone-300">
+                                            <div>
+                                                <div className="text-stone-500">Top speed @90</div>
+                                                <div>{buildWhatIfDelta.topSpeedDeltaKph >= 0 ? '+' : ''}{buildWhatIfDelta.topSpeedDeltaKph.toFixed(1)} km/h</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-stone-500">Cadence @8%</div>
+                                                <div>{buildWhatIfDelta.cadenceDeltaRpmAtGrade >= 0 ? '+' : ''}{buildWhatIfDelta.cadenceDeltaRpmAtGrade.toFixed(0)} rpm</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-stone-500">Pressure hint</div>
+                                                <div>{buildWhatIfDelta.pressureHintDeltaPct >= 0 ? '+' : ''}{buildWhatIfDelta.pressureHintDeltaPct.toFixed(1)}%</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Range Slider Visual */}
                                 <div className="mt-10 pt-8 border-t border-white/5">
@@ -393,6 +659,9 @@ export const TirePressureCalculator = () => {
                                                 ? `Prioritizing grip (${Math.round(Math.abs(preference) * 100)}%). Lower pressure.`
                                                 : `Prioritizing speed (${Math.round(preference * 100)}%). Higher pressure.`}
                                     </p>
+                                    <p className="text-center text-[11px] text-stone-600 mt-2">
+                                        Confidence drops as terrain gets rougher or setup gets more extreme.
+                                    </p>
                                 </div>
                             </div>
                         </motion.div>
@@ -403,14 +672,14 @@ export const TirePressureCalculator = () => {
                                 <div className="text-rose-400 mb-2"><Info className="w-4 h-4" /></div>
                                 <h4 className="text-sm font-bold text-stone-300 mb-1">Rim Width Matters</h4>
                                 <p className="text-xs text-stone-500 leading-relaxed">
-                                    Your {rimWidth}mm rims make your {tireWidth}mm tires behave like {Math.round(tireWidth + (rimWidth - 19) * 0.4)}mm tires. We've adjusted for this.
+                                    Your {rimWidth}mm rims make your {tireWidth}mm tires behave like {Math.round(measuredWidth)}mm tires. We&apos;ve adjusted for this.
                                 </p>
                             </div>
                             <div className="bg-stone-900/40 rounded-xl p-4 border border-white/5">
                                 <div className="text-rose-400 mb-2"><Mountain className="w-4 h-4" /></div>
                                 <h4 className="text-sm font-bold text-stone-300 mb-1">Temperature</h4>
                                 <p className="text-xs text-stone-500 leading-relaxed">
-                                    Tires gain ~1 psi (0.07 bar) per 10°F (5°C) increase. Check pressures before riding in the ambient temp you'll ride in.
+                                    Tires gain ~1 psi (0.07 bar) per 10°F (5°C) increase. Check pressures before riding in the ambient temp you&apos;ll ride in.
                                 </p>
                             </div>
                         </div>
