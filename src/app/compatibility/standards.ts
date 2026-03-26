@@ -1,7 +1,12 @@
 import { Component } from "@/lib/types/compatibility";
 
 // Helper to create a standard component
-const createStandard = (type: string, name: string, interfaces: Record<string, any>, attributes: Record<string, any> = {}): Component => ({
+const createStandard = (
+    type: string,
+    name: string,
+    interfaces: Record<string, unknown>,
+    attributes: Record<string, unknown> = {}
+): Component => ({
     id: `std-${type.toLowerCase()}-${name.toLowerCase().replace(/\s+/g, '-')}`,
     type,
     name,
@@ -41,6 +46,7 @@ export const STANDARDS: Record<string, Component> = {
 // Helper to map URL slugs to standard keys
 // e.g. "bsa" -> "frame-bsa" or "bb-bsa" depending on context
 export const resolveStandard = (slugPart: string, type: "Frame" | "BottomBracket" | "Wheel"): Component | null => {
-    const key = `${type.toLowerCase()}-${slugPart}`;
+    const typePrefix = type === "BottomBracket" ? "bb" : type.toLowerCase();
+    const key = `${typePrefix}-${slugPart}`;
     return STANDARDS[key] || null;
 };

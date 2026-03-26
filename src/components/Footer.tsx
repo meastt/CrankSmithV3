@@ -46,8 +46,8 @@ export function Footer() {
 
           {/* Navigation */}
           <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
-            <Link href="/compatibility/bottom-bracket/t47-vs-bsa" className="text-stone-500 hover:text-primary transition-colors">
-              Compatibility
+            <Link href="/features/bike-compatibility-checker" className="text-stone-500 hover:text-primary transition-colors">
+              Compatibility Checker
             </Link>
             <Link href="/guides" className="text-stone-500 hover:text-primary transition-colors">
               Guides
