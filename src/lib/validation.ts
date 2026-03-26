@@ -533,6 +533,88 @@ function validateDrivetrain(build: any, issues: ValidationIssue[]) {
 }
 
 // ============================================================================
+// ZONE 4: COCKPIT (Stem, Handlebar, Seatpost)
+// ============================================================================
+
+function validateCockpit(build: any, issues: ValidationIssue[]) {
+    const { fork, frame, cockpit } = build;
+    if (!cockpit) return;
+
+    const { stem, handlebar, seatpost } = cockpit;
+
+    // 1. Stem clamp diameter must match handlebar clamp diameter
+    if (stem && handlebar) {
+        const stemClamp = parseFloat(String(
+            stem.specs?.clamp_dia || stem.attributes?.clamp_dia || stem.attributes?.clamp_diameter || 0
+        ));
+        const barClamp = parseFloat(String(
+            handlebar.specs?.clamp_dia || handlebar.attributes?.clamp_dia || handlebar.attributes?.clamp_diameter || 0
+        ));
+        if (stemClamp && barClamp && Math.abs(stemClamp - barClamp) > 0.5) {
+            addIssue(issues, stem.id,
+                `Stem clamp (${stemClamp}mm) does not match handlebar diameter (${barClamp}mm)`,
+                'ERROR', handlebar.id);
+        }
+    }
+
+    // 2. Stem steerer clamp must match fork steerer tube diameter
+    if (stem && fork) {
+        const stemSteerer = parseFloat(String(
+            stem.specs?.steerer_clamp || stem.attributes?.steerer_clamp || stem.attributes?.steerer_diameter || 0
+        ));
+        const forkSteererRaw = fork.specs?.steerer_tube || fork.attributes?.steerer_tube || '';
+        if (stemSteerer && forkSteererRaw) {
+            const s = String(forkSteererRaw);
+            // Derive expected steerer diameter from common steerer standards
+            const expectedDia =
+                s.includes('1.5') || s.includes('1 1/2') || s.includes('38') ? 38.1 :
+                s.includes('1 1/4') || s.includes('31.8') ? 31.8 :
+                28.6; // default: 1-1/8"
+            if (Math.abs(stemSteerer - expectedDia) > 0.5) {
+                addIssue(issues, stem.id,
+                    `Stem steerer clamp (${stemSteerer}mm) does not fit fork steerer (${forkSteererRaw})`,
+                    'WARNING', fork.id);
+            }
+        }
+    }
+
+    // 3. Seatpost diameter must match frame's seatpost diameter
+    if (seatpost && frame) {
+        const frameSpDia = parseFloat(String(
+            frame.specs?.seatpost_diameter || frame.attributes?.seatpost_diameter || 0
+        ));
+        const spDia = parseFloat(String(
+            seatpost.specs?.diameter || seatpost.attributes?.diameter || 0
+        ));
+        if (frameSpDia && spDia && Math.abs(frameSpDia - spDia) > 0.1) {
+            addIssue(issues, seatpost.id,
+                `Seatpost diameter (${spDia}mm) does not fit frame (${frameSpDia}mm)`,
+                'ERROR', frame.id);
+        }
+    }
+
+    // 4. Handlebar type vs shifter type (drop bar levers on flat bar or vice versa)
+    if (handlebar && build.shifter) {
+        const barType = normalize(handlebar.specs?.bar_type || handlebar.attributes?.type || handlebar.attributes?.bar_type || '');
+        const shifterType = normalize(
+            build.shifter.compatibility_tags?.shifter_brake_type?.[0] ||
+            build.shifter.attributes?.type || ''
+        );
+        if (barType && shifterType) {
+            const barIsFlat = barType.includes('flat') || barType.includes('riser') || barType.includes('mtb');
+            const barIsDrop = barType.includes('drop');
+            const shifterIsFlat = shifterType.includes('flat') || shifterType.includes('mtb');
+            const shifterIsDrop = shifterType.includes('drop');
+            if ((barIsFlat && shifterIsDrop) || (barIsDrop && shifterIsFlat)) {
+                addIssue(issues, build.shifter.id,
+                    `Shifter type (${shifterType}) is not compatible with handlebar type (${barType})`,
+                    'ERROR', handlebar.id);
+            }
+        }
+    }
+}
+
+// ============================================================================
 // GLOBAL VALIDATORS
 // ============================================================================
 
@@ -715,6 +797,7 @@ export const Validator = {
         validateEngineRoom(buildData, issues);
         validateDrivetrain(buildData, issues);
         validateBrakes(buildData, issues);
+        validateCockpit(buildData, issues);
 
         return {
             compatible: issues.filter(i => i.severity === 'ERROR').length === 0,

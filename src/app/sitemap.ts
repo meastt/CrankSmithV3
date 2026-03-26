@@ -5,9 +5,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // Define all guides
     const guides = [
-        'mullet-drivetrain-guide',
-        't47-explained',
-        'gravel-gearing-1x-vs-2x'
+        'gravel-groupsets-explained',
+        'bottom-bracket-standards',
+        'brake-mount-standards',
     ];
 
     // Define sample compatibility pages (these are dynamic but we can list common ones)

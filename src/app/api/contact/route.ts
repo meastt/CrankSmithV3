@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
+function escapeHtml(str: string): string {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 export async function POST(request: Request) {
     try {
         const body = await request.json();
@@ -35,6 +44,11 @@ export async function POST(request: Request) {
         });
 
         // Email Content
+        const safeName = escapeHtml(name);
+        const safeEmail = escapeHtml(email);
+        const safeSubject = escapeHtml(subject);
+        const safeMessage = escapeHtml(message);
+
         const mailOptions = {
             from: process.env.ZOHO_EMAIL, // Must be the authenticated user
             to: process.env.ADMIN_EMAIL,
@@ -50,12 +64,12 @@ ${message}
             `,
             html: `
 <h3>New Contact Form Submission</h3>
-<p><strong>Name:</strong> ${name}</p>
-<p><strong>Email:</strong> ${email}</p>
-<p><strong>Subject:</strong> ${subject}</p>
+<p><strong>Name:</strong> ${safeName}</p>
+<p><strong>Email:</strong> ${safeEmail}</p>
+<p><strong>Subject:</strong> ${safeSubject}</p>
 <hr />
 <p><strong>Message:</strong></p>
-<p>${message.replace(/\n/g, '<br>')}</p>
+<p>${safeMessage.replace(/\n/g, '<br>')}</p>
             `,
         };
 

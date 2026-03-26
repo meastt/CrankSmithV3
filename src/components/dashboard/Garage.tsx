@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useBuildStore } from '@/store/buildStore';
+import { useToast } from '@/components/ui/Toast';
 import { useRouter } from 'next/navigation';
 import { Component } from '@/lib/types/compatibility';
 import { Loader2, Bike, Calendar } from 'lucide-react';
@@ -16,7 +17,9 @@ interface SavedBuild {
 export const Garage: React.FC = () => {
     const [builds, setBuilds] = useState<SavedBuild[]>([]);
     const [loading, setLoading] = useState(true);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const { setBuild } = useBuildStore();
+    const { toast } = useToast();
     const router = useRouter();
 
     useEffect(() => {
@@ -38,6 +41,24 @@ export const Garage: React.FC = () => {
     const loadBuild = (build: SavedBuild) => {
         setBuild(build.parts);
         router.push('/builder');
+    };
+
+    const deleteBuild = async (build: SavedBuild) => {
+        setDeletingId(build.id);
+        try {
+            const res = await fetch(`/api/builds?id=${build.id}`, { method: 'DELETE' });
+            if (res.ok) {
+                setBuilds(prev => prev.filter(b => b.id !== build.id));
+                toast({ type: 'success', title: 'Deleted', message: `"${build.name}" removed from Garage.` });
+            } else {
+                toast({ type: 'error', title: 'Delete failed', message: 'Could not delete build. Please try again.' });
+            }
+        } catch (err) {
+            console.error(err);
+            toast({ type: 'error', title: 'Error', message: 'Could not connect to server.' });
+        } finally {
+            setDeletingId(null);
+        }
     };
 
     if (loading) {
@@ -86,39 +107,22 @@ export const Garage: React.FC = () => {
                             <div className="flex justify-between text-sm items-center">
                                 <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Groupset</span>
                                 <span className="text-gray-200 font-medium truncate max-w-[150px]">
-                                    {build.parts.Derailleur?.name || 'None'}
+                                    {build.parts.RearDerailleur?.name || 'None'}
                                 </span>
                             </div>
                             <div className="flex justify-between text-sm items-center">
                                 <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Wheels</span>
-                                <span className="text-gray-200 font-medium truncate max-w-[150px]">{build.parts.Wheel?.name || 'None'}</span>
+                                <span className="text-gray-200 font-medium truncate max-w-[150px]">{build.parts.WheelFront?.name || 'None'}</span>
                             </div>
                         </div>
 
                         <div className="flex items-center justify-end space-x-3 pt-4 border-t border-white/10">
                             <button
-                                onClick={async (e) => {
-                                    e.stopPropagation();
-                                    if (!confirm('Are you sure you want to delete this build?')) return;
-
-                                    try {
-                                        const res = await fetch(`/api/builds?id=${build.id}`, {
-                                            method: 'DELETE',
-                                        });
-
-                                        if (res.ok) {
-                                            setBuilds(builds.filter(b => b.id !== build.id));
-                                        } else {
-                                            alert('Failed to delete build');
-                                        }
-                                    } catch (err) {
-                                        console.error(err);
-                                        alert('Error deleting build');
-                                    }
-                                }}
-                                className="px-3 py-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 text-xs font-medium rounded-lg transition-colors"
+                                onClick={() => deleteBuild(build)}
+                                disabled={deletingId === build.id}
+                                className="px-3 py-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 text-xs font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Delete
+                                {deletingId === build.id ? 'Deleting…' : 'Delete'}
                             </button>
                             <button
                                 onClick={() => loadBuild(build)}

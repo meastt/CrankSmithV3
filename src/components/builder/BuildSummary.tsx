@@ -1,39 +1,45 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useBuildStore } from '@/store/buildStore';
-import { AlertTriangle, Trash2, Save, Download, Package } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
+import { AlertTriangle, Trash2, Save, Download, Package, X } from 'lucide-react';
 
 export const BuildSummary: React.FC = () => {
-    const { parts, removePart, validationResult } = useBuildStore();
+    const { parts, removePart, validationResult, totalWeight } = useBuildStore();
+    const { toast } = useToast();
+    const [showSaveInput, setShowSaveInput] = useState(false);
+    const [buildName, setBuildName] = useState('');
+    const [saving, setSaving] = useState(false);
 
-    const totalWeight = Object.values(parts).reduce((sum, part) => sum + ((part as any)?.attributes?.weight_g || 0), 0);
     const partsCount = Object.values(parts).filter(Boolean).length;
 
     const handleSave = async () => {
-        const name = window.prompt('Name your build:');
-        if (!name) return;
+        if (!buildName.trim()) return;
+        setSaving(true);
 
         try {
             const res = await fetch('/api/builds', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, parts }),
+                body: JSON.stringify({ name: buildName.trim(), parts }),
             });
 
             if (res.ok) {
-                alert('Build saved to Garage!');
+                toast({ type: 'success', title: 'Saved!', message: `"${buildName.trim()}" added to your Garage.` });
+                setShowSaveInput(false);
+                setBuildName('');
+            } else if (res.status === 401) {
+                toast({ type: 'error', title: 'Sign in required', message: 'Please sign in to save builds.' });
+                window.location.href = '/sign-in';
             } else {
-                if (res.status === 401) {
-                    alert('Please sign in to save builds.');
-                    window.location.href = '/api/auth/signin';
-                } else {
-                    alert('Failed to save build.');
-                }
+                toast({ type: 'error', title: 'Save failed', message: 'Something went wrong. Please try again.' });
             }
         } catch (err) {
             console.error(err);
-            alert('An error occurred.');
+            toast({ type: 'error', title: 'Error', message: 'Could not connect to server.' });
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -42,7 +48,7 @@ export const BuildSummary: React.FC = () => {
         const rows = Object.entries(parts).map(([type, part]) => [
             type,
             (part as any)?.name || 'Not Selected',
-            (part as any)?.attributes?.weight_g || '0'
+            (part as any)?.weightGrams || '0'
         ]);
 
         const csvContent = [
@@ -66,21 +72,17 @@ export const BuildSummary: React.FC = () => {
     // Get extras
     const getExtras = () => {
         const extras: string[] = [];
-        // Check if frame is Road or Gravel for handlebar tape
         if (parts.Frame && (parts.Frame.type === 'ROAD' || parts.Frame.type === 'GRAVEL')) {
             extras.push('Handlebar Tape');
         }
-        // Check for tubeless setup
         if ((parts.WheelFront?.attributes?.tubeless_ready || parts.WheelRear?.attributes?.tubeless_ready) &&
             (parts.TireFront?.tubeless || parts.TireRear?.tubeless)) {
             extras.push('Tubeless Valves (x2)');
             extras.push('Tire Sealant');
         }
-        // Check for disc brakes
         if (parts.Frame?.brakeMount?.includes('FLAT') || parts.WheelFront?.brakeInterface?.includes('DISC')) {
             extras.push('Disc Rotors (x2)');
         }
-        // Check for shifter cables/batteries based on electronic/hydraulic
         if (parts.Shifter) {
             if (parts.Shifter.isElectronic) {
                 extras.push('Batteries / Charger');
@@ -188,13 +190,42 @@ export const BuildSummary: React.FC = () => {
 
             {/* Actions */}
             <div className="p-4 border-t border-white/5 space-y-2">
-                <button
-                    onClick={handleSave}
-                    className="w-full btn-ghost py-3 px-4 rounded-xl text-stone-300 font-medium text-sm flex items-center justify-center gap-2"
-                >
-                    <Save className="w-4 h-4" />
-                    Save to Garage
-                </button>
+                {showSaveInput ? (
+                    <div className="space-y-2">
+                        <input
+                            type="text"
+                            value={buildName}
+                            onChange={(e) => setBuildName(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setShowSaveInput(false); }}
+                            placeholder="Name your build..."
+                            autoFocus
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-stone-200 placeholder-stone-600 focus:outline-none focus:border-primary/50 transition-colors"
+                        />
+                        <div className="flex gap-2">
+                            <button
+                                onClick={handleSave}
+                                disabled={!buildName.trim() || saving}
+                                className="flex-1 btn-primary py-2.5 px-4 rounded-xl text-white font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {saving ? 'Saving…' : 'Save'}
+                            </button>
+                            <button
+                                onClick={() => { setShowSaveInput(false); setBuildName(''); }}
+                                className="p-2.5 text-stone-500 hover:text-stone-300 hover:bg-white/5 rounded-xl transition-colors"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => setShowSaveInput(true)}
+                        className="w-full btn-ghost py-3 px-4 rounded-xl text-stone-300 font-medium text-sm flex items-center justify-center gap-2"
+                    >
+                        <Save className="w-4 h-4" />
+                        Save to Garage
+                    </button>
+                )}
                 <button
                     onClick={handleExport}
                     className="w-full btn-primary py-3 px-4 rounded-xl text-white font-medium text-sm flex items-center justify-center gap-2"

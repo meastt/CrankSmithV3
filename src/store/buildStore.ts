@@ -1,37 +1,30 @@
 import { create } from 'zustand';
 import { Validator } from '../lib/validation';
-import { CompatibilityResult } from '../lib/types/compatibility';
-import {
-    Frame, Fork, Wheel, Tire, BottomBracket, Crankset,
-    Cassette, RearDerailleur, Shifter, Chain, BrakeCaliper,
-    BrakeRotor, Stem, Handlebar, Seatpost
-} from '../types/components';
+import { Component, CompatibilityResult } from '../lib/types/compatibility';
 
-// Define a union type for all possible components
-export type AnyComponent =
-    | Frame | Fork | Wheel | Tire
-    | BottomBracket | Crankset | Cassette | RearDerailleur | Shifter | Chain
-    | BrakeCaliper | BrakeRotor | Stem | Handlebar | Seatpost;
+// Single source-of-truth type for all runtime component data.
+// Strict per-type interfaces live in src/types/components.ts for reference only.
+export type AnyComponent = Component;
 
 interface BuildParts {
-    Frame: Frame | null;
-    Fork: Fork | null;
-    WheelFront: Wheel | null;
-    WheelRear: Wheel | null;
-    TireFront: Tire | null;
-    TireRear: Tire | null;
-    BottomBracket: BottomBracket | null;
-    Crankset: Crankset | null;
-    Cassette: Cassette | null;
-    RearDerailleur: RearDerailleur | null;
-    Shifter: Shifter | null;
-    BrakeCaliperFront: BrakeCaliper | null;
-    BrakeCaliperRear: BrakeCaliper | null;
-    BrakeRotorFront: BrakeRotor | null;
-    BrakeRotorRear: BrakeRotor | null;
-    Stem: Stem | null;
-    Handlebar: Handlebar | null;
-    Seatpost: Seatpost | null;
+    Frame: Component | null;
+    Fork: Component | null;
+    WheelFront: Component | null;
+    WheelRear: Component | null;
+    TireFront: Component | null;
+    TireRear: Component | null;
+    BottomBracket: Component | null;
+    Crankset: Component | null;
+    Cassette: Component | null;
+    RearDerailleur: Component | null;
+    Shifter: Component | null;
+    BrakeCaliperFront: Component | null;
+    BrakeCaliperRear: Component | null;
+    BrakeRotorFront: Component | null;
+    BrakeRotorRear: Component | null;
+    Stem: Component | null;
+    Handlebar: Component | null;
+    Seatpost: Component | null;
 }
 
 // Factory fork state for Road/Gravel framesets

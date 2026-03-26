@@ -1,16 +1,18 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { auth } from '@clerk/nextjs/server';
 
-const prisma = new PrismaClient();
+function isAdmin(userId: string): boolean {
+    const adminIds = (process.env.ADMIN_USER_IDS || '').split(',').map(id => id.trim()).filter(Boolean);
+    return adminIds.includes(userId);
+}
 
 export async function PUT(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const { userId } = await auth();
+    if (!userId || !isAdmin(userId)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -41,8 +43,8 @@ export async function DELETE(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const { userId } = await auth();
+    if (!userId || !isAdmin(userId)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

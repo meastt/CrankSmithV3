@@ -2,8 +2,12 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Component } from '@/lib/types/compatibility';
 import { normalizeComponent } from '@/lib/normalization';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@clerk/nextjs/server';
+
+function isAdmin(userId: string): boolean {
+    const adminIds = (process.env.ADMIN_USER_IDS || '').split(',').map(id => id.trim()).filter(Boolean);
+    return adminIds.includes(userId);
+}
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -25,12 +29,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-    const session = await getServerSession(authOptions);
+    const { userId } = await auth();
 
-    // TODO: Strict Admin Check
-    // For now, we allow any authenticated user to create parts to facilitate testing
-    // In production: if (!session || session.user.role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!session) {
+    if (!userId || !isAdmin(userId)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

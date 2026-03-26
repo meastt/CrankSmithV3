@@ -92,8 +92,15 @@ export interface Component {
     specs: ComponentSpecs;
     compatibility_tags: CompatibilityTags;
 
-    // Legacy support (to be phased out or mapped)
+    /**
+     * @deprecated Raw DB field kept as validation fallback while specs migration is in progress.
+     * New code should read from `specs` only. Will be removed once all components are fully normalised.
+     */
     interfaces?: any;
+    /**
+     * @deprecated Raw DB field kept as validation fallback while specs migration is in progress.
+     * New code should read from `specs` only. Will be removed once all components are fully normalised.
+     */
     attributes?: any;
 
     // Normalized fields for UI convenience

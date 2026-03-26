@@ -1,5 +1,14 @@
 
 // FILE: src/types/components.ts
+//
+// REFERENCE / DOCUMENTATION ONLY — these strict per-type interfaces describe the
+// intended shape of each component category. They are NOT used at runtime.
+//
+// All runtime code (stores, API, validation) uses the loose `Component` interface
+// from `src/lib/types/compatibility.ts`, which is what the API actually returns.
+//
+// These types exist so developers can see exactly which fields each component type
+// should carry. Use them as a guide when adding new components to the database.
 
 import {
     FrameType,
