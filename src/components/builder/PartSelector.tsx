@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { BuildDashboard } from './BuildDashboard';
 import React, { useEffect, useState, useCallback, useRef } from 'react';

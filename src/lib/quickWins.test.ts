@@ -1,4 +1,6 @@
 import { findQuickWins, optimizeQuickWinsForBudget, type QuickWin } from './quickWins';
+import type { Component } from '@/lib/types/compatibility';
+import type { BaselineBuild } from '@/types/weight';
 
 function makeQuickWin(
     category: 'wheels' | 'tires' | 'cassette',
@@ -25,7 +27,7 @@ function makeQuickWin(
                 type: 'Wheel',
                 attributes: { weight_g: 900, price_msrp: 200 },
                 interfaces: {},
-            } as any,
+            } as unknown as Component,
             weight_saved: weightSaved,
             cost_added: costAdded,
             cost_per_gram: costAdded / weightSaved,
@@ -84,7 +86,7 @@ describe('findQuickWins', () => {
             ],
             total_weight: 8000,
             total_cost: 2000,
-        } as any;
+        } as BaselineBuild;
 
         const allComponentsMap = {
             Wheel: [
@@ -94,7 +96,7 @@ describe('findQuickWins', () => {
                     attributes: { weight_g: 1400, price_msrp: 900 }
                 }
             ]
-        } as any;
+        } as unknown as Record<string, Component[]>;
 
         const quickWins = await findQuickWins(baseline, allComponentsMap);
 

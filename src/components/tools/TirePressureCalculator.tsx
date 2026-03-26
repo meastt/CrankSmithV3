@@ -26,7 +26,17 @@ interface PressureResult {
 
 // --- Helper Components ---
 
-const InputField = ({ label, value, onChange, unit, min, max, step = 1 }: any) => (
+interface InputFieldProps {
+    label: string;
+    value: number;
+    onChange: (value: number) => void;
+    unit: string;
+    min: number;
+    max: number;
+    step?: number;
+}
+
+const InputField = ({ label, value, onChange, unit, min, max, step = 1 }: InputFieldProps) => (
     <div className="group">
         <label className="block text-xs font-medium text-stone-500 mb-1.5 uppercase tracking-wider group-hover:text-stone-400 transition-colors">
             {label}
@@ -48,7 +58,14 @@ const InputField = ({ label, value, onChange, unit, min, max, step = 1 }: any) =
     </div>
 );
 
-const Toggle = ({ label, checked, onChange, icon: Icon }: any) => (
+interface ToggleProps {
+    label: string;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+    icon?: React.ComponentType<{ className?: string }>;
+}
+
+const Toggle = ({ label, checked, onChange, icon: Icon }: ToggleProps) => (
     <button
         onClick={() => onChange(!checked)}
         className={`
@@ -74,7 +91,16 @@ const Toggle = ({ label, checked, onChange, icon: Icon }: any) => (
     </button>
 );
 
-const PressureBar = ({ label, value, min, max, color, unit }: any) => {
+interface PressureBarProps {
+    label: string;
+    value: number;
+    min: number;
+    max: number;
+    color: string;
+    unit: string;
+}
+
+const PressureBar = ({ label, value, min, max, color, unit }: PressureBarProps) => {
     // Calculate position of the "recommended" dot within the min-max range
     // But actually, we want to show the range relative to a fixed scale (e.g. 0-100 psi)
     // Let's assume a dynamic scale based on context (Road vs MTB)
@@ -166,9 +192,13 @@ export const TirePressureCalculator = () => {
     useEffect(() => {
         if (buildSeedApplied) return;
 
-        const tireRear = parts.TireRear as any;
-        const wheelRear = parts.WheelRear as any;
-        const frame = parts.Frame as any;
+        const tireRear = parts.TireRear as { specs?: { width?: number | string }, attributes?: { width?: number | string }, interfaces?: { width?: number | string } } | undefined;
+        const wheelRear = parts.WheelRear as {
+            specs?: { internal_width?: number | string, diameter?: string },
+            attributes?: { internal_width?: number | string, inner_width?: number | string },
+            interfaces?: { internal_width?: number | string }
+        } | undefined;
+        const frame = parts.Frame as { category?: string, attributes?: { category?: string } } | undefined;
         const frameCategory = String(frame?.category || frame?.attributes?.category || '').toUpperCase();
 
         const parsedTireWidth = Number(tireRear?.specs?.width || tireRear?.attributes?.width || tireRear?.interfaces?.width || 0);
@@ -316,12 +346,13 @@ export const TirePressureCalculator = () => {
     };
 
     const buildWhatIfDelta = useMemo(() => {
-        const crank = parts.Crankset as any;
-        const cassette = parts.Cassette as any;
+        const crank = parts.Crankset as { specs?: { chainrings?: unknown[] }, attributes?: { teeth?: string } } | undefined;
+        const cassette = parts.Cassette as { specs?: { range?: string }, attributes?: { range?: string } } | undefined;
+        const wheelRear = parts.WheelRear as { specs?: { diameter?: string } } | undefined;
         if (!crank || !cassette) return null;
 
         const chainrings: number[] = Array.isArray(crank.specs?.chainrings)
-            ? crank.specs.chainrings.map((n: any) => Number(n)).filter((n: number) => !isNaN(n))
+            ? crank.specs.chainrings.map((n) => Number(n)).filter((n: number) => !isNaN(n))
             : String(crank.attributes?.teeth || '')
                 .replace(/[^0-9,/]/g, '')
                 .replace('/', ',')
@@ -332,7 +363,7 @@ export const TirePressureCalculator = () => {
         if (chainrings.length === 0) return null;
 
         const cassetteRange = String(cassette.specs?.range || cassette.attributes?.range || '11-34');
-        const wheelSize = String((parts.WheelRear as any)?.specs?.diameter || '').includes('650') ? 584 : 622;
+        const wheelSize = String(wheelRear?.specs?.diameter || '').includes('650') ? 584 : 622;
 
         return computeUnifiedWhatIf({
             baseline: { chainrings, cassetteRange, tireSize: tireWidth, wheelSize },
@@ -641,14 +672,14 @@ export const TirePressureCalculator = () => {
                                 <div className="text-rose-400 mb-2"><Info className="w-4 h-4" /></div>
                                 <h4 className="text-sm font-bold text-stone-300 mb-1">Rim Width Matters</h4>
                                 <p className="text-xs text-stone-500 leading-relaxed">
-                                    Your {rimWidth}mm rims make your {tireWidth}mm tires behave like {Math.round(measuredWidth)}mm tires. We've adjusted for this.
+                                    Your {rimWidth}mm rims make your {tireWidth}mm tires behave like {Math.round(measuredWidth)}mm tires. We&apos;ve adjusted for this.
                                 </p>
                             </div>
                             <div className="bg-stone-900/40 rounded-xl p-4 border border-white/5">
                                 <div className="text-rose-400 mb-2"><Mountain className="w-4 h-4" /></div>
                                 <h4 className="text-sm font-bold text-stone-300 mb-1">Temperature</h4>
                                 <p className="text-xs text-stone-500 leading-relaxed">
-                                    Tires gain ~1 psi (0.07 bar) per 10°F (5°C) increase. Check pressures before riding in the ambient temp you'll ride in.
+                                    Tires gain ~1 psi (0.07 bar) per 10°F (5°C) increase. Check pressures before riding in the ambient temp you&apos;ll ride in.
                                 </p>
                             </div>
                         </div>

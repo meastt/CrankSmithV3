@@ -14,6 +14,7 @@ import {
 } from '@/lib/gearCalculations';
 import { toSpeed, speedUnit, toWeight, weightUnit, fromWeight } from '@/lib/unitConversions';
 import { calculateBuildWeight, formatWeight } from '@/lib/weightCalculations';
+import type { Component } from '@/lib/types/compatibility';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useBuildStore } from '@/store/buildStore';
 import { computeUnifiedWhatIf } from '@/lib/whatIfEngine';
@@ -255,7 +256,8 @@ const SpeedChart = ({ setupA, setupB, cadence, showComparison = true }: { setupA
 export const DrivetrainLab = () => {
     const { unitSystem } = useSettingsStore();
     const searchParams = useSearchParams();
-    const [viewMode, setViewMode] = useState<'lab' | 'build'>('lab');
+    const initialViewMode = searchParams.get('mode') === 'build' ? 'build' : 'lab';
+    const [viewMode, setViewMode] = useState<'lab' | 'build'>(initialViewMode);
     const [setupA, setSetupA] = useState<Setup>({ ...PRESETS['road-compact'], id: 'setup-a', name: 'Road Compact' });
     const [setupB, setSetupB] = useState<Setup>({ ...PRESETS['road-semi'], id: 'setup-b', name: 'Road Semi-Compact' });
     const [cadence, setCadence] = useState(90);
@@ -275,7 +277,6 @@ export const DrivetrainLab = () => {
         const mode = searchParams.get('mode');
         // Priority 1: URL Params
         if (mode === 'build') {
-            setViewMode('build');
             const chainringsParam = searchParams.get('chainrings');
             const cassetteParam = searchParams.get('cassette');
             const tireParam = searchParams.get('tire');
@@ -437,7 +438,7 @@ export const DrivetrainLab = () => {
     // Build Weight Calculation
     const buildWeight = useMemo(() => {
         if (viewMode === 'build' && Object.keys(parts).length > 0) {
-            return calculateBuildWeight(parts as Record<string, any>);
+            return calculateBuildWeight(parts as unknown as Record<string, Component | null>);
         }
         return null;
     }, [parts, viewMode]);

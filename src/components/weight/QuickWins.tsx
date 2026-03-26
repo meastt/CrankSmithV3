@@ -99,15 +99,16 @@ export function QuickWins({ baseline, onBack }: QuickWinsProps) {
         };
         const baseWidth = extractMm(tireQuickWin.component.name);
         const newWidth = extractMm(tireQuickWin.upgrade.component.name);
-        const crank = parts.Crankset as any;
-        const cassette = parts.Cassette as any;
+        const crank = parts.Crankset as { specs?: { chainrings?: unknown[] } } | undefined;
+        const cassette = parts.Cassette as { specs?: { range?: string }, attributes?: { range?: string } } | undefined;
+        const wheelRear = parts.WheelRear as { specs?: { diameter?: string } } | undefined;
         if (!baseWidth || !newWidth || !crank || !cassette) return null;
 
         const chainrings: number[] = Array.isArray(crank.specs?.chainrings)
-            ? crank.specs.chainrings.map((n: any) => Number(n)).filter((n: number) => !isNaN(n))
+            ? crank.specs.chainrings.map((n) => Number(n)).filter((n: number) => !isNaN(n))
             : [50, 34];
         const cassetteRange = String(cassette.specs?.range || cassette.attributes?.range || '11-34');
-        const wheelSize = String((parts.WheelRear as any)?.specs?.diameter || '').includes('650') ? 584 : 622;
+        const wheelSize = String(wheelRear?.specs?.diameter || '').includes('650') ? 584 : 622;
 
         return computeUnifiedWhatIf({
             baseline: { chainrings, cassetteRange, tireSize: baseWidth, wheelSize },
