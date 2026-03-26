@@ -76,17 +76,20 @@ export const BuildSummary: React.FC = () => {
             extras.push('Handlebar Tape');
         }
         if ((parts.WheelFront?.attributes?.tubeless_ready || parts.WheelRear?.attributes?.tubeless_ready) &&
-            (parts.TireFront?.tubeless || parts.TireRear?.tubeless)) {
+            (parts.TireFront?.specs?.tubeless_ready || parts.TireRear?.specs?.tubeless_ready)) {
             extras.push('Tubeless Valves (x2)');
             extras.push('Tire Sealant');
         }
-        if (parts.Frame?.brakeMount?.includes('FLAT') || parts.WheelFront?.brakeInterface?.includes('DISC')) {
+        if (parts.Frame?.specs?.brake_mount?.includes('FLAT') || parts.WheelFront?.specs?.brake_interface?.includes('DISC')) {
             extras.push('Disc Rotors (x2)');
         }
         if (parts.Shifter) {
-            if (parts.Shifter.isElectronic) {
+            const shifterName = (parts.Shifter.name || '').toUpperCase();
+            const isElectronic = shifterName.includes('DI2') || shifterName.includes('AXS') || shifterName.includes('EPS') || shifterName.includes('ETAP');
+            const isHydraulic = parts.Shifter.attributes?.brake_fluid || parts.Shifter.attributes?.type === 'Hydraulic';
+            if (isElectronic) {
                 extras.push('Batteries / Charger');
-            } else if (parts.Shifter.brakeFluid) {
+            } else if (isHydraulic) {
                 extras.push('Hydraulic Hoses & Fluid');
             } else {
                 extras.push('Shift Cables & Housing');
