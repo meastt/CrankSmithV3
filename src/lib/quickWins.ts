@@ -11,6 +11,7 @@ export interface QuickWin {
     component: WeightComponent; // Current baseline component
     upgrade: UpgradeOption; // Best upgrade option
     score: number; // Quick win score (higher is better)
+    marginalGainScore: number; // Multi-factor 0-100 score
     reason: string; // Why this is a quick win
 }
 
@@ -49,6 +50,20 @@ function calculateQuickWinScore(
     }
 
     return score;
+}
+
+/**
+ * Marginal gain score (0-100):
+ * Combines grams saved, rotating impact, and efficiency.
+ */
+function calculateMarginalGainScore(upgrade: UpgradeOption, isRotating: boolean): number {
+    const weightScore = Math.min(40, Math.max(0, upgrade.weight_saved / 6)); // up to 40 pts
+    const efficiencyScore = Math.max(0, Math.min(35, 35 - (upgrade.cost_per_gram * 3))); // lower $/g is better
+    const rotatingBonus = isRotating ? 15 : 0;
+    const affordabilityScore = Math.max(0, Math.min(10, 10 - (upgrade.cost_added / 150)));
+
+    const total = weightScore + efficiencyScore + rotatingBonus + affordabilityScore;
+    return Number(Math.max(0, Math.min(100, total)).toFixed(1));
 }
 
 /**
@@ -115,17 +130,19 @@ export async function findQuickWins(
 
         // Generate reason
         const reason = generateReason(bestUpgrade, component.is_rotating);
+        const marginalGainScore = calculateMarginalGainScore(bestUpgrade, component.is_rotating);
 
         quickWins.push({
             component,
             upgrade: bestUpgrade,
             score,
+            marginalGainScore,
             reason,
         });
     }
 
-    // Sort by score (best quick wins first)
-    return quickWins.sort((a, b) => b.score - a.score);
+    // Sort by smart value score first, then by legacy score.
+    return quickWins.sort((a, b) => b.marginalGainScore - a.marginalGainScore || b.score - a.score);
 }
 
 /**
