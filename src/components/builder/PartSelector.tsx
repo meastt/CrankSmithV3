@@ -473,6 +473,12 @@ export const PartSelector: React.FC = () => {
             .then(data => {
                 if (Array.isArray(data)) {
                     setComponents(data);
+
+                    // Surface a clearer troubleshooting message when the API is reachable
+                    // but the database returns no components for the selected type.
+                    if (data.length === 0) {
+                        setError(`No ${activeType} components were returned by the API. Check database connection and seed data.`);
+                    }
                 } else {
                     setComponents([]);
                     setError('Invalid data received');
