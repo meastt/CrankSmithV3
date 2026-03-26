@@ -10,6 +10,12 @@ function addIssue(issues: ValidationIssue[], componentId: string, message: strin
     });
 }
 
+function hasSpecValue(value: unknown): boolean {
+    if (value === null || value === undefined) return false;
+    if (typeof value === 'string') return value.trim().length > 0;
+    return true;
+}
+
 // Helper to normalize strings strictly (lowercase, alphanumeric only)
 function normalize(s: string | undefined): string {
     if (!s) return '';
@@ -287,8 +293,19 @@ function validateRollingChassis(build: any, issues: ValidationIssue[]) {
     // 2. Fork <-> Front Wheel
     const frontWheel = wheels.find((w: any) => w.specs?.position === 'Front' || w.specs?.position === 'Set');
     if (fork && frontWheel) {
+        const forkFrontAxle = fork.specs?.front_axle;
+        const wheelFrontAxle = frontWheel.specs?.axle || frontWheel.specs?.front_axle;
+        if (!hasSpecValue(forkFrontAxle) || !hasSpecValue(wheelFrontAxle)) {
+            addIssue(
+                issues,
+                frontWheel.id,
+                'Front axle metadata is incomplete. Manual verification recommended (fork axle vs front wheel axle).',
+                'WARNING',
+                fork.id
+            );
+        }
         // Axle Standard
-        if (!isCompatibleValue(fork.specs?.front_axle, frontWheel.specs?.axle || frontWheel.specs?.front_axle)) {
+        if (hasSpecValue(forkFrontAxle) && hasSpecValue(wheelFrontAxle) && !isCompatibleValue(forkFrontAxle, wheelFrontAxle)) {
             addIssue(issues, frontWheel.id, `Front wheel axle (${frontWheel.specs?.axle}) does not match fork (${fork.specs?.front_axle})`, 'ERROR', fork.id);
         }
         // Wheel Size
@@ -304,8 +321,19 @@ function validateRollingChassis(build: any, issues: ValidationIssue[]) {
     // 3. Frame <-> Rear Wheel
     const rearWheel = wheels.find((w: any) => w.specs?.position === 'Rear' || w.specs?.position === 'Set');
     if (frame && rearWheel) {
+        const frameRearAxle = frame.specs?.rear_axle;
+        const wheelRearAxle = rearWheel.specs?.axle || rearWheel.specs?.rear_axle;
+        if (!hasSpecValue(frameRearAxle) || !hasSpecValue(wheelRearAxle)) {
+            addIssue(
+                issues,
+                rearWheel.id,
+                'Rear axle metadata is incomplete. Manual verification recommended (frame dropout vs rear wheel axle).',
+                'WARNING',
+                frame.id
+            );
+        }
         // Axle Standard
-        if (!isCompatibleValue(frame.specs?.rear_axle, rearWheel.specs?.axle || rearWheel.specs?.rear_axle)) {
+        if (hasSpecValue(frameRearAxle) && hasSpecValue(wheelRearAxle) && !isCompatibleValue(frameRearAxle, wheelRearAxle)) {
             addIssue(issues, rearWheel.id, `Rear wheel axle (${rearWheel.specs?.axle}) does not match frame (${frame.specs?.rear_axle})`, 'ERROR', frame.id);
         }
     }
@@ -334,7 +362,15 @@ function validateRollingChassis(build: any, issues: ValidationIssue[]) {
     tires.forEach((tire: any) => {
         const relevantWheel = getWheelForTire(tire);
         if (relevantWheel) {
-            if (!isCompatibleValue(tire.specs?.diameter, relevantWheel.specs?.diameter)) {
+            if (!hasSpecValue(tire.specs?.diameter) || !hasSpecValue(relevantWheel.specs?.diameter)) {
+                addIssue(
+                    issues,
+                    tire.id,
+                    'Wheel/tire diameter metadata is incomplete. Manual verification recommended for bead-seat diameter.',
+                    'WARNING',
+                    relevantWheel.id
+                );
+            } else if (!isCompatibleValue(tire.specs?.diameter, relevantWheel.specs?.diameter)) {
                 addIssue(issues, tire.id, `Tire diameter (${tire.specs?.diameter}) does not match wheel (${relevantWheel.specs?.diameter})`, 'ERROR', relevantWheel.id);
             }
         }
@@ -363,7 +399,17 @@ function validateEngineRoom(build: any, issues: ValidationIssue[]) {
         const bbShell = bottomBracket.specs?.bb_shell || bottomBracket.specs?.type ||
                         bottomBracket.attributes?.frame_shell;
 
-        if (!bbShellsCompatible(frameShell, bbShell)) {
+        if (!hasSpecValue(frameShell) || !hasSpecValue(bbShell)) {
+            addIssue(
+                issues,
+                bottomBracket.id,
+                'Bottom bracket shell metadata is incomplete. Manual verification recommended before purchase.',
+                'WARNING',
+                frame.id
+            );
+        }
+
+        if (hasSpecValue(frameShell) && hasSpecValue(bbShell) && !bbShellsCompatible(frameShell, bbShell)) {
             addIssue(issues, bottomBracket.id,
                 `Bottom Bracket shell (${bbShell || 'unknown'}) does not fit frame (${frameShell || 'unknown'})`,
                 'ERROR', frame.id);
@@ -377,7 +423,17 @@ function validateEngineRoom(build: any, issues: ValidationIssue[]) {
         const crankSpindle = crankset.specs?.spindle_type || crankset.interfaces?.spindle_type ||
                              crankset.attributes?.spindle_type;
 
-        if (bbSpindle && crankSpindle && !isCompatibleValue(bbSpindle, crankSpindle)) {
+        if (!hasSpecValue(bbSpindle) || !hasSpecValue(crankSpindle)) {
+            addIssue(
+                issues,
+                crankset.id,
+                'Spindle interface metadata is incomplete. Manual verification recommended (BB interface vs crank spindle).',
+                'WARNING',
+                bottomBracket.id
+            );
+        }
+
+        if (hasSpecValue(bbSpindle) && hasSpecValue(crankSpindle) && !isCompatibleValue(bbSpindle, crankSpindle)) {
             addIssue(issues, crankset.id,
                 `Crank spindle (${crankSpindle}) incompatible with BB (${bbSpindle})`,
                 'ERROR', bottomBracket.id);

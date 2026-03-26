@@ -262,6 +262,8 @@ export const DrivetrainLab = () => {
     const [setupB, setSetupB] = useState<Setup>({ ...PRESETS['road-semi'], id: 'setup-b', name: 'Road Semi-Compact' });
     const [cadence, setCadence] = useState(90);
     const [ftp, setFtp] = useState(250); // Watts
+    const [fiveMinPower, setFiveMinPower] = useState(320); // Watts
+    const [sprintPower, setSprintPower] = useState(900); // Watts
     const [weight, setWeight] = useState(75); // kg
     const [showMethodology, setShowMethodology] = useState(false);
     const [courseClimbGrade, setCourseClimbGrade] = useState(8);
@@ -407,7 +409,10 @@ export const DrivetrainLab = () => {
         const flatSpeed = getTopSpeed(setup, 95);
         const climbCadence = getCadenceAtGrade(setup, courseClimbGrade);
         const cadencePenalty = Math.abs(climbCadence - courseTargetCadence) * 0.25;
-        return (flatSpeed * flatWeight) + (climbCadence * 0.08 * climbWeight) - cadencePenalty;
+        const punchScore = Math.max(0, Math.min(20, (fiveMinPower / Math.max(1, weight)) * 1.6));
+        const sprintScore = Math.max(0, Math.min(20, (sprintPower / Math.max(1, weight)) * 0.8));
+        const powerBlend = (punchScore * climbWeight) + (sprintScore * flatWeight);
+        return (flatSpeed * flatWeight) + (climbCadence * 0.08 * climbWeight) + (powerBlend * 0.2) - cadencePenalty;
     };
 
     const applyEventProfile = () => {
@@ -753,6 +758,28 @@ export const DrivetrainLab = () => {
                                         className="bg-stone-900 border border-white/10 rounded px-2 py-1 text-white"
                                     />
                                 </label>
+                                <label className="flex flex-col gap-1">
+                                    <span className="text-stone-500">5-min power (W)</span>
+                                    <input
+                                        type="number"
+                                        min={120}
+                                        max={700}
+                                        value={fiveMinPower}
+                                        onChange={(e) => setFiveMinPower(Math.max(120, Math.min(700, Number(e.target.value) || 320)))}
+                                        className="bg-stone-900 border border-white/10 rounded px-2 py-1 text-white"
+                                    />
+                                </label>
+                                <label className="flex flex-col gap-1">
+                                    <span className="text-stone-500">Sprint power (W)</span>
+                                    <input
+                                        type="number"
+                                        min={300}
+                                        max={2200}
+                                        value={sprintPower}
+                                        onChange={(e) => setSprintPower(Math.max(300, Math.min(2200, Number(e.target.value) || 900)))}
+                                        className="bg-stone-900 border border-white/10 rounded px-2 py-1 text-white"
+                                    />
+                                </label>
                             </div>
                             <button
                                 onClick={applyEventProfile}
@@ -806,6 +833,9 @@ export const DrivetrainLab = () => {
                                     </p>
                                 );
                             })()}
+                            <p className="text-[11px] text-stone-500 mt-2">
+                                Score blends setup outputs with your 5-min and sprint power profile for climb vs flat demands.
+                            </p>
                         </div>
                     )}
                 </div>

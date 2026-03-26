@@ -185,6 +185,7 @@ export const TirePressureCalculator = () => {
     const [feedbackSavedCount, setFeedbackSavedCount] = useState(0);
     const [feedbackEntries, setFeedbackEntries] = useState<SetupFeedbackEntry[]>([]);
     const [whatIfTireWidth, setWhatIfTireWidth] = useState(32);
+    const [showEventPlan, setShowEventPlan] = useState(false);
     const { unitSystem } = useSettingsStore();
     const { parts } = useBuildStore();
     const measuredWidth = tireWidth + (rimWidth - 19) * 0.4;
@@ -381,6 +382,26 @@ export const TirePressureCalculator = () => {
         setFeedbackEntries(entries);
         setFeedbackSavedCount(entries.length);
     };
+
+    const eventPressurePlan = useMemo(() => {
+        const qualifyingAdjust = surface.startsWith('road') ? 1.5 : 1.0;
+        const raceAdjust = isWet ? -1.5 : -0.5;
+
+        return {
+            qualifying: {
+                front: Math.max(10, result.front.recommended + qualifyingAdjust),
+                rear: Math.max(10, result.rear.recommended + qualifyingAdjust),
+            },
+            dayBefore: {
+                front: result.front.recommended,
+                rear: result.rear.recommended,
+            },
+            raceDay: {
+                front: Math.max(10, result.front.recommended + raceAdjust),
+                rear: Math.max(10, result.rear.recommended + raceAdjust),
+            }
+        };
+    }, [result, surface, isWet]);
 
     return (
         <div className="w-full max-w-5xl mx-auto">
@@ -593,6 +614,40 @@ export const TirePressureCalculator = () => {
                                                     )}
                                                 </div>
                                             ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="mt-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                                    <div className="flex items-center justify-between">
+                                        <div className="text-xs text-stone-400">Event mode pressure sets</div>
+                                        <button
+                                            onClick={() => setShowEventPlan((v) => !v)}
+                                            className="text-[11px] text-cyan-300 hover:text-cyan-100 underline underline-offset-2"
+                                        >
+                                            {showEventPlan ? 'Hide event plan' : 'Show event plan'}
+                                        </button>
+                                    </div>
+                                    {showEventPlan && (
+                                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                                            <div className="rounded-lg border border-white/10 bg-black/20 p-2">
+                                                <div className="text-stone-500 mb-1">Qualifying</div>
+                                                <div className="font-mono text-stone-200">
+                                                    F {toPressure(eventPressurePlan.qualifying.front, unitSystem).toFixed(1)} / R {toPressure(eventPressurePlan.qualifying.rear, unitSystem).toFixed(1)} {pressureUnit(unitSystem)}
+                                                </div>
+                                            </div>
+                                            <div className="rounded-lg border border-white/10 bg-black/20 p-2">
+                                                <div className="text-stone-500 mb-1">Day before</div>
+                                                <div className="font-mono text-stone-200">
+                                                    F {toPressure(eventPressurePlan.dayBefore.front, unitSystem).toFixed(1)} / R {toPressure(eventPressurePlan.dayBefore.rear, unitSystem).toFixed(1)} {pressureUnit(unitSystem)}
+                                                </div>
+                                            </div>
+                                            <div className="rounded-lg border border-white/10 bg-black/20 p-2">
+                                                <div className="text-stone-500 mb-1">Race day</div>
+                                                <div className="font-mono text-stone-200">
+                                                    F {toPressure(eventPressurePlan.raceDay.front, unitSystem).toFixed(1)} / R {toPressure(eventPressurePlan.raceDay.rear, unitSystem).toFixed(1)} {pressureUnit(unitSystem)}
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>

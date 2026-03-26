@@ -6,7 +6,7 @@ import { useToast } from '@/components/ui/Toast';
 import { AlertTriangle, Trash2, Save, Download, Package, X } from 'lucide-react';
 
 export const BuildSummary: React.FC = () => {
-    const { parts, removePart, validationResult, totalWeight } = useBuildStore();
+    const { parts, removePart, validationResult } = useBuildStore();
     const { toast } = useToast();
     const [showSaveInput, setShowSaveInput] = useState(false);
     const [buildName, setBuildName] = useState('');
@@ -101,6 +101,10 @@ export const BuildSummary: React.FC = () => {
     const extras = getExtras();
     const issues = validationResult?.issues || [];
     const errors = issues.filter(r => r.severity === 'ERROR');
+    const warnings = issues.filter(r => r.severity === 'WARNING');
+    const manualVerificationWarnings = warnings.filter((w) =>
+        w.message.toLowerCase().includes('manual verification')
+    );
 
     return (
         <div className="flex flex-col h-full">
@@ -166,6 +170,23 @@ export const BuildSummary: React.FC = () => {
                             {errors.map((result, idx) => (
                                 <li key={idx} className="text-xs text-red-300/80 flex items-start gap-2">
                                     <span className="w-1 h-1 bg-red-400 rounded-full mt-1.5 shrink-0" />
+                                    {result.message}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+                {manualVerificationWarnings.length > 0 && (
+                    <div className="mt-4 bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-blue-300 mb-2">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span className="font-semibold text-sm">Manual Verification Recommended</span>
+                        </div>
+                        <ul className="space-y-1.5">
+                            {manualVerificationWarnings.map((result, idx) => (
+                                <li key={idx} className="text-xs text-blue-100/90 flex items-start gap-2">
+                                    <span className="w-1 h-1 bg-blue-300 rounded-full mt-1.5 shrink-0" />
                                     {result.message}
                                 </li>
                             ))}
