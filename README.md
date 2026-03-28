@@ -8,7 +8,7 @@
 ---
 
 [![Status](https://img.shields.io/badge/Status-Currently_Live-06b6d4?style=for-the-badge)](https://cranksmith.com)
-[![Version](https://img.shields.io/badge/Version-3.0.0-1e293b?style=for-the-badge)](https://github.com/michaeleast/CrankSmithV3)
+[![Version](https://img.shields.io/badge/Version-4.0.0-1e293b?style=for-the-badge)](https://github.com/michaeleast/CrankSmithV3)
 [![Mobile](https://img.shields.io/badge/Mobile-iOS_|_Android-06b6d4?style=for-the-badge)](#mobile-deployment-reference)
 
 **CrankSmith** is a professional-grade bicycle configuration tool designed for performance cyclists, DIY wrenchers, and upgrade-curious racers. Unlike generic bike builders, CrankSmith uses a **deterministic compatibility engine** to validate technical interoperability across road, gravel, and MTB standards.
