@@ -236,6 +236,58 @@ describe('calculateTirePressure', () => {
             expect(result.rear.max).toBeCloseTo(result.rear.recommended * 1.1, 5);
         });
     });
+
+    // -----------------------------------------------------------------------
+    // Boundary / Edge Cases — Golden Parity Fixtures
+    // -----------------------------------------------------------------------
+
+    describe('Boundary edge cases', () => {
+        it('extreme narrow tire (20mm) — capped at 120 PSI max', () => {
+            const result = calculateTirePressure(makeInput({
+                riderWeight: 90, bikeWeight: 10, tireWidth: 20, rimWidth: 15,
+                surface: 'road-smooth', isTubeless: false, preference: 1,
+            }));
+            expect(result.rear.recommended).toBeLessThanOrEqual(120);
+            expect(result.front.recommended).toBeGreaterThan(0);
+        });
+
+        it('extreme wide tire (80mm fat bike) — stays above floor', () => {
+            const result = calculateTirePressure(makeInput({
+                riderWeight: 80, bikeWeight: 14, tireWidth: 80, rimWidth: 40,
+                surface: 'mtb-enduro', isTubeless: true,
+            }));
+            expect(result.front.recommended).toBeGreaterThanOrEqual(15);
+            expect(result.rear.recommended).toBeGreaterThanOrEqual(15);
+            expect(Number.isFinite(result.front.recommended)).toBe(true);
+        });
+
+        it('very light rider (40kg) with narrow tires — no NaN or negative', () => {
+            const result = calculateTirePressure(makeInput({
+                riderWeight: 40, bikeWeight: 6, tireWidth: 23, rimWidth: 17,
+            }));
+            expect(Number.isFinite(result.front.recommended)).toBe(true);
+            expect(Number.isFinite(result.rear.recommended)).toBe(true);
+            expect(result.front.recommended).toBeGreaterThan(0);
+        });
+
+        it('very heavy rider (150kg) — values are sensible and clamped', () => {
+            const result = calculateTirePressure(makeInput({
+                riderWeight: 150, bikeWeight: 12, tireWidth: 28, rimWidth: 21,
+                surface: 'road-smooth', isTubeless: false,
+            }));
+            expect(result.rear.recommended).toBeLessThanOrEqual(120);
+            expect(result.front.recommended).toBeGreaterThan(0);
+        });
+
+        it('rim wider than tire (30mm rim + 23mm tire) — no crash', () => {
+            const result = calculateTirePressure(makeInput({
+                tireWidth: 23, rimWidth: 30,
+            }));
+            expect(Number.isFinite(result.front.recommended)).toBe(true);
+            expect(Number.isFinite(result.rear.recommended)).toBe(true);
+            expect(result.front.recommended).toBeGreaterThan(0);
+        });
+    });
 });
 
 // ===========================================================================

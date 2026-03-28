@@ -4,6 +4,7 @@ import { DM_Sans, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { CapacitorInit } from "@/components/CapacitorInit";
 import { Providers } from "@/components/Providers";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
@@ -66,6 +67,7 @@ export default function RootLayout({
       >
         <Providers>
           <ServiceWorkerRegister />
+          <CapacitorInit />
           <OfflineIndicator />
           <Header />
           <main className="flex-grow">

@@ -15,8 +15,8 @@ export function TerrorDisplay({ baseline, target, onReset, onSave }: TerrorDispl
     const hasUpgrades = target && target.upgrades.length > 0;
 
     return (
-        <div className="sticky top-20 z-30 bg-stone-900/95 backdrop-blur-xl border-b border-white/10 shadow-2xl">
-            <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="sticky top-16 md:top-20 z-30 bg-stone-900/95 backdrop-blur-xl border-b border-white/10 shadow-2xl">
+            <div className="max-w-7xl mx-auto px-3 py-2 md:px-4 md:py-4">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                     {/* Baseline Weight */}
                     <div className="flex items-center gap-3">

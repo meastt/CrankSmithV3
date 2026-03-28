@@ -2,14 +2,19 @@
 
 import React, { useEffect, useState } from 'react';
 import { Component } from '@/lib/types/compatibility';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useToast } from '@/components/ui/Toast';
 import { Plus, Trash2, Edit, Search } from 'lucide-react';
 import Link from 'next/link';
+import { LoadingState, EmptyState } from '@/components/ui/StateDisplays';
 
 export default function AdminComponentsPage() {
     const [components, setComponents] = useState<Component[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('All');
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+    const { toast } = useToast();
 
     useEffect(() => {
         fetchComponents();
@@ -28,8 +33,6 @@ export default function AdminComponentsPage() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this component?')) return;
-
         try {
             const res = await fetch(`/api/components/${id}`, {
                 method: 'DELETE',
@@ -37,11 +40,12 @@ export default function AdminComponentsPage() {
             if (res.ok) {
                 setComponents(components.filter(c => c.id !== id));
             } else {
-                alert('Failed to delete component');
+                toast({ type: 'error', title: 'Delete Failed', message: 'Failed to delete component.' });
             }
         } catch (error) {
             console.error('Error deleting component', error);
         }
+        setDeleteTarget(null);
     };
 
     const filteredComponents = components.filter(c => {
@@ -54,6 +58,15 @@ export default function AdminComponentsPage() {
 
     return (
         <div className="space-y-6">
+            <ConfirmDialog
+                isOpen={deleteTarget !== null}
+                title="Delete Component"
+                message="Are you sure you want to delete this component? This action cannot be undone."
+                confirmLabel="Delete"
+                variant="danger"
+                onConfirm={() => deleteTarget && handleDelete(deleteTarget)}
+                onCancel={() => setDeleteTarget(null)}
+            />
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold">Components</h1>
                 <Link
@@ -104,11 +117,11 @@ export default function AdminComponentsPage() {
                         <tbody className="divide-y divide-gray-800">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">Loading...</td>
+                                    <td colSpan={5}><LoadingState message="Loading components..." /></td>
                                 </tr>
                             ) : filteredComponents.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">No components found</td>
+                                    <td colSpan={5}><EmptyState title="No components found" message="Try adjusting your search or filter." /></td>
                                 </tr>
                             ) : (
                                 filteredComponents.map(component => (
@@ -129,7 +142,7 @@ export default function AdminComponentsPage() {
                                                 <Edit className="w-4 h-4" />
                                             </Link>
                                             <button
-                                                onClick={() => handleDelete(component.id)}
+                                                onClick={() => setDeleteTarget(component.id)}
                                                 className="inline-block p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                                             >
                                                 <Trash2 className="w-4 h-4" />

@@ -1,4 +1,30 @@
+'use client';
+
 import Link from "next/link";
+import { useCallback } from "react";
+
+function ExternalLink({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) {
+  const handleClick = useCallback(async (e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      const { Capacitor } = await import('@capacitor/core');
+      if (Capacitor.isNativePlatform()) {
+        const { Browser } = await import('@capacitor/browser');
+        await Browser.open({ url: href });
+        return;
+      }
+    } catch {
+      // Not on native platform, fall through
+    }
+    window.open(href, '_blank', 'noopener,noreferrer');
+  }, [href]);
+
+  return (
+    <a href={href} onClick={handleClick} className={className}>
+      {children}
+    </a>
+  );
+}
 
 export function Footer() {
   return (
@@ -29,14 +55,12 @@ export function Footer() {
             </p>
             <p className="text-xs text-stone-600">
               Made by{" "}
-              <a
+              <ExternalLink
                 href="https://techridgeseo.com"
-                target="_blank"
-                rel="noopener noreferrer"
                 className="text-cyan-400 hover:text-cyan-300 transition-colors"
               >
                 Tech Ridge SEO
-              </a>
+              </ExternalLink>
             </p>
             <div className="mt-2 text-xs text-stone-600 flex flex-col gap-1">
               <span>St. George, UT</span>
@@ -58,14 +82,12 @@ export function Footer() {
             <Link href="/privacy" className="text-stone-500 hover:text-primary transition-colors">
               Privacy
             </Link>
-            <a
+            <ExternalLink
               href="https://instagram.com/cranksmithapp"
-              target="_blank"
-              rel="noopener noreferrer"
               className="text-stone-500 hover:text-primary transition-colors"
             >
               Instagram
-            </a>
+            </ExternalLink>
           </nav>
         </div>
       </div>

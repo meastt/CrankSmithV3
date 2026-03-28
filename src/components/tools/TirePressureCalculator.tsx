@@ -322,7 +322,7 @@ export const TirePressureCalculator = () => {
 
     return (
         <div className="w-full max-w-5xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
 
                 {/* Left Column: Inputs */}
                 <div className="lg:col-span-5 space-y-8">
@@ -331,7 +331,7 @@ export const TirePressureCalculator = () => {
                             <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                             System Details
                         </h3>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <InputField
                                 label="Rider Weight"
                                 value={Number(toWeight(riderWeight, unitSystem).toFixed(1))}
@@ -357,7 +357,7 @@ export const TirePressureCalculator = () => {
                             <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                             Tire & Rim
                         </h3>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <InputField
                                 label="Tire Width"
                                 value={tireWidth}
@@ -386,11 +386,11 @@ export const TirePressureCalculator = () => {
                             <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                             Conditions
                         </h3>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div>
                             <select
                                 value={surface}
                                 onChange={(e) => setSurface(e.target.value as SurfaceType)}
-                                className="col-span-2 bg-stone-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-rose-500/50"
+                                className="w-full bg-stone-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-rose-500/50"
                             >
                                 <option value="road-smooth">Smooth Tarmac</option>
                                 <option value="road-poor">Rough Road / Chip Seal</option>
@@ -411,11 +411,11 @@ export const TirePressureCalculator = () => {
 
                 {/* Right Column: Results */}
                 <div className="lg:col-span-7">
-                    <div className="sticky top-8">
+                    <div className="lg:sticky lg:top-8">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-stone-900/80 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl relative overflow-hidden"
+                            className="bg-stone-900/80 backdrop-blur-xl rounded-3xl p-4 sm:p-6 lg:p-8 border border-white/10 shadow-2xl relative overflow-hidden"
                         >
                             {/* Background Glow */}
                             <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/10 blur-[100px] rounded-full pointer-events-none" />
@@ -597,7 +597,7 @@ export const TirePressureCalculator = () => {
                                         <span>Max Speed</span>
                                     </div>
 
-                                    <div className="relative h-8 flex items-center">
+                                    <div className="relative h-12 flex items-center">
                                         {/* Track Background */}
                                         <div className="absolute inset-x-0 h-2 bg-stone-800 rounded-full overflow-hidden">
                                             <div className="absolute left-1/4 right-1/4 top-0 bottom-0 bg-gradient-to-r from-rose-900/50 via-rose-500/50 to-rose-900/50 rounded-full opacity-50" />
@@ -611,15 +611,15 @@ export const TirePressureCalculator = () => {
                                             step="0.1"
                                             value={preference}
                                             onChange={(e) => setPreference(parseFloat(e.target.value))}
-                                            className="relative w-full h-8 opacity-0 z-20 cursor-pointer"
+                                            className="relative w-full h-12 opacity-0 z-20 cursor-pointer"
                                             aria-label="Pressure Preference"
                                         />
 
                                         {/* Custom Thumb Visual (follows the hidden input) */}
                                         <div
-                                            className="absolute h-4 w-4 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)] border-2 border-stone-900 pointer-events-none z-10 transition-all duration-75"
+                                            className="absolute h-6 w-6 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)] border-2 border-stone-900 pointer-events-none z-10 transition-all duration-75"
                                             style={{
-                                                left: `calc(${((preference + 1) / 2) * 100}% - 8px)`
+                                                left: `calc(${((preference + 1) / 2) * 100}% - 12px)`
                                             }}
                                         />
                                     </div>
@@ -631,7 +631,7 @@ export const TirePressureCalculator = () => {
                                                 ? `Prioritizing grip (${Math.round(Math.abs(preference) * 100)}%). Lower pressure.`
                                                 : `Prioritizing speed (${Math.round(preference * 100)}%). Higher pressure.`}
                                     </p>
-                                    <p className="text-center text-[11px] text-stone-600 mt-2">
+                                    <p className="text-center text-xs text-stone-600 mt-2">
                                         Confidence drops as terrain gets rougher or setup gets more extreme.
                                     </p>
                                 </div>
@@ -639,7 +639,7 @@ export const TirePressureCalculator = () => {
                         </motion.div>
 
                         {/* Quick Tips */}
-                        <div className="mt-6 grid grid-cols-2 gap-4">
+                        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="bg-stone-900/40 rounded-xl p-4 border border-white/5">
                                 <div className="text-rose-400 mb-2"><Info className="w-4 h-4" /></div>
                                 <h4 className="text-sm font-bold text-stone-300 mb-1">Rim Width Matters</h4>

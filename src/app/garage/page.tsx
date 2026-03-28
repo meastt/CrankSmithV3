@@ -1,14 +1,19 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 export const dynamic = 'force-dynamic';
 import { useBuildStore } from '@/store/buildStore';
 import { useRouter } from 'next/navigation';
-import { Trash2, Edit3, Bike, ArrowRight, Settings } from 'lucide-react';
+import Image from 'next/image';
+import { Trash2, Edit3, Bike, ArrowRight, Settings, WifiOff, Loader2 } from 'lucide-react';
 import { useUser, SignInButton } from '@clerk/nextjs';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import templates from '@/data/templates.json';
 import { Component } from '@/lib/types/compatibility';
+import { LoadingState } from '@/components/ui/StateDisplays';
 
 interface SavedBuild {
     id: string;
@@ -21,12 +26,35 @@ export default function GaragePage() {
     // Default to guest view initially to prevent blocking
     const { user, isLoaded } = useUser();
     const [builds, setBuilds] = useState<SavedBuild[] | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+    const [fetchError, setFetchError] = useState(false);
     const router = useRouter();
     const { setBuild, loadTemplate } = useBuildStore();
+    const isOnline = useOnlineStatus();
+
+    const fetchBuilds = useCallback(async () => {
+        if (!user) return;
+        const res = await fetch('/api/builds');
+        if (res.ok) {
+            const data = await res.json();
+            setBuilds(data);
+            setFetchError(false);
+        }
+    }, [user]);
+
+    const { isRefreshing, pullDistance, threshold } = usePullToRefresh({
+        onRefresh: fetchBuilds,
+    });
 
     // Only fetch builds if we are definitely logged in
+    // Re-fetch when coming back online after a fetch error
     useEffect(() => {
         if (isLoaded && user) {
+            if (!isOnline) {
+                if (builds === null) setBuilds([]);
+                setFetchError(true);
+                return;
+            }
             fetch('/api/builds')
                 .then(res => {
                     if (res.ok) return res.json();
@@ -34,15 +62,17 @@ export default function GaragePage() {
                 })
                 .then(data => {
                     setBuilds(data);
+                    setFetchError(false);
                 })
                 .catch(err => {
                     console.error("Error fetching builds:", err);
-                    setBuilds([]);
+                    setFetchError(true);
+                    if (builds === null) setBuilds([]);
                 });
         } else if (isLoaded && !user) {
             setBuilds([]);
         }
-    }, [isLoaded, user]);
+    }, [isLoaded, user, isOnline]);
 
     // If Clerk is loading, we can show a subtle indicator or just the guest view
     // We do NOT block the entire UI on isLoaded anymore
@@ -59,8 +89,6 @@ export default function GaragePage() {
     };
 
     const deleteBuild = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this build?')) return;
-
         try {
             const res = await fetch(`/api/builds?id=${id}`, { method: 'DELETE' });
             if (res.ok) {
@@ -69,6 +97,7 @@ export default function GaragePage() {
         } catch (e) {
             console.error(e);
         }
+        setDeleteTarget(null);
     };
 
     // Normalize templates just in case of import issues
@@ -79,14 +108,48 @@ export default function GaragePage() {
     if (isLoadingBuilds) {
         return (
             <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                <LoadingState message="Loading your builds..." />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-950 p-6 md:p-12">
+        <div className="min-h-screen bg-gray-950 p-4 pt-safe pb-safe md:p-12">
+            {/* Pull-to-refresh indicator */}
+            {(pullDistance > 0 || isRefreshing) && (
+                <div
+                    className="flex justify-center items-center overflow-hidden transition-all"
+                    style={{ height: isRefreshing ? 48 : pullDistance }}
+                >
+                    <Loader2
+                        className={`w-6 h-6 text-blue-400 ${isRefreshing ? 'animate-spin' : ''}`}
+                        style={{
+                            opacity: Math.min(pullDistance / threshold, 1),
+                            transform: `rotate(${(pullDistance / threshold) * 360}deg)`,
+                        }}
+                    />
+                </div>
+            )}
+            <ConfirmDialog
+                isOpen={deleteTarget !== null}
+                title="Delete Build"
+                message="Are you sure you want to delete this build? This action cannot be undone."
+                confirmLabel="Delete"
+                variant="danger"
+                onConfirm={() => deleteTarget && deleteBuild(deleteTarget)}
+                onCancel={() => setDeleteTarget(null)}
+            />
             <div className="max-w-6xl mx-auto">
+                {(!isOnline || fetchError) && (
+                    <div className="mb-6 flex items-center gap-3 px-4 py-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400">
+                        <WifiOff className="w-5 h-5 flex-shrink-0" />
+                        <p className="text-sm">
+                            {!isOnline
+                                ? "You're offline. Your saved builds will load when you reconnect."
+                                : "Couldn't load your builds. They'll refresh automatically when the connection is restored."}
+                        </p>
+                    </div>
+                )}
                 <div className="flex justify-between items-end mb-8 border-b border-white/10 pb-6">
                     <div>
                         <h1 className="text-3xl font-bold text-white tracking-tight">My Garage</h1>
@@ -122,36 +185,7 @@ export default function GaragePage() {
                             </SignInButton>
                         </div>
 
-                        <div>
-                            <h2 className="text-xl font-bold text-white mb-6">Starter Templates</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {templateList.map((template: any) => (
-                                    <div key={template.id} className="group bg-gray-900 border border-white/10 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all duration-300">
-                                        <div className="h-32 bg-gradient-to-br from-blue-900/20 to-purple-900/20 flex items-center justify-center relative">
-                                            <Bike className="w-12 h-12 text-blue-400/50 group-hover:text-blue-400 transition-colors" />
-                                        </div>
-                                        <div className="p-5">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <h3 className="text-lg font-bold text-white">{template.name}</h3>
-                                                <span className="px-2 py-1 rounded-full bg-white/10 text-xs text-gray-300">{template.category}</span>
-                                            </div>
-                                            <p className="text-sm text-gray-400 mb-4 line-clamp-2">{template.description}</p>
-                                            <button
-                                                onClick={() => {
-                                                    // @ts-ignore - JSON import typing
-                                                    const parts = template.parts;
-                                                    loadTemplate(parts as any);
-                                                    router.push('/builder');
-                                                }}
-                                                className="w-full py-2 bg-white/5 hover:bg-blue-600 hover:text-white text-blue-400 rounded-lg font-medium transition-colors flex items-center justify-center"
-                                            >
-                                                Use Template <ArrowRight className="w-4 h-4 ml-2" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        <TemplateGrid templateList={templateList} loadTemplate={loadTemplate} router={router} />
                     </div>
                 ) : (builds ?? []).length === 0 ? (
                     <div className="space-y-12">
@@ -167,36 +201,7 @@ export default function GaragePage() {
                             </button>
                         </div>
 
-                        <div>
-                            <h2 className="text-xl font-bold text-white mb-6">Starter Templates</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {templateList.map((template: any) => (
-                                    <div key={template.id} className="group bg-gray-900 border border-white/10 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all duration-300">
-                                        <div className="h-32 bg-gradient-to-br from-blue-900/20 to-purple-900/20 flex items-center justify-center relative">
-                                            <Bike className="w-12 h-12 text-blue-400/50 group-hover:text-blue-400 transition-colors" />
-                                        </div>
-                                        <div className="p-5">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <h3 className="text-lg font-bold text-white">{template.name}</h3>
-                                                <span className="px-2 py-1 rounded-full bg-white/10 text-xs text-gray-300">{template.category}</span>
-                                            </div>
-                                            <p className="text-sm text-gray-400 mb-4 line-clamp-2">{template.description}</p>
-                                            <button
-                                                onClick={() => {
-                                                    // @ts-ignore - JSON import typing
-                                                    const parts = template.parts as Record<string, Component>;
-                                                    loadTemplate(parts);
-                                                    router.push('/builder');
-                                                }}
-                                                className="w-full py-2 bg-white/5 hover:bg-blue-600 hover:text-white text-blue-400 rounded-lg font-medium transition-colors flex items-center justify-center"
-                                            >
-                                                Use Template <ArrowRight className="w-4 h-4 ml-2" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        <TemplateGrid templateList={templateList} loadTemplate={loadTemplate} router={router} />
                     </div>
                 ) : (
                     <div className="space-y-12">
@@ -219,8 +224,9 @@ export default function GaragePage() {
                                                 <Edit3 className="w-3 h-3 mr-1.5" /> Load
                                             </button>
                                             <button
-                                                onClick={() => deleteBuild(build.id)}
-                                                className="text-sm font-medium text-gray-500 hover:text-red-400 flex items-center transition-colors"
+                                                onClick={() => setDeleteTarget(build.id)}
+                                                disabled={!isOnline}
+                                                className="text-sm font-medium text-gray-500 hover:text-red-400 flex items-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-gray-500"
                                             >
                                                 <Trash2 className="w-3 h-3 mr-1.5" /> Delete
                                             </button>
@@ -231,34 +237,61 @@ export default function GaragePage() {
                         </div>
 
                         <div className="pt-8 border-t border-white/10">
-                            <h2 className="text-xl font-bold text-white mb-6">Start New from Template</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {templateList.map((template: any) => (
-                                    <div key={template.id} className="group bg-gray-900 border border-white/10 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all duration-300">
-                                        <div className="p-5">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <h3 className="text-lg font-bold text-white">{template.name}</h3>
-                                                <span className="px-2 py-1 rounded-full bg-white/10 text-xs text-gray-300">{template.category}</span>
-                                            </div>
-                                            <p className="text-sm text-gray-400 mb-4 line-clamp-2">{template.description}</p>
-                                            <button
-                                                onClick={() => {
-                                                    // @ts-ignore - JSON import typing
-                                                    const parts = template.parts;
-                                                    loadTemplate(parts as any);
-                                                    router.push('/builder');
-                                                }}
-                                                className="w-full py-2 bg-white/5 hover:bg-blue-600 hover:text-white text-blue-400 rounded-lg font-medium transition-colors flex items-center justify-center"
-                                            >
-                                                Use Template <ArrowRight className="w-4 h-4 ml-2" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                            <TemplateGrid title="Start New from Template" templateList={templateList} loadTemplate={loadTemplate} router={router} />
                         </div>
                     </div>
                 )}
+            </div>
+        </div>
+    );
+}
+
+function TemplateGrid({ title = 'Starter Templates', templateList, loadTemplate, router }: {
+    title?: string;
+    templateList: any[];
+    loadTemplate: (parts: any) => void;
+    router: ReturnType<typeof useRouter>;
+}) {
+    return (
+        <div>
+            <h2 className="text-xl font-bold text-white mb-6">{title}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {templateList.map((template: any) => (
+                    <div key={template.id} className="group bg-gray-900 border border-white/10 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all duration-300">
+                        <div className="h-40 relative overflow-hidden">
+                            {template.image ? (
+                                <Image
+                                    src={template.image}
+                                    alt={template.name}
+                                    fill
+                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                    sizes="(max-width: 768px) 100vw, 33vw"
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-blue-900/20 to-purple-900/20 flex items-center justify-center">
+                                    <Bike className="w-12 h-12 text-blue-400/50" />
+                                </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent" />
+                        </div>
+                        <div className="p-5">
+                            <div className="flex justify-between items-start mb-2">
+                                <h3 className="text-lg font-bold text-white">{template.name}</h3>
+                                <span className="px-2 py-1 rounded-full bg-white/10 text-xs text-gray-300">{template.category}</span>
+                            </div>
+                            <p className="text-sm text-gray-400 mb-4 line-clamp-2">{template.description}</p>
+                            <button
+                                onClick={() => {
+                                    loadTemplate(template.parts as any);
+                                    router.push('/builder');
+                                }}
+                                className="w-full py-2 bg-white/5 hover:bg-blue-600 hover:text-white text-blue-400 rounded-lg font-medium transition-colors flex items-center justify-center"
+                            >
+                                Use Template <ArrowRight className="w-4 h-4 ml-2" />
+                            </button>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );

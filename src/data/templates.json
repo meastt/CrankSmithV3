@@ -4,6 +4,7 @@
         "name": "Ultimate Climbing Machine",
         "description": "A featherweight road build designed for the steepest ascents. Sub-7kg goal.",
         "category": "Road",
+        "image": "/images/climber.webp",
         "parts": {
             "Frame": {
                 "id": "frame-specialized-aethos",
@@ -122,6 +123,7 @@
         "name": "Unbound Gravel Racer",
         "description": "Fast, capable, and ready for 200 miles of flint. Aero optimized gravel setup.",
         "category": "Gravel",
+        "image": "/images/unbound.webp",
         "parts": {
             "Frame": {
                 "id": "frame-cervelo-aspero",
@@ -238,6 +240,7 @@
         "name": "Dream Trail Ripper",
         "description": "140mm travel do-it-all trail bike. Light enough to climb, burly enough to descend.",
         "category": "MTB",
+        "image": "/images/trailbike.webp",
         "parts": {
             "Frame": {
                 "id": "frame-stumpjumper",

@@ -259,7 +259,7 @@ export default function WeightPage() {
                         className="flex items-center gap-2 text-stone-400 hover:text-white transition-colors"
                     >
                         <ArrowLeft className="w-5 h-5" />
-                        <span className="text-sm font-medium">Back to Dashboard</span>
+                        <span className="text-sm font-medium hidden sm:inline">Back to Dashboard</span>
                     </Link>
                     <div className="flex items-center gap-2">
                         <Scale className="w-5 h-5 text-emerald-500" />
@@ -297,7 +297,7 @@ export default function WeightPage() {
                                     <button
                                         key={mode}
                                         onClick={() => setModeFilter(mode)}
-                                        className={`px-2.5 py-1 text-[11px] rounded-md border ${
+                                        className={`px-3 py-1.5 text-xs rounded-md border ${
                                             modeFilter === mode
                                                 ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-200'
                                                 : 'bg-stone-900/60 border-white/10 text-stone-300 hover:text-white'

@@ -163,7 +163,7 @@ export function ManualEntryModal({ isOpen, onClose, onSave }: ManualEntryModalPr
                                                 category: e.target.value as ComponentCategory,
                                             })
                                         }
-                                        className="w-full px-4 py-2 bg-stone-900 border border-white/10 rounded-lg text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+                                        className="w-full px-4 py-3 bg-stone-900 border border-white/10 rounded-lg text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
                                     >
                                         <option value="">Select category...</option>
                                         {allCategories.map(({ displayName, category }) => (
@@ -186,7 +186,7 @@ export function ManualEntryModal({ isOpen, onClose, onSave }: ManualEntryModalPr
                                             setFormData({ ...formData, name: e.target.value })
                                         }
                                         placeholder="e.g., Dura-Ace R9270 Crankset"
-                                        className="w-full px-4 py-2 bg-stone-900 border border-white/10 rounded-lg text-white placeholder:text-stone-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+                                        className="w-full px-4 py-3 bg-stone-900 border border-white/10 rounded-lg text-white placeholder:text-stone-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
                                     />
                                 </div>
 
@@ -202,7 +202,7 @@ export function ManualEntryModal({ isOpen, onClose, onSave }: ManualEntryModalPr
                                             setFormData({ ...formData, brand: e.target.value })
                                         }
                                         placeholder="e.g., Shimano"
-                                        className="w-full px-4 py-2 bg-stone-900 border border-white/10 rounded-lg text-white placeholder:text-stone-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+                                        className="w-full px-4 py-3 bg-stone-900 border border-white/10 rounded-lg text-white placeholder:text-stone-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
                                     />
                                 </div>
 
@@ -218,7 +218,7 @@ export function ManualEntryModal({ isOpen, onClose, onSave }: ManualEntryModalPr
                                             setFormData({ ...formData, weight: e.target.value })
                                         }
                                         placeholder="e.g., 612"
-                                        className="w-full px-4 py-2 bg-stone-900 border border-white/10 rounded-lg text-white placeholder:text-stone-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+                                        className="w-full px-4 py-3 bg-stone-900 border border-white/10 rounded-lg text-white placeholder:text-stone-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
                                     />
                                 </div>
 
@@ -234,14 +234,14 @@ export function ManualEntryModal({ isOpen, onClose, onSave }: ManualEntryModalPr
                                             setFormData({ ...formData, cost: e.target.value })
                                         }
                                         placeholder="e.g., 850"
-                                        className="w-full px-4 py-2 bg-stone-900 border border-white/10 rounded-lg text-white placeholder:text-stone-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+                                        className="w-full px-4 py-3 bg-stone-900 border border-white/10 rounded-lg text-white placeholder:text-stone-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
                                     />
                                 </div>
                             </div>
 
                             <button
                                 onClick={handleAddComponent}
-                                className="w-full md:w-auto px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+                                className="w-full md:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
                             >
                                 <Plus className="w-4 h-4" />
                                 Add Component
@@ -308,14 +308,14 @@ export function ManualEntryModal({ isOpen, onClose, onSave }: ManualEntryModalPr
                     <div className="flex items-center justify-between px-6 py-4 border-t border-white/10 bg-stone-950/50">
                         <button
                             onClick={onClose}
-                            className="px-6 py-2 text-stone-400 hover:text-white transition-colors"
+                            className="px-6 py-2.5 text-stone-400 hover:text-white transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleSave}
                             disabled={components.length === 0}
-                            className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-stone-800 disabled:text-stone-600 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
+                            className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:bg-stone-800 disabled:text-stone-600 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
                         >
                             <Save className="w-4 h-4" />
                             Save Build

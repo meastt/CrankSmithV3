@@ -135,17 +135,25 @@ export const ShareCard: React.FC<ShareCardProps> = ({
         }
     };
 
-    // Social share handlers
+    // Social share handlers — use window.location.href as fallback for Capacitor
+    // where window.open(_blank) is blocked or opens in the same webview
+    const openExternalUrl = (url: string) => {
+        const newWindow = window.open(url, '_blank');
+        if (!newWindow) {
+            window.location.href = url;
+        }
+    };
+
     const shareToTwitter = () => {
         const text = `Check out my ${frameName} build on CrankSmith! ${weightDisplay}${weightLabel}.`;
         const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(getShareUrl())}`;
-        window.open(url, '_blank');
+        openExternalUrl(url);
         trackEvent('build_share_social', { network: 'x', frame_name: frameName });
     };
 
     const shareToFacebook = () => {
         const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}`;
-        window.open(url, '_blank');
+        openExternalUrl(url);
         trackEvent('build_share_social', { network: 'facebook', frame_name: frameName });
     };
 
@@ -258,11 +266,11 @@ export const ShareCard: React.FC<ShareCardProps> = ({
     const ShareButtons = (
         <div className="mt-4 space-y-3">
             <div className="flex justify-center gap-2">
+                {'share' in navigator && (
+                    <button onClick={handleNativeShare} className="p-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-colors"><Share2 className="w-5 h-5" /></button>
+                )}
                 <button onClick={shareToTwitter} className="p-3 rounded-xl bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 text-[#1DA1F2] transition-colors"><Twitter className="w-5 h-5" /></button>
                 <button onClick={shareToFacebook} className="p-3 rounded-xl bg-[#4267B2]/10 hover:bg-[#4267B2]/20 text-[#4267B2] transition-colors"><Facebook className="w-5 h-5" /></button>
-                {'share' in navigator && (
-                    <button onClick={handleNativeShare} className="p-3 rounded-xl bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white transition-colors"><Share2 className="w-5 h-5" /></button>
-                )}
             </div>
             <div className="grid grid-cols-2 gap-2">
                 <button onClick={handleDownload} disabled={downloading} className="flex items-center justify-center gap-2 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-500 transition-colors disabled:opacity-50">

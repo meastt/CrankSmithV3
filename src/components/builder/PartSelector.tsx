@@ -13,6 +13,7 @@ import { useClerk, useUser } from '@clerk/nextjs';
 import { useSettingsStore } from '@/store/settingsStore';
 import { FreehubSelector } from './FreehubSelector';
 import { ForkChoiceModal } from './ForkChoiceModal';
+import { InputDialog } from '@/components/ui/InputDialog';
 import { InfoBox, BUILD_STEP_INFO } from './InfoBox';
 import {
     Eye, EyeOff, ChevronLeft, ChevronRight, Check,
@@ -657,6 +658,7 @@ export const PartSelector: React.FC = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [saveError, setSaveError] = useState<string | null>(null);
+    const [showNameDialog, setShowNameDialog] = useState(false);
     const { isSignedIn } = useUser();
 
     useEffect(() => {
@@ -666,16 +668,17 @@ export const PartSelector: React.FC = () => {
     }, [currentStep, parts.Seatpost]);
 
     // Save build handler
-    const handleSaveBuild = async () => {
+    const handleSaveBuild = () => {
         if (!isSignedIn) {
             setSaveError('Please sign in to save builds');
             setSaveStatus('error');
             return;
         }
+        setShowNameDialog(true);
+    };
 
-        const name = window.prompt('Name your build:', parts.Frame?.name || 'My Build');
-        if (!name) return;
-
+    const handleSaveConfirm = async (name: string) => {
+        setShowNameDialog(false);
         setIsSaving(true);
         setSaveStatus('idle');
         setSaveError(null);
@@ -1075,6 +1078,18 @@ export const PartSelector: React.FC = () => {
 
     return (
         <div className="flex-1 flex flex-col h-full bg-gray-950 overflow-hidden relative">
+            {/* Build Name Dialog */}
+            <InputDialog
+                isOpen={showNameDialog}
+                title="Name Your Build"
+                message="Give your build a name so you can find it later in the Garage."
+                defaultValue={parts.Frame?.name || 'My Build'}
+                placeholder="e.g. Sunday Race Rig"
+                confirmLabel="Save Build"
+                onConfirm={handleSaveConfirm}
+                onCancel={() => setShowNameDialog(false)}
+            />
+
             {/* Dashboard Overlay */}
             <AnimatePresence>
                 {showDashboard && (

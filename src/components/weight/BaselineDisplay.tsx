@@ -30,7 +30,7 @@ export function BaselineDisplay({ build, onStartUpgrading, onQuickWins }: Baseli
 
                     {/* Weight number */}
                     <div className="relative bg-stone-900/50 border-2 border-emerald-500/30 rounded-3xl px-12 py-8">
-                        <div className="text-6xl md:text-8xl font-mono font-bold text-emerald-500 tracking-tight flex items-baseline justify-center gap-4">
+                        <div className="text-4xl sm:text-6xl md:text-8xl font-mono font-bold text-emerald-500 tracking-tight flex items-baseline justify-center gap-4">
                             <span>
                                 {formatWeightImperial(build.total_weight).lbs}
                                 <span className="text-2xl md:text-4xl ml-2 text-emerald-500/60">lbs</span>

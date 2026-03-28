@@ -106,7 +106,7 @@ export const PerformancePanel: React.FC = () => {
                         onChange={(e) => setCadence(Number(e.target.value))}
                         className="w-full"
                     />
-                    <div className="flex justify-between text-[10px] text-stone-600 mt-2 font-mono">
+                    <div className="flex justify-between text-xs text-stone-600 mt-2 font-mono">
                         <span>60</span>
                         <span>90</span>
                         <span>120</span>
@@ -191,7 +191,7 @@ export const PerformancePanel: React.FC = () => {
                                         style={{ width: `${Math.min((climbingIndex * 100) / 1.2, 100)}%` }}
                                     />
                                 </div>
-                                <div className="flex justify-between text-[10px] text-stone-600 mt-1">
+                                <div className="flex justify-between text-xs text-stone-600 mt-1">
                                     <span>Hard</span>
                                     <span>Easy</span>
                                 </div>

@@ -355,6 +355,22 @@ describe('Edge cases', () => {
         // 1 / (30/52) = 52/30 = 1.733
         expect(calculateClimbingIndex(30 / 52)).toBeCloseTo(1.733, 2);
     });
+
+    it('getAllGearRatios with empty arrays — returns empty, no crash', () => {
+        expect(getAllGearRatios([], [])).toEqual([]);
+        expect(getAllGearRatios([50], [])).toEqual([]);
+        expect(getAllGearRatios([], [11])).toEqual([]);
+    });
+
+    it('parseCassetteRange with 9-speed style range (synthetic fallback)', () => {
+        const range = parseCassetteRange(32, 11);
+        // 11-32 is a known 11-speed range, but a 9-speed 11-32 doesn't exist in library
+        // It should match the known 11-speed entry
+        expect(range).toBeDefined();
+        expect(range.length).toBeGreaterThanOrEqual(9);
+        expect(range[0]).toBe(11);
+        expect(range[range.length - 1]).toBe(32);
+    });
 });
 
 describe('convertSpeed', () => {

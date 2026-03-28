@@ -123,7 +123,7 @@ const SetupSelector = ({ label, setup, onChange, color }: { label: string, setup
 
                     <div className="space-y-3">
                         <div>
-                            <label className="text-[10px] text-stone-500 uppercase">Chainrings</label>
+                            <label className="text-xs text-stone-500 uppercase">Chainrings</label>
                             <input
                                 type="text"
                                 value={setup.chainrings.join('/')}
@@ -132,25 +132,25 @@ const SetupSelector = ({ label, setup, onChange, color }: { label: string, setup
                                     const rings = val.split('/').map(n => parseInt(n)).filter(n => !isNaN(n));
                                     if (rings.length > 0) onChange({ ...setup, chainrings: rings });
                                 }}
-                                className="w-full bg-black/30 border border-white/10 rounded px-2 py-1 text-sm font-mono text-white"
+                                className="w-full bg-black/30 border border-white/10 rounded px-3 py-2 text-sm font-mono text-white"
                             />
                         </div>
                         <div>
-                            <label className="text-[10px] text-stone-500 uppercase">Cassette Range</label>
+                            <label className="text-xs text-stone-500 uppercase">Cassette Range</label>
                             <input
                                 type="text"
                                 value={setup.cassetteRange}
                                 onChange={(e) => onChange({ ...setup, cassetteRange: e.target.value })}
-                                className="w-full bg-black/30 border border-white/10 rounded px-2 py-1 text-sm font-mono text-white"
+                                className="w-full bg-black/30 border border-white/10 rounded px-3 py-2 text-sm font-mono text-white"
                             />
                         </div>
                         <div>
-                            <label className="text-[10px] text-stone-500 uppercase">Tire Width (mm)</label>
+                            <label className="text-xs text-stone-500 uppercase">Tire Width (mm)</label>
                             <input
                                 type="number"
                                 value={setup.tireSize}
                                 onChange={(e) => onChange({ ...setup, tireSize: parseInt(e.target.value) || 28 })}
-                                className="w-full bg-black/30 border border-white/10 rounded px-2 py-1 text-sm font-mono text-white"
+                                className="w-full bg-black/30 border border-white/10 rounded px-3 py-2 text-sm font-mono text-white"
                             />
                         </div>
                     </div>
@@ -164,6 +164,23 @@ const SetupSelector = ({ label, setup, onChange, color }: { label: string, setup
 
 const SpeedChart = ({ setupA, setupB, cadence, showComparison = true }: { setupA: Setup, setupB: Setup, cadence: number, showComparison?: boolean }) => {
     const { unitSystem } = useSettingsStore();
+    const [activeBar, setActiveBar] = useState<number | null>(null);
+    const chartRef = React.useRef<HTMLDivElement>(null);
+
+    // Dismiss tooltip when tapping outside the chart
+    useEffect(() => {
+        const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+            if (chartRef.current && !chartRef.current.contains(e.target as Node)) {
+                setActiveBar(null);
+            }
+        };
+        document.addEventListener('mousedown', handleOutsideClick);
+        document.addEventListener('touchstart', handleOutsideClick);
+        return () => {
+            document.removeEventListener('mousedown', handleOutsideClick);
+            document.removeEventListener('touchstart', handleOutsideClick);
+        };
+    }, []);
 
     // Generate data points
     const getData = (setup: Setup) => {
@@ -208,7 +225,7 @@ const SpeedChart = ({ setupA, setupB, cadence, showComparison = true }: { setupA
                 </div>
             </div>
 
-            <div className="relative h-64 w-full overflow-hidden">
+            <div ref={chartRef} className="relative h-64 w-full overflow-hidden">
                 {/* Grid Lines */}
                 <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                     {[0, 1, 2, 3, 4].map(i => (
@@ -216,16 +233,24 @@ const SpeedChart = ({ setupA, setupB, cadence, showComparison = true }: { setupA
                     ))}
                 </div>
 
-                {/* Bars for Setup A */}
+                {/* Bars for Setup A — tap-activated tooltips for mobile */}
                 <div className="absolute inset-0 flex items-end gap-1 opacity-50">
                     {dataA.map((d, i) => (
                         <div
                             key={`a-${i}`}
-                            className="flex-1 bg-cyan-500/30 rounded-t-sm hover:bg-cyan-500 transition-colors group relative"
+                            className={`flex-1 rounded-t-sm transition-colors relative cursor-pointer ${
+                                activeBar === i ? 'bg-cyan-500' : 'bg-cyan-500/30 hover:bg-cyan-500'
+                            }`}
                             style={{ height: `${(d.speed / maxSpeed) * 100}%` }}
+                            onClick={() => setActiveBar(activeBar === i ? null : i)}
                         >
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-stone-900 text-cyan-400 text-xs px-2 py-1 rounded border border-cyan-500/30 opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-10">
+                            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-stone-900 text-cyan-400 text-xs px-2 py-1 rounded border border-cyan-500/30 pointer-events-none whitespace-nowrap z-10 transition-opacity ${
+                                activeBar === i ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                            }`}>
                                 {d.speed.toFixed(1)} {speedUnit(unitSystem)}
+                                {showComparison && dataB[i] && (
+                                    <span className="text-rose-400 ml-1.5">/ {dataB[i].speed.toFixed(1)}</span>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -547,7 +572,7 @@ export const DrivetrainLab = () => {
                                 <Activity className="w-5 h-5 text-primary" />
                                 Speed Analysis
                             </h3>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 flex-wrap">
                                 <button
                                     onClick={() => setShowMethodology((v) => !v)}
                                     className="text-xs px-2 py-1 rounded border border-white/15 text-stone-300 hover:text-white hover:border-white/30"
@@ -555,14 +580,31 @@ export const DrivetrainLab = () => {
                                     {showMethodology ? 'Hide calculations' : 'Show calculations'}
                                 </button>
                                 <span className="text-xs text-stone-500 uppercase">Cadence</span>
+                                {/* Preset pills for mobile touch */}
+                                <div className="flex gap-1 md:hidden">
+                                    {[60, 75, 90, 105, 120].map((rpm) => (
+                                        <button
+                                            key={rpm}
+                                            onClick={() => setCadence(rpm)}
+                                            className={`text-xs px-2 py-1.5 rounded-lg font-mono transition-colors ${
+                                                cadence === rpm
+                                                    ? 'bg-primary text-white'
+                                                    : 'bg-white/5 text-stone-400 hover:bg-white/10'
+                                            }`}
+                                        >
+                                            {rpm}
+                                        </button>
+                                    ))}
+                                </div>
+                                {/* Range slider for desktop */}
                                 <input
                                     type="range"
                                     min="60" max="120"
                                     value={cadence}
                                     onChange={(e) => setCadence(parseInt(e.target.value))}
-                                    className="w-32 accent-primary"
+                                    className="w-32 accent-primary hidden md:block"
                                 />
-                                <span className="text-sm font-mono text-white w-8">{cadence}</span>
+                                <span className="text-sm font-mono text-white w-8 hidden md:block">{cadence}</span>
                             </div>
                         </div>
 

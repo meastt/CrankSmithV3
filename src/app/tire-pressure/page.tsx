@@ -16,7 +16,7 @@ export default function TirePressurePage() {
                         className="flex items-center gap-2 text-stone-400 hover:text-white transition-colors"
                     >
                         <ArrowLeft className="w-5 h-5" />
-                        <span className="text-sm font-medium">Back to Dashboard</span>
+                        <span className="text-sm font-medium hidden sm:inline">Back to Dashboard</span>
                     </Link>
                     <div className="text-sm font-bold text-rose-500 uppercase tracking-wider">
                         The Contact Patch

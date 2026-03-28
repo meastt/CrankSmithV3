@@ -1056,5 +1056,104 @@ describe('Validator.validateBuild', () => {
             });
             expect(() => Validator.validateBuild(build)).not.toThrow();
         });
+
+        it('components with empty specs object should not crash', () => {
+            const build = makeBaseBuild({
+                frame: makeComponent({ id: 'f', specs: {} }),
+                fork: makeComponent({ id: 'fk', specs: {} }),
+                bottomBracket: makeComponent({ id: 'bb', specs: {} }),
+                crankset: makeComponent({ id: 'c', specs: {} }),
+                shifter: makeComponent({ id: 'sh', specs: {} }),
+                rearDerailleur: makeComponent({ id: 'rd', specs: {} }),
+                cassette: makeComponent({ id: 'cass', specs: {} }),
+            });
+            expect(() => Validator.validateBuild(build)).not.toThrow();
+        });
+    });
+
+    // -----------------------------------------------------------------------
+    // Cross-Platform Parity: Golden Fixture Tests
+    // -----------------------------------------------------------------------
+
+    describe('Golden Fixtures — Cross-protocol mismatches', () => {
+        it('should error on Campagnolo N3W cassette on SRAM XDR wheel', () => {
+            const build = makeBaseBuild({
+                wheels: [
+                    makeComponent({
+                        id: 'wr', specs: { position: 'Rear', freehub_body: 'XDR' },
+                    }),
+                ],
+                cassette: makeComponent({
+                    id: 'cass', specs: { freehub_body: 'N3W' },
+                }),
+            });
+            const result = Validator.validateBuild(build);
+            const fhIssue = result.issues.find(i =>
+                i.componentId === 'cass' && i.severity === 'ERROR' && i.message.toLowerCase().includes('freehub')
+            );
+            expect(fhIssue).toBeDefined();
+        });
+
+        it('should error on 11-speed shifter + 12-speed cassette (speed mismatch)', () => {
+            const build = makeBaseBuild({
+                shifter: makeComponent({
+                    id: 'sh', name: 'Shimano 105 ST-R7000',
+                    compatibility_tags: { protocol: ['Shimano_Mechanical'] },
+                    specs: { speeds: 11 },
+                }),
+                rearDerailleur: makeComponent({
+                    id: 'rd', name: 'Shimano 105 RD-R7000',
+                    compatibility_tags: { protocol: ['Shimano_Mechanical'] },
+                    specs: { speeds: 11 },
+                }),
+                cassette: makeComponent({
+                    id: 'cass', specs: { speeds: 12, largest_cog: 34, freehub_body: 'HG' },
+                }),
+            });
+            const result = Validator.validateBuild(build);
+            const speedIssue = result.issues.find(i =>
+                i.severity === 'ERROR' && i.message.toLowerCase().includes('speed')
+            );
+            expect(speedIssue).toBeDefined();
+        });
+
+        it('should error on Post Mount fork + Flat Mount front caliper', () => {
+            const build = makeBaseBuild({
+                fork: makeComponent({
+                    id: 'fk', specs: { brake_mount: 'Post Mount' },
+                }),
+                brakes: {
+                    calipers: [
+                        makeComponent({
+                            id: 'cal-f', specs: { position: 'Front', mount: 'Flat Mount' },
+                        }),
+                    ],
+                    rotors: [],
+                },
+            });
+            const result = Validator.validateBuild(build);
+            const mountIssue = result.issues.find(i =>
+                i.componentId === 'cal-f' && i.severity === 'ERROR' && i.message.toLowerCase().includes('mount')
+            );
+            expect(mountIssue).toBeDefined();
+        });
+
+        it('should error on Campagnolo shifter + Shimano derailleur (name-inferred protocol)', () => {
+            const build = makeBaseBuild({
+                shifter: makeComponent({
+                    id: 'sh', name: 'Campagnolo Super Record EPS',
+                    specs: { speeds: 12 },
+                }),
+                rearDerailleur: makeComponent({
+                    id: 'rd', name: 'Shimano Dura-Ace Di2 RD-R9250',
+                    specs: { speeds: 12 },
+                }),
+            });
+            const result = Validator.validateBuild(build);
+            const protocolIssue = result.issues.find(i =>
+                i.severity === 'ERROR' && i.message.toLowerCase().includes('protocol')
+            );
+            expect(protocolIssue).toBeDefined();
+        });
     });
 });

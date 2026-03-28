@@ -1,22 +1,32 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useBuildStore } from '@/store/buildStore';
 import { BuildSummary } from './BuildSummary';
 import { PerformancePanel } from './PerformancePanel';
 import { Layers, Activity, Save, X, Scale } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { InputDialog } from '@/components/ui/InputDialog';
+import { useToast } from '@/components/ui/Toast';
+import { haptic } from '@/lib/haptics';
 
 export const BuilderMobileNav: React.FC = () => {
     const { parts } = useBuildStore();
+    const router = useRouter();
     const [activeModal, setActiveModal] = useState<'summary' | 'performance' | null>(null);
+    const [showNameDialog, setShowNameDialog] = useState(false);
+    const { toast } = useToast();
 
     const totalWeight = Object.values(parts).reduce((sum, part) => sum + ((part as any)?.attributes?.weight_g || 0), 0);
     const partsCount = Object.values(parts).filter(Boolean).length;
 
-    const handleSave = async () => {
-        const name = window.prompt('Name your build:');
-        if (!name) return;
+    const handleSave = () => {
+        setShowNameDialog(true);
+    };
+
+    const handleSaveConfirm = async (name: string) => {
+        setShowNameDialog(false);
 
         try {
             const res = await fetch('/api/builds', {
@@ -26,23 +36,37 @@ export const BuilderMobileNav: React.FC = () => {
             });
 
             if (res.ok) {
-                alert('Build saved to Garage!');
+                haptic('success');
+                toast({ type: 'success', title: 'Build Saved', message: 'Your build has been saved to the Garage.' });
             } else {
+                haptic('error');
                 if (res.status === 401) {
-                    alert('Please sign in to save builds.');
-                    window.location.href = '/api/auth/signin';
+                    toast({ type: 'error', title: 'Sign In Required', message: 'Please sign in to save builds.' });
+                    setTimeout(() => { router.push('/sign-in'); }, 1500);
                 } else {
-                    alert('Failed to save build.');
+                    toast({ type: 'error', title: 'Save Failed', message: 'Failed to save build. Please try again.' });
                 }
             }
         } catch (err) {
             console.error(err);
-            alert('An error occurred.');
+            haptic('error');
+            toast({ type: 'error', title: 'Error', message: 'An error occurred. Check your connection.' });
         }
     };
 
     return (
         <>
+            {/* Build Name Dialog */}
+            <InputDialog
+                isOpen={showNameDialog}
+                title="Name Your Build"
+                message="Give your build a name so you can find it later in the Garage."
+                placeholder="e.g. Sunday Race Rig"
+                confirmLabel="Save Build"
+                onConfirm={handleSaveConfirm}
+                onCancel={() => setShowNameDialog(false)}
+            />
+
             {/* Bottom Navigation Bar - Mobile Only */}
             <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-stone-950/95 backdrop-blur-xl border-t border-white/5 pb-safe">
                 <div className="flex items-center justify-between px-4 py-3">
@@ -52,7 +76,7 @@ export const BuilderMobileNav: React.FC = () => {
                             <Scale className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">
+                            <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
                                 {partsCount} parts
                             </p>
                             <p className="text-lg font-bold text-stone-100 font-mono leading-tight">

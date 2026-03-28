@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Component } from '@/lib/types/compatibility';
+import { useToast } from '@/components/ui/Toast';
 import { Save, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
@@ -16,6 +17,7 @@ const PART_TYPES = ['Frame', 'Wheel', 'Tire', 'BottomBracket', 'Crank', 'Shifter
 
 export default function ComponentForm({ initialData }: { initialData?: Component }) {
     const router = useRouter();
+    const { toast } = useToast();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         type: initialData?.type || 'Frame',
@@ -53,11 +55,11 @@ export default function ComponentForm({ initialData }: { initialData?: Component
                 router.push('/admin/components');
                 router.refresh();
             } else {
-                alert('Failed to save component');
+                toast({ type: 'error', title: 'Save Failed', message: 'Failed to save component.' });
             }
         } catch (error) {
             console.error(error);
-            alert('Invalid JSON in interfaces or attributes');
+            toast({ type: 'error', title: 'Invalid JSON', message: 'Check interfaces or attributes JSON syntax.' });
         } finally {
             setLoading(false);
         }

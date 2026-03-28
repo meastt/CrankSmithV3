@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useBuildStore } from '@/store/buildStore';
 import { useToast } from '@/components/ui/Toast';
 import { AlertTriangle, Trash2, Save, Download, Package, X } from 'lucide-react';
@@ -25,6 +26,7 @@ const PAIRED_FRONT_KEYS: Record<string, string> = {
 export const BuildSummary: React.FC = () => {
     const { parts, removePart, validationResult, totalWeight, factoryFork } = useBuildStore();
     const { toast } = useToast();
+    const router = useRouter();
     const [showSaveInput, setShowSaveInput] = useState(false);
     const [buildName, setBuildName] = useState('');
     const [saving, setSaving] = useState(false);
@@ -48,7 +50,7 @@ export const BuildSummary: React.FC = () => {
                 setBuildName('');
             } else if (res.status === 401) {
                 toast({ type: 'error', title: 'Sign in required', message: 'Please sign in to save builds.' });
-                window.location.href = '/sign-in';
+                router.push('/sign-in');
             } else {
                 toast({ type: 'error', title: 'Save failed', message: 'Something went wrong. Please try again.' });
             }
@@ -175,7 +177,7 @@ export const BuildSummary: React.FC = () => {
                             >
                                 <div className="flex justify-between items-start gap-2">
                                     <div className="min-w-0 flex-1">
-                                        <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">
+                                        <span className="text-xs font-semibold text-primary uppercase tracking-wider">
                                             {displayLabel}
                                         </span>
                                         {isFactoryFork ? (
@@ -250,7 +252,7 @@ export const BuildSummary: React.FC = () => {
                 {/* Required Extras */}
                 {extras.length > 0 && (
                     <div className="mt-4 bg-primary/5 border border-primary/10 rounded-xl p-4">
-                        <h3 className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-2">
+                        <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">
                             Required Extras
                         </h3>
                         <ul className="space-y-1.5">
