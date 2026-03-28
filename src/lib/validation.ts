@@ -281,8 +281,10 @@ function validateRollingChassis(build: any, issues: ValidationIssue[]) {
     if (frame && fork) {
         // Steerer Tube
         if (frame.specs?.headset && fork.specs?.steerer_tube) {
-            const frameHeadset = normalize(frame.specs.headset);
-            const forkSteerer = normalize(fork.specs.steerer_tube);
+            // Use raw lowercase values here — normalize() strips decimal points,
+            // which breaks the "1.5" check (it becomes "15").
+            const frameHeadset = String(frame.specs.headset).toLowerCase();
+            const forkSteerer = String(fork.specs.steerer_tube).toLowerCase();
 
             if (frameHeadset.includes('1.5') && forkSteerer.includes('straight')) {
                 addIssue(issues, fork.id, `Fork steerer (${fork.specs.steerer_tube}) may not fit frame headset (${frame.specs.headset})`, 'WARNING', frame.id);

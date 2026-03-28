@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Gauge, Info, ChevronDown, Droplets, Mountain, Zap } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Gauge, Info, Droplets, Mountain, Zap } from 'lucide-react';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useBuildStore } from '@/store/buildStore';
 import { toWeight, weightUnit, fromWeight, toPressure, pressureUnit } from '@/lib/unitConversions';
+import { calculateTirePressure, type SurfaceType, type PressureResult } from '@/lib/tirePressureCalculations';
 import { computeUnifiedWhatIf } from '@/lib/whatIfEngine';
 import {
     addSetupFeedback,
@@ -14,15 +15,6 @@ import {
     type FeedbackOutcome,
     type SetupFeedbackEntry
 } from '@/lib/verifiedFeedback';
-
-// --- Types ---
-
-type SurfaceType = 'road-smooth' | 'road-poor' | 'gravel-smooth' | 'gravel-chunky' | 'mtb-trail' | 'mtb-enduro';
-
-interface PressureResult {
-    front: { min: number; max: number; recommended: number };
-    rear: { min: number; max: number; recommended: number };
-}
 
 // --- Helper Components ---
 
@@ -225,86 +217,11 @@ export const TirePressureCalculator = () => {
 
     // Calculation Logic
     const result = useMemo((): PressureResult => {
-        const totalWeightKg = riderWeight + bikeWeight;
-        const totalWeightLbs = totalWeightKg * 2.20462;
-
-        // Base calculation (Modified Frank Berto formula approximation)
-        // W = Weight per wheel (lbs)
-        // d = Tire width (mm)
-        // P = 145 * (W / d)^1.2 (Very rough approximation of the curves)
-
-        // Weight distribution (45% Front / 55% Rear)
-        const frontLoadLbs = totalWeightLbs * 0.45;
-        const rearLoadLbs = totalWeightLbs * 0.55;
-
-        // Adjust tire width based on rim width (Rule of thumb: +0.4mm for every 1mm increase in rim width over standard)
-        // Standard rim for 25mm tire is ~17mm. 
-        const calculateBasePsi = (loadLbs: number, widthMm: number) => {
-            // Modified Berto formula for modern volume
-            // Increased width exponent to 1.5 to better account for volume scaling
-            return 140 * Math.pow(loadLbs / Math.pow(widthMm, 1.5), 0.9);
-        };
-
-        let frontPsi = calculateBasePsi(frontLoadLbs, measuredWidth);
-        let rearPsi = calculateBasePsi(rearLoadLbs, measuredWidth);
-
-        // Adjustments
-        if (isTubeless) {
-            frontPsi *= 0.9;
-            rearPsi *= 0.9;
-        }
-
-        // Surface adjustments
-        const surfaceModifiers: Record<SurfaceType, number> = {
-            'road-smooth': 1.0,
-            'road-poor': 0.95,
-            'gravel-smooth': 0.9,
-            'gravel-chunky': 0.85,
-            'mtb-trail': 0.8,
-            'mtb-enduro': 0.75
-        };
-
-        frontPsi *= surfaceModifiers[surface];
-        rearPsi *= surfaceModifiers[surface];
-
-        if (isWet) {
-            frontPsi -= 3;
-            rearPsi -= 3;
-        }
-
-        // Preference Adjustment (Slider)
-        // Range: ±8% based on slider position (-1 to 1)
-        const preferenceModifier = 1 + (preference * 0.08);
-        frontPsi *= preferenceModifier;
-        rearPsi *= preferenceModifier;
-
-        const disciplineBounds: Record<SurfaceType, { min: number; max: number }> = {
-            'road-smooth': { min: 45, max: 100 },
-            'road-poor': { min: 38, max: 85 },
-            'gravel-smooth': { min: 24, max: 55 },
-            'gravel-chunky': { min: 20, max: 45 },
-            'mtb-trail': { min: 16, max: 35 },
-            'mtb-enduro': { min: 14, max: 32 }
-        };
-        const bounds = disciplineBounds[surface];
-
-        // Safety clamps (discipline-specific)
-        frontPsi = Math.max(bounds.min, Math.min(bounds.max, frontPsi));
-        rearPsi = Math.max(bounds.min, Math.min(bounds.max, rearPsi));
-
-        return {
-            front: {
-                min: frontPsi * 0.9,
-                max: frontPsi * 1.1,
-                recommended: frontPsi
-            },
-            rear: {
-                min: rearPsi * 0.9,
-                max: rearPsi * 1.1,
-                recommended: rearPsi
-            }
-        };
-    }, [riderWeight, bikeWeight, tireWidth, rimWidth, measuredWidth, surface, isTubeless, isWet, preference]);
+        return calculateTirePressure({
+            riderWeight, bikeWeight, tireWidth, rimWidth,
+            surface, isTubeless, isWet, preference,
+        });
+    }, [riderWeight, bikeWeight, tireWidth, rimWidth, surface, isTubeless, isWet, preference]);
 
     const confidenceLabel = surface.startsWith('road')
         ? 'Higher confidence on smoother surfaces'

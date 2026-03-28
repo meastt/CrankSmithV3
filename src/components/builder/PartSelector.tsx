@@ -312,6 +312,10 @@ export const PartSelector: React.FC = () => {
 
     const [showDashboard, setShowDashboard] = useState(false);
 
+    // Crankset Pre-filter State
+    const [drivetrainType, setDrivetrainType] = useState<'1x' | '2x' | null>(null);
+    const [drivetrainSpeed, setDrivetrainSpeed] = useState<number | null>(null);
+
     // Freehub Selection State
     const [showFreehubSelector, setShowFreehubSelector] = useState(false);
     const [pendingWheel, setPendingWheel] = useState<AnyComponent | null>(null);
@@ -444,6 +448,8 @@ export const PartSelector: React.FC = () => {
     // Reset filters when changing steps
     const resetFilters = useCallback(() => {
         setSelectedBrand(null);
+        setDrivetrainType(null);
+        setDrivetrainSpeed(null);
     }, []);
 
     // Scroll to top when step changes
@@ -924,19 +930,19 @@ export const PartSelector: React.FC = () => {
                 return type === 'ROAD' || (width > 0 && width <= 35);
             });
         } else if (frameCategory === 'GRAVEL') {
-            // Show Gravel and Road tires - check type OR width-based filtering
+            // Gravel tires: 38c minimum, up to 60mm (covers 50c, 2.1", 2.2")
             filteredComponents = filteredComponents.filter(c => {
                 const type = getTireType(c);
                 const width = getTireWidth(c);
 
-                // Explicit gravel/road type match
-                if (type === 'GRAVEL' || type === 'ROAD') return true;
+                // Explicit gravel type always included
+                if (type === 'GRAVEL') return true;
 
-                // Width-based: show tires 28-55mm for gravel
-                if (width >= 28 && width <= 55) return true;
+                // Width-based: gravel tires 38-60mm
+                if (width >= 38 && width <= 60) return true;
 
-                // Also respect max tire clearance if available
-                if (maxTireWidth > 0 && width > 0 && width <= maxTireWidth) return true;
+                // Respect frame max clearance for wider tires (still enforce 38mm floor)
+                if (maxTireWidth > 0 && width >= 38 && width <= maxTireWidth) return true;
 
                 return false;
             });
@@ -1005,6 +1011,42 @@ export const PartSelector: React.FC = () => {
         }
     }
 
+    // Crankset drivetrain type + speed pre-filtering
+    if (activeType === 'Crankset' && drivetrainType) {
+        filteredComponents = filteredComponents.filter(c => {
+            const chainrings = (c as any).specs?.chainrings || (c as any).attributes?.chainrings;
+            const name = ((c as any).name || '').toUpperCase();
+
+            if (drivetrainType === '1x') {
+                if (Array.isArray(chainrings) && chainrings.length === 1) return true;
+                if (name.includes('1X')) return true;
+                // Single chainring if only one number in chainrings
+                if (Array.isArray(chainrings) && chainrings.length <= 1) return true;
+                // If no chainring info, check name for 2x indicators
+                if (!chainrings && !name.includes('2X') && !name.match(/\d{2}\/\d{2}/)) return true;
+                return false;
+            } else {
+                // 2x
+                if (Array.isArray(chainrings) && chainrings.length >= 2) return true;
+                if (name.includes('2X') || name.match(/\d{2}\/\d{2}/)) return true;
+                // If no info, exclude known 1x
+                if (name.includes('1X')) return false;
+                if (Array.isArray(chainrings) && chainrings.length === 1) return false;
+                return true;
+            }
+        });
+    }
+
+    if (activeType === 'Crankset' && drivetrainSpeed) {
+        filteredComponents = filteredComponents.filter(c => {
+            const speeds = (c as any).specs?.speeds || (c as any).attributes?.speeds;
+            if (speeds && Number(speeds) === drivetrainSpeed) return true;
+            // If no speed info, keep it (let user decide)
+            if (!speeds) return true;
+            return false;
+        });
+    }
+
     // Brand
     if (selectedBrand) {
         filteredComponents = filteredComponents.filter(c => c.brand === selectedBrand);
@@ -1012,6 +1054,7 @@ export const PartSelector: React.FC = () => {
 
     const uniqueBrands = Array.from(new Set(components.map(c => c.brand))).sort();
     const showCategorySelection = activeType === 'Frame' && !frameCategory;
+    const showCranksetPreFilter = activeType === 'Crankset' && (!drivetrainType || !drivetrainSpeed);
 
     const currentStepInfo = BUILD_SEQUENCE[currentStep];
 
@@ -1019,6 +1062,10 @@ export const PartSelector: React.FC = () => {
     const handleBack = () => {
         if (selectedBrand) {
             setSelectedBrand(null);
+        } else if (activeType === 'Crankset' && drivetrainSpeed) {
+            setDrivetrainSpeed(null);
+        } else if (activeType === 'Crankset' && drivetrainType) {
+            setDrivetrainType(null);
         } else if (frameCategory) {
             setFrameCategory(null);
         } else if (currentStep > 0) {
@@ -1278,7 +1325,7 @@ export const PartSelector: React.FC = () => {
             <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pb-40 lg:pb-6">
                 <div className="p-4 md:p-6">
                     {/* Contextual Constraints Banner */}
-                    {!loading && !showCategorySelection && (() => {
+                    {!loading && !showCategorySelection && !showCranksetPreFilter && (() => {
                         const constraints = getActiveConstraints(parts, activeType, selectedFreehubStandard);
                         if (constraints.length === 0) return null;
                         return (
@@ -1295,7 +1342,7 @@ export const PartSelector: React.FC = () => {
                     })()}
 
                     {/* Freehub/Ecosystem Reminder Banner (green accent) - dismissible */}
-                    {!loading && !showCategorySelection && selectedFreehubStandard && !freehubReminderDismissed &&
+                    {!loading && !showCategorySelection && !showCranksetPreFilter && selectedFreehubStandard && !freehubReminderDismissed &&
                      ['BottomBracket', 'Crankset', 'Cassette', 'RearDerailleur', 'Shifter'].includes(activeType) && (
                         <motion.div
                             initial={{ opacity: 0, y: -10 }}
@@ -1335,7 +1382,7 @@ export const PartSelector: React.FC = () => {
                     )}
 
                     {/* Step-specific Info Box - dismissible */}
-                    {!loading && !showCategorySelection && BUILD_STEP_INFO[activeType] && !dismissedInfoBoxes.has(activeType) && (
+                    {!loading && !showCategorySelection && !showCranksetPreFilter && BUILD_STEP_INFO[activeType] && !dismissedInfoBoxes.has(activeType) && (
                         <div className="mb-4 relative group">
                             <InfoBox
                                 type={BUILD_STEP_INFO[activeType].type}
@@ -1378,6 +1425,46 @@ export const PartSelector: React.FC = () => {
                                         <p className="text-sm text-stone-500">Select to see {cat} frames</p>
                                     </button>
                                 ))}
+                            </div>
+                        ) : showCranksetPreFilter ? (
+                            <div className="space-y-6">
+                                {!drivetrainType ? (
+                                    <>
+                                        <p className="text-sm text-stone-400">What type of drivetrain?</p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <button
+                                                onClick={() => setDrivetrainType('1x')}
+                                                className="p-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-primary/50 transition-all text-left group"
+                                            >
+                                                <h3 className="text-xl font-bold text-stone-100 group-hover:text-primary mb-2">1x</h3>
+                                                <p className="text-sm text-stone-500">Single chainring — simple, clean, reliable</p>
+                                            </button>
+                                            <button
+                                                onClick={() => setDrivetrainType('2x')}
+                                                className="p-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-primary/50 transition-all text-left group"
+                                            >
+                                                <h3 className="text-xl font-bold text-stone-100 group-hover:text-primary mb-2">2x</h3>
+                                                <p className="text-sm text-stone-500">Double chainring — wider range, tighter gear steps</p>
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : !drivetrainSpeed ? (
+                                    <>
+                                        <p className="text-sm text-stone-400">How many speeds?</p>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            {[10, 11, 12, 13].map(spd => (
+                                                <button
+                                                    key={spd}
+                                                    onClick={() => setDrivetrainSpeed(spd)}
+                                                    className="p-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-primary/50 transition-all text-center group"
+                                                >
+                                                    <h3 className="text-2xl font-bold text-stone-100 group-hover:text-primary mb-1">{spd}</h3>
+                                                    <p className="text-sm text-stone-500">speed</p>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </>
+                                ) : null}
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

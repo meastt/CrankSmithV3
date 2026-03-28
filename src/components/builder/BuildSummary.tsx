@@ -5,8 +5,25 @@ import { useBuildStore } from '@/store/buildStore';
 import { useToast } from '@/components/ui/Toast';
 import { AlertTriangle, Trash2, Save, Download, Package, X } from 'lucide-react';
 
+// Parts that are displayed as consolidated rows (front/rear → single row)
+const PAIRED_PARTS: Record<string, { label: string; front: string; rear: string }> = {
+    Wheels:       { label: 'Wheels',        front: 'WheelFront',        rear: 'WheelRear' },
+    Tires:        { label: 'Tires',         front: 'TireFront',         rear: 'TireRear' },
+    BrakeCalipers:{ label: 'Brake Calipers',front: 'BrakeCaliperFront', rear: 'BrakeCaliperRear' },
+    BrakeRotors:  { label: 'Brake Rotors',  front: 'BrakeRotorFront',   rear: 'BrakeRotorRear' },
+};
+
+// Keys to skip in the main loop (they're rendered as part of a pair)
+const PAIRED_REAR_KEYS = new Set(['WheelRear', 'TireRear', 'BrakeCaliperRear', 'BrakeRotorRear']);
+const PAIRED_FRONT_KEYS: Record<string, string> = {
+    WheelFront: 'Wheels',
+    TireFront: 'Tires',
+    BrakeCaliperFront: 'BrakeCalipers',
+    BrakeRotorFront: 'BrakeRotors',
+};
+
 export const BuildSummary: React.FC = () => {
-    const { parts, removePart, validationResult } = useBuildStore();
+    const { parts, removePart, validationResult, totalWeight, factoryFork } = useBuildStore();
     const { toast } = useToast();
     const [showSaveInput, setShowSaveInput] = useState(false);
     const [buildName, setBuildName] = useState('');
@@ -124,39 +141,75 @@ export const BuildSummary: React.FC = () => {
             {/* Parts List */}
             <div className="flex-1 overflow-y-auto p-4">
                 <div className="space-y-2">
-                    {(Object.entries(parts) as [keyof typeof parts, typeof parts[keyof typeof parts]][]).map(([type, component]) => (
-                        <div
-                            key={type}
-                            className={`group rounded-xl border transition-all ${component
-                                ? 'bg-white/[0.02] border-white/5 hover:border-white/10'
-                                : 'border-dashed border-white/5'
-                                } p-3`}
-                        >
-                            <div className="flex justify-between items-start gap-2">
-                                <div className="min-w-0 flex-1">
-                                    <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">
-                                        {type.replace('BottomBracket', 'BB')}
-                                    </span>
-                                    {component ? (
-                                        <p className="text-sm font-medium text-stone-200 truncate mt-0.5">
-                                            {(component as any).name}
-                                        </p>
-                                    ) : (
-                                        <p className="text-sm text-stone-600 italic mt-0.5">Not selected</p>
+                    {(Object.entries(parts) as [keyof typeof parts, typeof parts[keyof typeof parts]][]).map(([type, component]) => {
+                        // Skip rear keys — they are rendered as part of the consolidated front row
+                        if (PAIRED_REAR_KEYS.has(type)) return null;
+
+                        // Determine display label and whether this is a paired slot
+                        const pairKey = PAIRED_FRONT_KEYS[type];
+                        const pair = pairKey ? PAIRED_PARTS[pairKey] : null;
+                        const displayLabel = pair
+                            ? pair.label
+                            : type === 'Fork' ? 'Fork'
+                            : type.replace('BottomBracket', 'BB');
+
+                        // For paired parts, use front component and strip "(Front)" suffix for display
+                        const displayComponent = component;
+                        const displayName = pair && displayComponent
+                            ? (displayComponent as any).name?.replace(/\s*\(Front\)\s*$/i, '')
+                            : (displayComponent as any)?.name;
+
+                        // Factory fork special case
+                        const isFactoryFork = type === 'Fork' && !component && factoryFork.usingFactoryFork && parts.Frame;
+                        const factoryForkLabel = factoryFork.factoryForkName || 'Factory Fork (included)';
+
+                        const hasContent = !!component || isFactoryFork;
+
+                        return (
+                            <div
+                                key={type}
+                                className={`group rounded-xl border transition-all ${hasContent
+                                    ? 'bg-white/[0.02] border-white/5 hover:border-white/10'
+                                    : 'border-dashed border-white/5'
+                                    } p-3`}
+                            >
+                                <div className="flex justify-between items-start gap-2">
+                                    <div className="min-w-0 flex-1">
+                                        <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">
+                                            {displayLabel}
+                                        </span>
+                                        {isFactoryFork ? (
+                                            <p className="text-sm font-medium text-stone-400 truncate mt-0.5">
+                                                {factoryForkLabel}
+                                            </p>
+                                        ) : component ? (
+                                            <p className="text-sm font-medium text-stone-200 truncate mt-0.5">
+                                                {displayName}
+                                            </p>
+                                        ) : (
+                                            <p className="text-sm text-stone-600 italic mt-0.5">Not selected</p>
+                                        )}
+                                    </div>
+                                    {component && (
+                                        <button
+                                            onClick={() => {
+                                                if (pair) {
+                                                    removePart(pair.front as keyof typeof parts);
+                                                    removePart(pair.rear as keyof typeof parts);
+                                                } else {
+                                                    removePart(type);
+                                                }
+                                            }}
+                                            className="opacity-0 group-hover:opacity-100 p-1.5 text-stone-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                                            title="Remove part"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
                                     )}
                                 </div>
-                                {component && (
-                                    <button
-                                        onClick={() => removePart(type)}
-                                        className="opacity-0 group-hover:opacity-100 p-1.5 text-stone-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
-                                        title="Remove part"
-                                    >
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
-                                )}
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {/* Validation Errors */}
