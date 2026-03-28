@@ -1,3 +1,4 @@
+
 # CrankSmith Mobile Parity Refactor Plan (iOS + Android)
 
 _Date: March 28, 2026_
