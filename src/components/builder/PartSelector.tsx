@@ -772,7 +772,30 @@ export const PartSelector: React.FC = () => {
     const isCompatible = (component: AnyComponent): boolean => {
         if (activeType === 'Frame') return true;
 
-        // Construct a temporary build object
+        // Create a baseline build without the candidate component
+        const baseBuildData = {
+            frame: parts.Frame || undefined,
+            fork: parts.Fork || undefined,
+            wheels: [parts.WheelFront, parts.WheelRear].filter(Boolean) as any[],
+            tires: [parts.TireFront, parts.TireRear].filter(Boolean) as any[],
+            bottomBracket: parts.BottomBracket || undefined,
+            crankset: parts.Crankset || undefined,
+            cassette: parts.Cassette || undefined,
+            rearDerailleur: parts.RearDerailleur || undefined,
+            shifter: parts.Shifter || undefined,
+            brakes: {
+                levers: parts.Shifter || undefined,
+                calipers: [parts.BrakeCaliperFront, parts.BrakeCaliperRear].filter(Boolean) as any[],
+                rotors: [parts.BrakeRotorFront, parts.BrakeRotorRear].filter(Boolean) as any[],
+            },
+            cockpit: {
+                stem: parts.Stem || undefined,
+                handlebar: parts.Handlebar || undefined,
+                seatpost: parts.Seatpost || undefined
+            }
+        };
+
+        // Construct a temporary build object with the candidate component
         const tempParts = { ...parts };
 
         // Add the candidate component
@@ -802,7 +825,7 @@ export const PartSelector: React.FC = () => {
             (tempParts as any)[activeType] = component;
         }
 
-        // Map to Validator structure
+        // Map candidate build to Validator structure
         const buildData = {
             frame: tempParts.Frame || undefined,
             fork: tempParts.Fork || undefined,
@@ -825,10 +848,16 @@ export const PartSelector: React.FC = () => {
             }
         };
 
+        const baseResult = validateBuilderBuild(baseBuildData);
         const result = validateBuilderBuild(buildData);
 
-        // Check if there are any ERROR severity issues
-        return result.compatible;
+        const baseErrorMessages = new Set(baseResult.issues.filter(i => i.severity === 'ERROR').map(i => i.message));
+        const newErrorMessages = result.issues.filter(i => i.severity === 'ERROR').map(i => i.message);
+
+        // It is compatible if NO NEW errors are introduced by adding this component
+        const newlyIntroducedErrors = newErrorMessages.filter(msg => !baseErrorMessages.has(msg));
+
+        return newlyIntroducedErrors.length === 0;
     };
 
     // FILTERS
