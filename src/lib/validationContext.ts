@@ -93,11 +93,11 @@ function collectGravelAssumptionIssues(parts: Record<string, any>): ValidationIs
     [tireFront, tireRear].forEach((tire, index) => {
         if (!tire) return;
         const width = parseWidth(tire.specs?.width || tire.attributes?.width || tire.widthMM);
-        if (width !== null && width < 35) {
+        if (width !== null && width < 38) {
             issues.push({
                 componentId: tire.id || `tire-${index}`,
                 severity: 'WARNING',
-                message: `Builder gravel assumption: tire width ${width}mm is narrower than typical gravel fit`
+                message: `Builder gravel assumption: tire width ${width}mm is narrower than typical gravel fit (38mm minimum recommended)`
             });
         }
     });

@@ -981,9 +981,9 @@ export const PartSelector: React.FC = () => {
                 // Explicit gravel type always included
                 if (type === 'GRAVEL') return true;
 
-                // Width-based: gravel tires 32-60mm
+                // Width-based: gravel tires 38-60mm minimum (38mm is true gravel racing minimum)
                 // (isCompatible strict validation will strip tires wider than the frame's max clearance from the final view)
-                if (width >= 32 && width <= 60) return true;
+                if (width >= 38 && width <= 60) return true;
 
                 // Fallback catch-all if explicitly declared but unparseable
                 if (width === 0) return true;

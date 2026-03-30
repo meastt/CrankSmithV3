@@ -12,10 +12,14 @@ export function normalizeComponent(c: any): Component {
     // Compatibility Tags (Protocols, Mounts)
     let protocol = raw.protocol ? (Array.isArray(raw.protocol) ? raw.protocol : [raw.protocol]) : [];
 
-    // Protocol Normalization
+    // Protocol Normalization — canonicalize stored values to the inference names
     protocol = protocol.map((p: string) => {
         if (p === 'AXS') return 'SRAM_AXS';
         if (p === 'SRAM_AXS_(13s)') return 'SRAM_AXS_13s';
+        // Shimano 12-speed mechanical — multiple stored names, all mean the same thing
+        if (p === 'Shimano_Road_12s' || p === 'Shimano_Road_12s_Mech') return 'Shimano_12s_Mech';
+        // Shimano 11-speed mechanical
+        if (p === 'Shimano_Road_11s' || p === 'Shimano_Road_11s_Mech') return 'Shimano_11s_Mech';
         return p;
     });
 
@@ -33,7 +37,10 @@ export function normalizeComponent(c: any): Component {
             nameUpper.includes('DEORE') || nameUpper.includes('XT') || nameUpper.includes('XTR') ||
             nameUpper.includes('SLX') || nameUpper.includes('CUES')) {
             if (isElectronic) {
-                protocol.push('Shimano_Di2');
+                const speeds = Number(raw.speeds);
+                if (speeds === 12) protocol.push('Shimano_Di2_12s');
+                else if (speeds === 11) protocol.push('Shimano_Di2_11s');
+                else protocol.push('Shimano_Di2');
             } else {
                 const speeds = Number(raw.speeds);
                 if (speeds === 12) protocol.push('Shimano_12s_Mech');
@@ -175,7 +182,8 @@ export function normalizeComponent(c: any): Component {
             break;
 
         case 'Crankset':
-            specs.spindle_type = raw.spindle || raw.spindle_type; // "DUB"
+            // Support multiple field names used across different ingest sources
+            specs.spindle_type = raw.spindle || raw.spindle_type || raw.bb_interface || raw.bb_type;
             specs.speeds = Number(raw.speeds);
             // Parse chainrings
             const teeth = raw.teeth || raw.chainrings;
