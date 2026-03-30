@@ -288,6 +288,47 @@ describe('calculateTirePressure', () => {
             expect(result.front.recommended).toBeGreaterThan(0);
         });
     });
+
+    // -----------------------------------------------------------------------
+    // Phase 5 Non-Builder Regression Guardrails
+    // -----------------------------------------------------------------------
+
+    describe('Phase 5 non-builder regression guardrails', () => {
+        it('road and mtb scenarios remain separated after builder refactor', () => {
+            const road = calculateTirePressure(makeInput({
+                riderWeight: 78,
+                bikeWeight: 8,
+                tireWidth: 28,
+                rimWidth: 21,
+                surface: 'road-smooth',
+                isTubeless: true,
+            }));
+
+            const mtb = calculateTirePressure(makeInput({
+                riderWeight: 78,
+                bikeWeight: 13,
+                tireWidth: 60,
+                rimWidth: 30,
+                surface: 'mtb-trail',
+                isTubeless: true,
+            }));
+
+            expect(road.front.recommended).toBeGreaterThan(road.front.min);
+            expect(mtb.front.recommended).toBeGreaterThan(mtb.front.min);
+            expect(road.front.recommended).toBeGreaterThan(mtb.front.recommended);
+            expect(road.rear.recommended).toBeGreaterThan(road.front.recommended);
+            expect(mtb.rear.recommended).toBeGreaterThan(mtb.front.recommended);
+        });
+
+        it('gravel pressure recommendation still sits between road and mtb in typical setup', () => {
+            const road = calculateTirePressure(makeInput({ tireWidth: 30, surface: 'road-smooth' }));
+            const gravel = calculateTirePressure(makeInput({ tireWidth: 42, rimWidth: 25, surface: 'gravel-smooth' }));
+            const mtb = calculateTirePressure(makeInput({ tireWidth: 58, rimWidth: 30, surface: 'mtb-trail' }));
+
+            expect(road.front.recommended).toBeGreaterThan(gravel.front.recommended);
+            expect(gravel.front.recommended).toBeGreaterThan(mtb.front.recommended);
+        });
+    });
 });
 
 // ===========================================================================

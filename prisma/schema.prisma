@@ -15,6 +15,9 @@ model Component {
   id          String   @id @default(uuid())
   type        String   // Frame, Wheel, etc.
   name        String
+  discipline  String   @default("multi") // gravel, road, mtb, multi
+  disciplineTags String? // JSON string array for secondary discipline tags
+  builderEligible Boolean @default(false) // True when component can appear in gravel builder
   interfaces  String   // JSON string of interface standards
   attributes  String   // JSON string of technical specs
   createdAt   DateTime @default(now())

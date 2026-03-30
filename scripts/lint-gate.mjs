@@ -6,7 +6,11 @@ const MAX_WARNINGS = Number(process.env.LINT_GATE_MAX_WARNINGS ?? 60);
 
 function runEslintJson() {
   try {
-    return execSync('npx eslint . --format json', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    return execSync('npx eslint . --format json', { 
+      encoding: 'utf8', 
+      stdio: ['ignore', 'pipe', 'pipe'],
+      maxBuffer: 10 * 1024 * 1024
+    });
   } catch (error) {
     if (error && typeof error === 'object' && 'stdout' in error && error.stdout) {
       return String(error.stdout);

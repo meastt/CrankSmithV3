@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/Toast';
 import { useRouter } from 'next/navigation';
 import { Component } from '@/lib/types/compatibility';
 import { Loader2, Bike, Calendar } from 'lucide-react';
+import { validateBuilderPartsPayload } from '@/lib/builderGuard';
 
 interface SavedBuild {
     id: string;
@@ -18,6 +19,7 @@ export const Garage: React.FC = () => {
     const [builds, setBuilds] = useState<SavedBuild[]>([]);
     const [loading, setLoading] = useState(true);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [loadWarning, setLoadWarning] = useState<string | null>(null);
     const { setBuild } = useBuildStore();
     const { toast } = useToast();
     const router = useRouter();
@@ -39,6 +41,11 @@ export const Garage: React.FC = () => {
     }, []);
 
     const loadBuild = (build: SavedBuild) => {
+        const guard = validateBuilderPartsPayload(build.parts);
+        if (!guard.valid) {
+            setLoadWarning(`"${build.name}" is a legacy non-gravel build and can't be loaded in the gravel-only builder.`);
+            return;
+        }
         setBuild(build.parts);
         router.push('/builder');
     };
@@ -70,6 +77,12 @@ export const Garage: React.FC = () => {
     }
 
     return (
+        <div className="space-y-4">
+            {loadWarning && (
+                <div className="px-4 py-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-300 text-sm">
+                    {loadWarning}
+                </div>
+            )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {builds.length === 0 ? (
                 <div className="col-span-full text-center py-16 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
@@ -84,7 +97,10 @@ export const Garage: React.FC = () => {
                     </button>
                 </div>
             ) : (
-                builds.map(build => (
+                builds.map(build => {
+                    const guard = validateBuilderPartsPayload(build.parts);
+                    const isLegacyBuild = !guard.valid;
+                    return (
                     <div key={build.id} className="group bg-gradient-to-br from-white/[0.07] to-white/[0.02] backdrop-blur-xl p-6 rounded-2xl border border-white/[0.08] hover:border-primary/30 hover:from-white/[0.1] hover:to-white/[0.05] hover:shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.05)] transition-all duration-300">
                         <div className="flex justify-between items-start mb-6">
                             <div>
@@ -98,6 +114,11 @@ export const Garage: React.FC = () => {
                                 <Bike className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
                             </div>
                         </div>
+                        {isLegacyBuild && (
+                            <p className="text-xs text-amber-300 mb-4">
+                                Legacy non-gravel build (read-only in gravel builder)
+                            </p>
+                        )}
 
                         <div className="space-y-3 mb-6">
                             <div className="flex justify-between text-sm items-center">
@@ -126,14 +147,16 @@ export const Garage: React.FC = () => {
                             </button>
                             <button
                                 onClick={() => loadBuild(build)}
-                                className="px-4 py-2 bg-white/10 hover:bg-primary text-white text-sm font-medium rounded-lg transition-all hover:shadow-lg hover:shadow-primary/20"
+                                disabled={isLegacyBuild}
+                                className="px-4 py-2 bg-white/10 hover:bg-primary text-white text-sm font-medium rounded-lg transition-all hover:shadow-lg hover:shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white/10"
                             >
-                                Load Build
+                                {isLegacyBuild ? 'Legacy Build' : 'Load Build'}
                             </button>
                         </div>
                     </div>
-                ))
+                )})
             )}
+        </div>
         </div>
     );
 };

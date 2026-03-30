@@ -14,12 +14,15 @@ import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import templates from '@/data/templates.json';
 import { Component } from '@/lib/types/compatibility';
 import { LoadingState } from '@/components/ui/StateDisplays';
+import { validateBuilderPartsPayload } from '@/lib/builderGuard';
 
 interface SavedBuild {
     id: string;
     name: string;
     parts: string; // JSON string
     createdAt: string;
+    builderStatus?: 'gravel_compatible' | 'legacy_non_gravel' | 'invalid_payload';
+    builderViolations?: string[];
 }
 
 export default function GaragePage() {
@@ -27,6 +30,7 @@ export default function GaragePage() {
     const { user, isLoaded } = useUser();
     const [builds, setBuilds] = useState<SavedBuild[] | null>(null);
     const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+    const [loadWarning, setLoadWarning] = useState<string | null>(null);
     const [fetchError, setFetchError] = useState(false);
     const router = useRouter();
     const { setBuild, loadTemplate } = useBuildStore();
@@ -81,6 +85,11 @@ export default function GaragePage() {
     const loadBuild = (build: SavedBuild) => {
         try {
             const parts = JSON.parse(build.parts);
+            const violations = build.builderViolations ?? validateBuilderPartsPayload(parts).violations;
+            if (violations.length > 0) {
+                setLoadWarning(`"${build.name}" is a legacy non-gravel build and cannot be loaded into the gravel-only builder yet.`);
+                return;
+            }
             setBuild(parts as any);
             router.push('/builder');
         } catch (e) {
@@ -150,6 +159,12 @@ export default function GaragePage() {
                         </p>
                     </div>
                 )}
+                {loadWarning && (
+                    <div className="mb-6 flex items-center gap-3 px-4 py-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-300">
+                        <Edit3 className="w-5 h-5 flex-shrink-0" />
+                        <p className="text-sm">{loadWarning}</p>
+                    </div>
+                )}
                 <div className="flex justify-between items-end mb-8 border-b border-white/10 pb-6">
                     <div>
                         <h1 className="text-3xl font-bold text-white tracking-tight">My Garage</h1>
@@ -207,6 +222,18 @@ export default function GaragePage() {
                     <div className="space-y-12">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {(builds ?? []).map(build => (
+                                (() => {
+                                    let violations: string[] = build.builderViolations ?? [];
+                                    try {
+                                        if (violations.length === 0 && !build.builderStatus) {
+                                            const parsed = JSON.parse(build.parts);
+                                            violations = validateBuilderPartsPayload(parsed).violations;
+                                        }
+                                    } catch {
+                                        violations = ['Invalid build payload'];
+                                    }
+                                    const isLegacyBuild = violations.length > 0;
+                                    return (
                                 <div key={build.id} className="group bg-gray-900 border border-white/10 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all duration-300">
                                     <div className="h-32 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center relative">
                                         <Bike className="w-12 h-12 text-gray-700 group-hover:text-blue-500/50 transition-colors" />
@@ -215,13 +242,19 @@ export default function GaragePage() {
                                     <div className="p-5">
                                         <h3 className="text-lg font-bold text-white mb-1">{build.name}</h3>
                                         <p className="text-xs text-gray-500 mb-4">Created {new Date(build.createdAt).toLocaleDateString()}</p>
+                                        {isLegacyBuild && (
+                                            <p className="text-xs text-amber-300 mb-3">
+                                                Legacy non-gravel build (read-only in gravel builder)
+                                            </p>
+                                        )}
 
                                         <div className="flex items-center justify-between pt-4 border-t border-white/5">
                                             <button
                                                 onClick={() => loadBuild(build)}
-                                                className="text-sm font-medium text-blue-400 hover:text-blue-300 flex items-center"
+                                                disabled={isLegacyBuild}
+                                                className="text-sm font-medium text-blue-400 hover:text-blue-300 flex items-center disabled:text-stone-600 disabled:cursor-not-allowed"
                                             >
-                                                <Edit3 className="w-3 h-3 mr-1.5" /> Load
+                                                <Edit3 className="w-3 h-3 mr-1.5" /> {isLegacyBuild ? 'Legacy Build' : 'Load'}
                                             </button>
                                             <button
                                                 onClick={() => setDeleteTarget(build.id)}
@@ -233,6 +266,8 @@ export default function GaragePage() {
                                         </div>
                                     </div>
                                 </div>
+                                    );
+                                })()
                             ))}
                         </div>
 

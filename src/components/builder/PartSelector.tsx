@@ -4,7 +4,7 @@
 import { BuildDashboard } from './BuildDashboard';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { Validator } from '@/lib/validation';
+import { validateBuilderBuild } from '@/lib/validationContext';
 import { PartCard } from './PartCard';
 import { ShareCard } from './ShareCard';
 import { BuildSummary } from './BuildSummary';
@@ -45,7 +45,7 @@ const BUILD_SEQUENCE = [
     { type: 'Seatpost', label: 'Seatpost', icon: Settings, description: 'Seating' },
 ];
 
-const FRAME_CATEGORIES = [FrameType.ROAD, FrameType.GRAVEL, FrameType.MTB];
+const FRAME_CATEGORIES = [FrameType.GRAVEL];
 
 // Helper to generate human-readable constraint messages
 function getActiveConstraints(parts: any, activeType: string, selectedFreehubStandard: string | null): string[] {
@@ -304,7 +304,7 @@ function getCompatibilitySignal(
 
 export const PartSelector: React.FC = () => {
     const [currentStep, setCurrentStep] = useState(0);
-    const [frameCategory, setFrameCategory] = useState<string | null>(null);
+    const [frameCategory, setFrameCategory] = useState<string | null>(FrameType.GRAVEL);
     const [components, setComponents] = useState<AnyComponent[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -441,7 +441,7 @@ export const PartSelector: React.FC = () => {
         if (searchParams.get('new') === 'true') {
             clearBuild();
             setCurrentStep(0);
-            setFrameCategory(null);
+            setFrameCategory(FrameType.GRAVEL);
             window.history.replaceState({}, '', '/builder');
         }
     }, [searchParams, clearBuild]);
@@ -472,7 +472,7 @@ export const PartSelector: React.FC = () => {
         setError(null);
         resetFilters();
 
-        fetch(`/api/components?type=${activeType}`)
+        fetch(`/api/components?type=${activeType}&context=builder`)
             .then(res => {
                 if (!res.ok) throw new Error('Failed to fetch components');
                 return res.json();
@@ -612,7 +612,7 @@ export const PartSelector: React.FC = () => {
                 setCurrentStep(prev => prev + 1);
                 resetFilters();
                 if (activeType === 'Frame') {
-                    setFrameCategory(null);
+                    setFrameCategory(FrameType.GRAVEL);
                 }
             }
         }, 300);
@@ -633,7 +633,7 @@ export const PartSelector: React.FC = () => {
         setTimeout(() => {
             setCurrentStep(2); // Jump to Wheels step
             resetFilters();
-            setFrameCategory(null);
+            setFrameCategory(FrameType.GRAVEL);
         }, 300);
     }, [pendingFrame, setPart, setFactoryForkChoice, resetFilters]);
 
@@ -650,7 +650,7 @@ export const PartSelector: React.FC = () => {
         setTimeout(() => {
             setCurrentStep(1); // Go to Fork step
             resetFilters();
-            setFrameCategory(null);
+            setFrameCategory(FrameType.GRAVEL);
         }, 300);
     }, [pendingFrame, setPart, setFactoryForkChoice, resetFilters]);
 
@@ -697,8 +697,19 @@ export const PartSelector: React.FC = () => {
                 setSaveError('Please sign in to save builds');
                 setSaveStatus('error');
             } else {
-                const text = await res.text();
-                setSaveError(text || 'Failed to save build');
+                let message = 'Failed to save build';
+                try {
+                    const payload = await res.json();
+                    if (Array.isArray(payload?.violations) && payload.violations.length > 0) {
+                        message = `This build includes non-gravel/legacy parts: ${payload.violations.slice(0, 3).join(', ')}`;
+                    } else if (payload?.error) {
+                        message = payload.error;
+                    }
+                } catch {
+                    const text = await res.text();
+                    if (text) message = text;
+                }
+                setSaveError(message);
                 setSaveStatus('error');
             }
         } catch (err) {
@@ -814,7 +825,7 @@ export const PartSelector: React.FC = () => {
             }
         };
 
-        const result = Validator.validateBuild(buildData);
+        const result = validateBuilderBuild(buildData);
 
         // Check if there are any ERROR severity issues
         return result.compatible;
@@ -1070,7 +1081,7 @@ export const PartSelector: React.FC = () => {
         } else if (activeType === 'Crankset' && drivetrainType) {
             setDrivetrainType(null);
         } else if (frameCategory) {
-            setFrameCategory(null);
+            setFrameCategory(FrameType.GRAVEL);
         } else if (currentStep > 0) {
             setCurrentStep(prev => prev - 1);
         }
@@ -1357,6 +1368,15 @@ export const PartSelector: React.FC = () => {
                     })()}
 
                     {/* Freehub/Ecosystem Reminder Banner (green accent) - dismissible */}
+                    {!loading && !showCategorySelection && !showCranksetPreFilter && (
+                        <div className="mb-4 p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
+                            <p className="text-xs text-cyan-200">
+                                <span className="font-semibold">Gravel-only Builder Mode:</span> this builder surfaces only gravel-eligible components.
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Freehub/Ecosystem Reminder Banner (green accent) - dismissible */}
                     {!loading && !showCategorySelection && !showCranksetPreFilter && selectedFreehubStandard && !freehubReminderDismissed &&
                      ['BottomBracket', 'Crankset', 'Cassette', 'RearDerailleur', 'Shifter'].includes(activeType) && (
                         <motion.div
@@ -1370,19 +1390,19 @@ export const PartSelector: React.FC = () => {
                                 <p className="text-sm text-emerald-200">
                                     <span className="font-medium">Your drivetrain ecosystem:</span>{' '}
                                     <span className="text-emerald-300">
-                                        {selectedFreehubStandard === 'HG' && 'Shimano HG (11s road/MTB compatible)'}
-                                        {selectedFreehubStandard === 'XDR' && 'SRAM XDR (SRAM road/gravel 12s)'}
-                                        {selectedFreehubStandard === 'XD' && 'SRAM XD (SRAM MTB, 10T capable)'}
+                                        {selectedFreehubStandard === 'HG' && 'Shimano HG (common gravel-compatible standard)'}
+                                        {selectedFreehubStandard === 'XDR' && 'SRAM XDR (modern gravel/road 12s)'}
+                                        {selectedFreehubStandard === 'XD' && 'SRAM XD (wide-range compatible, 10T capable)'}
                                         {selectedFreehubStandard === 'MICROSPLINE' && 'Shimano Microspline (Shimano 12s)'}
                                         {selectedFreehubStandard === 'N3W' && 'Campagnolo N3W (Campagnolo 13s)'}
                                         {!['HG', 'XDR', 'XD', 'MICROSPLINE', 'N3W'].includes(selectedFreehubStandard) && selectedFreehubStandard}
                                     </span>
                                 </p>
                                 <p className="text-xs text-emerald-400/70 mt-1">
-                                    {selectedFreehubStandard === 'XDR' && 'Choose SRAM groupset components (Red, Force, Rival, Apex)'}
-                                    {selectedFreehubStandard === 'XD' && 'Choose SRAM Eagle groupset components (XX, X0, GX, NX)'}
-                                    {selectedFreehubStandard === 'HG' && 'Choose Shimano groupset components (Dura-Ace, Ultegra, 105, GRX, Deore, etc.)'}
-                                    {selectedFreehubStandard === 'MICROSPLINE' && 'Choose Shimano 12-speed components (Deore, SLX, XT, XTR)'}
+                                    {selectedFreehubStandard === 'XDR' && 'Choose SRAM gravel-friendly groupset components (Red, Force, Rival, Apex, XPLR)'}
+                                    {selectedFreehubStandard === 'XD' && 'Choose wide-range compatible drivetrain components for steep gravel gearing'}
+                                    {selectedFreehubStandard === 'HG' && 'Choose Shimano-compatible groupset components (especially GRX and compatible HG cassettes)'}
+                                    {selectedFreehubStandard === 'MICROSPLINE' && 'Choose Shimano 12-speed compatible components where Microspline is required'}
                                     {selectedFreehubStandard === 'N3W' && 'Choose Campagnolo components (Super Record, Record, Chorus, Ekar)'}
                                 </p>
                             </div>
@@ -1516,12 +1536,15 @@ export const PartSelector: React.FC = () => {
                                 {filteredComponents.length === 0 && !showIncompatible && (
                                     <div className="col-span-full text-center py-12 text-stone-500">
                                         <AlertTriangle className="w-8 h-8 mx-auto mb-3 text-amber-500/50" />
-                                        <p className="mb-2">No compatible components found.</p>
+                                        <p className="mb-2">No gravel-compatible components found for this step.</p>
+                                        <p className="text-xs text-stone-600 mb-3">
+                                            Try adjusting earlier selections, or verify gravel entries are marked builder-eligible in the catalog.
+                                        </p>
                                         <button
                                             onClick={() => setShowIncompatible(true)}
                                             className="text-primary hover:underline"
                                         >
-                                            Show all parts to see why
+                                            Show all loaded parts to diagnose
                                         </button>
                                     </div>
                                 )}

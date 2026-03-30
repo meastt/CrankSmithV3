@@ -1,5 +1,6 @@
 
 import { Component, ComponentSpecs, CompatibilityTags } from './types/compatibility';
+import { normalizeDiscipline, parseDisciplineTags } from './discipline';
 
 export function normalizeComponent(c: any): Component {
     const interfaces = c.interfaces ? JSON.parse(c.interfaces as string) : {};
@@ -245,6 +246,20 @@ export function normalizeComponent(c: any): Component {
 
     const image = attributes.image || attributes.imageUrl || '/placeholder.png';
 
+    const discipline = normalizeDiscipline(
+        c.discipline || attributes.discipline || specs.category
+    );
+    const normalizedDisciplineTags = parseDisciplineTags(
+        c.disciplineTags || attributes.disciplineTags || attributes.discipline_tags
+    );
+    const disciplineTags = normalizedDisciplineTags.length > 0 ? normalizedDisciplineTags : undefined;
+    const builderEligible = Boolean(
+        c.builderEligible ??
+        attributes.builderEligible ??
+        attributes.builder_eligible ??
+        (discipline === 'gravel')
+    );
+
     return {
         id: c.id,
         type: c.type,
@@ -258,6 +273,9 @@ export function normalizeComponent(c: any): Component {
         compatibility_tags,
         interfaces, // Legacy support
         attributes, // Legacy support
-        wheelSize
+        wheelSize,
+        discipline,
+        disciplineTags,
+        builderEligible
     };
 }
