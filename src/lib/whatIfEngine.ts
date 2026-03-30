@@ -22,6 +22,25 @@ export interface WhatIfDelta {
     pressureHintDeltaPct: number;
 }
 
+function finiteOrDefault(value: number | undefined, fallback: number): number {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
+    return value;
+}
+
+function sanitizeChainrings(chainrings: number[]): number[] {
+    const valid = chainrings.filter((ring) => Number.isFinite(ring) && ring > 0);
+    return valid.length > 0 ? valid : [1];
+}
+
+function sanitizeSetup(setup: WhatIfSetup): WhatIfSetup {
+    return {
+        ...setup,
+        chainrings: sanitizeChainrings(setup.chainrings),
+        tireSize: Math.max(1, finiteOrDefault(setup.tireSize, 1)),
+        wheelSize: Math.max(1, finiteOrDefault(setup.wheelSize, 622)),
+    };
+}
+
 function smallestCog(cassetteRange: string): number {
     const [min, max] = cassetteRange.split('-').map((n) => parseInt(n));
     if (!isNaN(min) && !isNaN(max)) return Math.min(min, max);
@@ -50,14 +69,18 @@ function topSpeed(setup: WhatIfSetup, cadenceRpm: number): number {
 }
 
 export function computeUnifiedWhatIf(input: WhatIfInput): WhatIfDelta {
-    const cadence = input.cadenceRpm ?? 90;
-    const climbGrade = input.climbGradePercent ?? 8;
+    const cadence = Math.max(1, finiteOrDefault(input.cadenceRpm, 90));
+    const climbGrade = Math.max(0, finiteOrDefault(input.climbGradePercent, 8));
+    const ftp = Math.max(0, finiteOrDefault(input.ftp, 0));
+    const riderWeightKg = Math.max(0, finiteOrDefault(input.riderWeightKg, 0));
+    const baseline = sanitizeSetup(input.baseline);
+    const candidate = sanitizeSetup(input.candidate);
 
-    const topA = topSpeed(input.baseline, cadence);
-    const topB = topSpeed(input.candidate, cadence);
-    const cadA = cadenceAtGrade(input.baseline, input.ftp, input.riderWeightKg, climbGrade);
-    const cadB = cadenceAtGrade(input.candidate, input.ftp, input.riderWeightKg, climbGrade);
-    const pressureHint = ((input.baseline.tireSize - input.candidate.tireSize) / Math.max(1, input.baseline.tireSize)) * 100;
+    const topA = topSpeed(baseline, cadence);
+    const topB = topSpeed(candidate, cadence);
+    const cadA = cadenceAtGrade(baseline, ftp, riderWeightKg, climbGrade);
+    const cadB = cadenceAtGrade(candidate, ftp, riderWeightKg, climbGrade);
+    const pressureHint = ((baseline.tireSize - candidate.tireSize) / Math.max(1, baseline.tireSize)) * 100;
 
     return {
         topSpeedDeltaKph: topB - topA,

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { Validator } from '../lib/validation';
 import { Component, CompatibilityResult } from '../lib/types/compatibility';
+import { validateBuilderBuild } from '../lib/validationContext';
 
 // Single source-of-truth type for all runtime component data.
 // Strict per-type interfaces live in src/types/components.ts for reference only.
@@ -236,7 +236,7 @@ export const useBuildStore = create<BuildState>((set, get) => ({
             }
         };
 
-        const result = Validator.validateBuild(buildData);
+        const result = validateBuilderBuild(buildData);
         set({ validationResult: result });
     },
 

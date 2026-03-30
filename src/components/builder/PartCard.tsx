@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { AnyComponent } from '@/store/buildStore';
-import { Plus, Check, ExternalLink, Ban } from 'lucide-react';
+import { Plus, Check, ExternalLink, Ban, ShieldCheck } from 'lucide-react';
 
 interface PartCardProps {
     component: AnyComponent;
@@ -398,6 +398,8 @@ export const PartCard: React.FC<PartCardProps> = ({
     const typeLabel = 'type' in component ? (component as any).type :
         'position' in component ? (component as any).position :
             'Part';
+    const discipline = String((component as any).discipline || '').toLowerCase();
+    const builderEligible = Boolean((component as any).builderEligible);
 
     return (
         <div
@@ -442,6 +444,12 @@ export const PartCard: React.FC<PartCardProps> = ({
                         }`}>
                             {component.brand}
                         </span>
+                        {builderEligible && (discipline === 'gravel' || discipline === 'multi') && (
+                            <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                                <ShieldCheck className="w-3 h-3" />
+                                Gravel validated
+                            </span>
+                        )}
                     </div>
 
                     {/* Selection indicator */}

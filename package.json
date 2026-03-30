@@ -14,7 +14,10 @@
     "test": "jest",
     "ci:check": "npm run typecheck && npm test -- --runInBand && npm run lint:gate",
     "postinstall": "prisma generate",
-    "db:component-counts": "tsx scripts/check_component_counts.ts"
+    "db:component-counts": "tsx scripts/check_component_counts.ts",
+    "db:audit-builder-eligibility": "tsx scripts/audit_builder_eligibility.ts",
+    "db:audit-build-migration": "tsx scripts/audit_saved_build_migration.ts",
+    "rollout:check-gates": "tsx scripts/check_rollout_gates.ts"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.4",

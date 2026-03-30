@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { PrismaClient } from '@prisma/client';
+import { validateBuilderPartsPayload } from '@/lib/builderGuard';
+import { assessBuildForBuilderMigration } from '@/lib/buildMigration';
+import { isGravelBuilderEnabled } from '@/lib/featureFlags';
 
 const prisma = new PrismaClient();
 
@@ -18,6 +21,19 @@ export async function POST(request: Request) {
 
         if (!name || !parts) {
             return new NextResponse("Missing required fields", { status: 400 });
+        }
+
+        if (isGravelBuilderEnabled()) {
+            const builderGuard = validateBuilderPartsPayload(parts);
+            if (!builderGuard.valid) {
+                return NextResponse.json(
+                    {
+                        error: 'Build contains non-gravel or non-builder-eligible components',
+                        violations: builderGuard.violations
+                    },
+                    { status: 400 }
+                );
+            }
         }
 
         // Save the full parts object to ensure we can reload the build with all attributes/interfaces
@@ -67,7 +83,16 @@ export async function GET(request: Request) {
             orderBy: { createdAt: 'desc' }
         });
 
-        return NextResponse.json(builds);
+        const buildsWithMigrationStatus = builds.map((build) => {
+            const assessment = assessBuildForBuilderMigration(build.parts);
+            return {
+                ...build,
+                builderStatus: assessment.status,
+                builderViolations: assessment.violations,
+            };
+        });
+
+        return NextResponse.json(buildsWithMigrationStatus);
     } catch (error) {
         console.error("[BUILDS_GET]", error);
         return new NextResponse("Internal Error", { status: 500 });

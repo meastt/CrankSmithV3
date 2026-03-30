@@ -9,6 +9,7 @@ import {
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
+    const context = searchParams.get('context');
 
     let data: any[] = [];
 
@@ -74,6 +75,13 @@ export async function GET(request: Request) {
                 ...MOCK_BARS,
                 ...MOCK_SEATPOSTS
             ];
+    }
+
+    if (context === 'builder') {
+        data = data.filter((item: any) => {
+            const category = String(item?.specs?.category || item?.attributes?.category || '').toLowerCase();
+            return category === 'gravel';
+        });
     }
 
     return NextResponse.json(data);

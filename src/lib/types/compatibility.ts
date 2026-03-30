@@ -109,6 +109,11 @@ export interface Component {
     widthMM?: number;
     chainrings?: number[];
     range_array?: number[]; // [10, 33]
+
+    // Discipline controls for gravel-only builder gating
+    discipline?: 'gravel' | 'road' | 'mtb' | 'multi';
+    disciplineTags?: Array<'gravel' | 'road' | 'mtb'>;
+    builderEligible?: boolean;
 }
 
 export interface ValidationIssue {

@@ -396,3 +396,32 @@ describe('getSpeedUnit', () => {
         expect(getSpeedUnit('imperial')).toBe('mph');
     });
 });
+
+describe('Phase 5 non-builder regression guardrails', () => {
+    it('road and mtb drivetrains maintain distinct speed bands', () => {
+        const roadCirc = calculateWheelCircumference(622, 28);
+        const mtbCirc = calculateWheelCircumference(622, 60);
+
+        const roadTop = calculateSpeed(50 / 11, roadCirc, 90);
+        const roadLow = calculateSpeed(34 / 34, roadCirc, 90);
+        const mtbTop = calculateSpeed(32 / 10, mtbCirc, 90);
+        const mtbLow = calculateSpeed(32 / 52, mtbCirc, 90);
+
+        expect(roadTop).toBeGreaterThan(roadLow);
+        expect(mtbTop).toBeGreaterThan(mtbLow);
+        expect(roadTop).toBeGreaterThan(mtbTop);
+    });
+
+    it('gravel 1x speed sits between compact road and wide-range mtb setups', () => {
+        const roadCirc = calculateWheelCircumference(622, 28);
+        const gravelCirc = calculateWheelCircumference(622, 42);
+        const mtbCirc = calculateWheelCircumference(622, 60);
+
+        const roadTop = calculateSpeed(50 / 11, roadCirc, 90);
+        const gravelTop = calculateSpeed(40 / 10, gravelCirc, 90);
+        const mtbTop = calculateSpeed(32 / 10, mtbCirc, 90);
+
+        expect(roadTop).toBeGreaterThan(gravelTop);
+        expect(gravelTop).toBeGreaterThan(mtbTop);
+    });
+});

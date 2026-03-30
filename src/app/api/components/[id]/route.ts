@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
+import {
+    deriveDisciplineFromAttributes,
+    normalizeDiscipline,
+    parseDisciplineTags,
+    validateBuilderEligibility
+} from '@/lib/discipline';
 
 function isAdmin(userId: string): boolean {
     const adminIds = (process.env.ADMIN_USER_IDS || '').split(',').map(id => id.trim()).filter(Boolean);
@@ -21,12 +27,28 @@ export async function PUT(
     try {
         const body = await request.json();
         const { type, name, interfaces, attributes } = body;
+        const derivedDiscipline = deriveDisciplineFromAttributes(attributes);
+        const discipline = normalizeDiscipline(body.discipline || derivedDiscipline || 'multi');
+        const disciplineTags = parseDisciplineTags(body.disciplineTags);
+        const builderEligible = Boolean(body.builderEligible ?? (discipline === 'gravel'));
 
-        const component = await prisma.component.update({
+        const eligibilityCheck = validateBuilderEligibility(discipline, disciplineTags, builderEligible);
+        if (!eligibilityCheck.valid) {
+            return NextResponse.json(
+                { error: eligibilityCheck.message || 'Invalid builder eligibility combination' },
+                { status: 400 }
+            );
+        }
+
+        const componentModel: any = prisma.component;
+        const component = await componentModel.update({
             where: { id },
             data: {
                 type,
                 name,
+                discipline,
+                disciplineTags: disciplineTags.length > 0 ? JSON.stringify(disciplineTags) : null,
+                builderEligible,
                 interfaces: JSON.stringify(interfaces),
                 attributes: JSON.stringify(attributes),
             },
