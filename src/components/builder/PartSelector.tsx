@@ -973,20 +973,16 @@ export const PartSelector: React.FC = () => {
                 return type === 'ROAD' || (width > 0 && width <= 35);
             });
         } else if (frameCategory === 'GRAVEL') {
-            // Gravel tires: 32c minimum, up to 60mm
+            // Gravel tires: 38mm minimum. isCompatible will further restrict to frame's max clearance.
             filteredComponents = filteredComponents.filter(c => {
                 const type = getTireType(c);
                 const width = getTireWidth(c);
 
-                // Explicit gravel type always included
-                if (type === 'GRAVEL') return true;
-
-                // Width-based: gravel tires 38-60mm minimum (38mm is true gravel racing minimum)
-                // (isCompatible strict validation will strip tires wider than the frame's max clearance from the final view)
+                // Width-based filter: 38mm floor enforced regardless of type tag
                 if (width >= 38 && width <= 60) return true;
 
-                // Fallback catch-all if explicitly declared but unparseable
-                if (width === 0) return true;
+                // Explicit gravel type with unknown/unparseable width — let it through
+                if (type === 'GRAVEL' && width === 0) return true;
 
                 return false;
             });
