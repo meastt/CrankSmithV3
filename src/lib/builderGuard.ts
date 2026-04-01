@@ -1,4 +1,4 @@
-import { deriveDisciplineFromAttributes, normalizeDiscipline, parseDisciplineTags } from './discipline';
+import { deriveDisciplineFromAttributes, normalizeDiscipline } from './discipline';
 
 type PartLike = {
     id?: string;
@@ -17,12 +17,14 @@ function isBuilderCompatible(component: PartLike): boolean {
         component.specs?.category ||
         deriveDisciplineFromAttributes(component.attributes)
     );
-    const tags = parseDisciplineTags(component.disciplineTags || component.attributes?.disciplineTags);
     const builderEligible = Boolean(component.builderEligible ?? (discipline === 'gravel'));
 
     if (!builderEligible) return false;
     if (discipline === 'gravel') return true;
-    if (discipline === 'multi' && tags.includes('gravel')) return true;
+    // Accept all multi-discipline components that are builderEligible.
+    // Per-type filters in PartSelector (width gates, category checks, etc.)
+    // handle fine-grained gravel scoping.
+    if (discipline === 'multi') return true;
     return false;
 }
 

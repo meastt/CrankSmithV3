@@ -33,7 +33,7 @@ describe('builder guard', () => {
     ]));
   });
 
-  test('rejects multi components without gravel tag', () => {
+  test('accepts multi components without gravel tag when builderEligible', () => {
     const payload = {
       Cassette: {
         id: 'c1',
@@ -45,7 +45,7 @@ describe('builder guard', () => {
     };
 
     const result = validateBuilderPartsPayload(payload);
-    expect(result.valid).toBe(false);
-    expect(result.violations).toEqual(['Cassette: Multi no gravel']);
+    expect(result.valid).toBe(true);
+    expect(result.violations).toEqual([]);
   });
 });
