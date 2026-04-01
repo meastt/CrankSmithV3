@@ -12,6 +12,7 @@ import { useBuildStore, AnyComponent } from '@/store/buildStore';
 import { useClerk, useUser } from '@clerk/nextjs';
 import { useSettingsStore } from '@/store/settingsStore';
 import { FreehubSelector } from './FreehubSelector';
+import { ComponentPreFilter } from './ComponentPreFilter';
 import { ForkChoiceModal } from './ForkChoiceModal';
 import { InputDialog } from '@/components/ui/InputDialog';
 import { InfoBox, BUILD_STEP_INFO } from './InfoBox';
@@ -316,6 +317,15 @@ export const PartSelector: React.FC = () => {
     // Crankset Pre-filter State
     const [drivetrainType, setDrivetrainType] = useState<'1x' | '2x' | null>(null);
     const [drivetrainSpeed, setDrivetrainSpeed] = useState<number | null>(null);
+    const [cranksetSkipped, setCranksetSkipped] = useState(false);
+
+    // Per-step Pre-filter State
+    const [frameMaterial, setFrameMaterial] = useState<string | null>(null);
+    const [wheelMaterial, setWheelMaterial] = useState<string | null>(null);
+    const [tireSizeRange, setTireSizeRange] = useState<string | null>(null);
+    const [drivetrainElectronic, setDrivetrainElectronic] = useState<string | null>(null);
+    const [rotorSize, setRotorSize] = useState<string | null>(null);
+    const [seatpostType, setSeatpostType] = useState<string | null>(null);
 
     // Freehub Selection State
     const [showFreehubSelector, setShowFreehubSelector] = useState(false);
@@ -451,6 +461,13 @@ export const PartSelector: React.FC = () => {
         setSelectedBrand(null);
         setDrivetrainType(null);
         setDrivetrainSpeed(null);
+        setCranksetSkipped(false);
+        setFrameMaterial(null);
+        setWheelMaterial(null);
+        setTireSizeRange(null);
+        setDrivetrainElectronic(null);
+        setRotorSize(null);
+        setSeatpostType(null);
     }, []);
 
     // Scroll to top when step changes
@@ -1052,7 +1069,7 @@ export const PartSelector: React.FC = () => {
     }
 
     // Crankset drivetrain type + speed pre-filtering
-    if (activeType === 'Crankset' && drivetrainType) {
+    if (activeType === 'Crankset' && drivetrainType && !cranksetSkipped) {
         filteredComponents = filteredComponents.filter(c => {
             const chainrings = (c as any).specs?.chainrings || (c as any).attributes?.chainrings;
             const name = ((c as any).name || '').toUpperCase();
@@ -1060,16 +1077,12 @@ export const PartSelector: React.FC = () => {
             if (drivetrainType === '1x') {
                 if (Array.isArray(chainrings) && chainrings.length === 1) return true;
                 if (name.includes('1X')) return true;
-                // Single chainring if only one number in chainrings
                 if (Array.isArray(chainrings) && chainrings.length <= 1) return true;
-                // If no chainring info, check name for 2x indicators
                 if (!chainrings && !name.includes('2X') && !name.match(/\d{2}\/\d{2}/)) return true;
                 return false;
             } else {
-                // 2x
                 if (Array.isArray(chainrings) && chainrings.length >= 2) return true;
                 if (name.includes('2X') || name.match(/\d{2}\/\d{2}/)) return true;
-                // If no info, exclude known 1x
                 if (name.includes('1X')) return false;
                 if (Array.isArray(chainrings) && chainrings.length === 1) return false;
                 return true;
@@ -1077,13 +1090,84 @@ export const PartSelector: React.FC = () => {
         });
     }
 
-    if (activeType === 'Crankset' && drivetrainSpeed) {
+    if (activeType === 'Crankset' && drivetrainSpeed && !cranksetSkipped) {
         filteredComponents = filteredComponents.filter(c => {
             const speeds = (c as any).specs?.speeds || (c as any).attributes?.speeds;
             if (speeds && Number(speeds) === drivetrainSpeed) return true;
-            // If no speed info, keep it (let user decide)
             if (!speeds) return true;
             return false;
+        });
+    }
+
+    // Frame material pre-filter
+    if (activeType === 'Frame' && frameMaterial && frameMaterial !== 'all') {
+        filteredComponents = filteredComponents.filter(c => {
+            const mat = ((c as any).attributes?.material || '').toUpperCase();
+            const target = frameMaterial.toUpperCase();
+            if (target === 'ALUMINUM') return mat.includes('ALUMINUM') || mat.includes('ALLOY') || mat === 'AL';
+            if (target === 'TITANIUM') return mat.includes('TITANIUM') || mat === 'TI';
+            return mat.includes(target);
+        });
+    }
+
+    // Wheel material pre-filter
+    if (activeType === 'Wheel' && wheelMaterial && wheelMaterial !== 'all') {
+        filteredComponents = filteredComponents.filter(c => {
+            const mat = ((c as any).attributes?.material || '').toUpperCase();
+            if (wheelMaterial === 'Carbon') return mat.includes('CARBON');
+            return !mat.includes('CARBON'); // Alloy
+        });
+    }
+
+    // Tire size range pre-filter
+    if (activeType === 'Tire' && tireSizeRange && tireSizeRange !== 'all') {
+        const getTireWidthLocal = (c: any): number => {
+            const width = c.widthMM || c.specs?.width || c.interfaces?.width || c.attributes?.width || 0;
+            if (typeof width === 'number') return width;
+            return parseFloat(String(width).replace(/[^0-9.]/g, '')) || 0;
+        };
+        filteredComponents = filteredComponents.filter(c => {
+            const width = getTireWidthLocal(c as any);
+            if (width === 0) return true; // no width data — let compatibility check handle it
+            switch (tireSizeRange) {
+                case '38-40': return width >= 38 && width <= 40;
+                case '41-45': return width >= 41 && width <= 45;
+                case '46-50': return width >= 46 && width <= 50;
+                case '51+':   return width >= 51;
+                default:      return true;
+            }
+        });
+    }
+
+    // Electronic / mechanical pre-filter (RearDerailleur + auto-applies to Shifter)
+    if ((activeType === 'RearDerailleur' || activeType === 'Shifter') && drivetrainElectronic && drivetrainElectronic !== 'all') {
+        filteredComponents = filteredComponents.filter(c => {
+            const isElectronic = (c as any).attributes?.electronic === true;
+            return drivetrainElectronic === 'electronic' ? isElectronic : !isElectronic;
+        });
+    }
+
+    // Brake rotor size pre-filter
+    if (activeType === 'BrakeRotor' && rotorSize && rotorSize !== 'all') {
+        filteredComponents = filteredComponents.filter(c => {
+            const size = parseInt(String((c as any).attributes?.rotor_size || (c as any).specs?.rotor_size || 0));
+            switch (rotorSize) {
+                case '140':  return size === 140;
+                case '160':  return size === 160;
+                case '180':  return size === 180;
+                case '200+': return size >= 200;
+                default:     return true;
+            }
+        });
+    }
+
+    // Seatpost type pre-filter
+    if (activeType === 'Seatpost' && seatpostType && seatpostType !== 'all') {
+        filteredComponents = filteredComponents.filter(c => {
+            const isDropper =
+                (c as any).interfaces?.dropper === true ||
+                (c as any).attributes?.dropper === true;
+            return seatpostType === 'dropper' ? isDropper : !isDropper;
         });
     }
 
@@ -1094,7 +1178,52 @@ export const PartSelector: React.FC = () => {
 
     const uniqueBrands = Array.from(new Set(components.map(c => c.brand))).sort();
     const showCategorySelection = activeType === 'Frame' && !frameCategory;
-    const showCranksetPreFilter = activeType === 'Crankset' && (!drivetrainType || !drivetrainSpeed);
+
+    // Unified pre-filter gate: show question cards before the part grid
+    const showPreFilter = (() => {
+        switch (activeType) {
+            case 'Frame':         return frameMaterial === null;
+            case 'Wheel':         return wheelMaterial === null;
+            case 'Tire':          return tireSizeRange === null;
+            case 'Crankset':      return !cranksetSkipped && (!drivetrainType || !drivetrainSpeed);
+            case 'RearDerailleur':return drivetrainElectronic === null;
+            case 'BrakeRotor':    return rotorSize === null;
+            case 'Seatpost':      return seatpostType === null;
+            default:              return false;
+        }
+    })();
+
+    // Handler called when user picks a filter card option
+    const handlePreFilterSelect = (value: string) => {
+        switch (activeType) {
+            case 'Frame':          setFrameMaterial(value); break;
+            case 'Wheel':          setWheelMaterial(value); break;
+            case 'Tire':           setTireSizeRange(value); break;
+            case 'Crankset':
+                if (!drivetrainType) setDrivetrainType(value as '1x' | '2x');
+                else setDrivetrainSpeed(Number(value));
+                break;
+            case 'RearDerailleur': setDrivetrainElectronic(value); break;
+            case 'BrakeRotor':     setRotorSize(value); break;
+            case 'Seatpost':       setSeatpostType(value); break;
+        }
+    };
+
+    // Handler called when user skips the pre-filter
+    const handlePreFilterSkip = () => {
+        switch (activeType) {
+            case 'Frame':          setFrameMaterial('all'); break;
+            case 'Wheel':          setWheelMaterial('all'); break;
+            case 'Tire':           setTireSizeRange('all'); break;
+            case 'Crankset':       setCranksetSkipped(true); break;
+            case 'RearDerailleur': setDrivetrainElectronic('all'); break;
+            case 'BrakeRotor':     setRotorSize('all'); break;
+            case 'Seatpost':       setSeatpostType('all'); break;
+        }
+    };
+
+    // Keep legacy compat variable so nothing else in this file breaks
+    const showCranksetPreFilter = false;
 
     const currentStepInfo = BUILD_SEQUENCE[currentStep];
 
@@ -1102,10 +1231,23 @@ export const PartSelector: React.FC = () => {
     const handleBack = () => {
         if (selectedBrand) {
             setSelectedBrand(null);
-        } else if (activeType === 'Crankset' && drivetrainSpeed) {
+        } else if (activeType === 'Frame' && frameMaterial) {
+            setFrameMaterial(null);
+        } else if (activeType === 'Wheel' && wheelMaterial) {
+            setWheelMaterial(null);
+        } else if (activeType === 'Tire' && tireSizeRange) {
+            setTireSizeRange(null);
+        } else if (activeType === 'Crankset' && drivetrainSpeed && !cranksetSkipped) {
             setDrivetrainSpeed(null);
-        } else if (activeType === 'Crankset' && drivetrainType) {
+        } else if (activeType === 'Crankset' && (drivetrainType || cranksetSkipped)) {
             setDrivetrainType(null);
+            setCranksetSkipped(false);
+        } else if (activeType === 'RearDerailleur' && drivetrainElectronic) {
+            setDrivetrainElectronic(null);
+        } else if (activeType === 'BrakeRotor' && rotorSize) {
+            setRotorSize(null);
+        } else if (activeType === 'Seatpost' && seatpostType) {
+            setSeatpostType(null);
         } else if (frameCategory) {
             setFrameCategory(FrameType.GRAVEL);
         } else if (currentStep > 0) {
@@ -1487,46 +1629,13 @@ export const PartSelector: React.FC = () => {
                                     </button>
                                 ))}
                             </div>
-                        ) : showCranksetPreFilter ? (
-                            <div className="space-y-6">
-                                {!drivetrainType ? (
-                                    <>
-                                        <p className="text-sm text-stone-400">What type of drivetrain?</p>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <button
-                                                onClick={() => setDrivetrainType('1x')}
-                                                className="p-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-primary/50 transition-all text-left group"
-                                            >
-                                                <h3 className="text-xl font-bold text-stone-100 group-hover:text-primary mb-2">1x</h3>
-                                                <p className="text-sm text-stone-500">Single chainring — simple, clean, reliable</p>
-                                            </button>
-                                            <button
-                                                onClick={() => setDrivetrainType('2x')}
-                                                className="p-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-primary/50 transition-all text-left group"
-                                            >
-                                                <h3 className="text-xl font-bold text-stone-100 group-hover:text-primary mb-2">2x</h3>
-                                                <p className="text-sm text-stone-500">Double chainring — wider range, tighter gear steps</p>
-                                            </button>
-                                        </div>
-                                    </>
-                                ) : !drivetrainSpeed ? (
-                                    <>
-                                        <p className="text-sm text-stone-400">How many speeds?</p>
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                            {[10, 11, 12, 13].map(spd => (
-                                                <button
-                                                    key={spd}
-                                                    onClick={() => setDrivetrainSpeed(spd)}
-                                                    className="p-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-primary/50 transition-all text-center group"
-                                                >
-                                                    <h3 className="text-2xl font-bold text-stone-100 group-hover:text-primary mb-1">{spd}</h3>
-                                                    <p className="text-sm text-stone-500">speed</p>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </>
-                                ) : null}
-                            </div>
+                        ) : showPreFilter ? (
+                            <ComponentPreFilter
+                                activeType={activeType}
+                                drivetrainType={drivetrainType}
+                                onSelect={handlePreFilterSelect}
+                                onSkip={handlePreFilterSkip}
+                            />
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {/* Compatible parts first */}
