@@ -141,6 +141,9 @@ export function normalizeComponent(c: any): Component {
             specs.front_axle = raw.axle_standard || raw.axle;
             specs.max_tire_width = toMM(raw.max_tire);
             specs.brake_mount = raw.brake_mount;
+            // wheel_size is stored in interfaces for 61/73 forks — capture it into specs
+            // so the fork wheel-size compatibility check in PartSelector can find it.
+            specs.wheel_size = toWheelSize(raw.wheel_size || raw.diameter) || undefined;
             break;
 
         case 'Wheel':
@@ -200,8 +203,9 @@ export function normalizeComponent(c: any): Component {
                 specs.range = `${min}-${max}t`;
             }
             specs.largest_cog = raw.cog_list ? Math.max(...raw.cog_list) : undefined;
-            // Freehub body is tricky, typically "freehub_mount" for Campy, or implied by brand/model
-            specs.freehub_body = raw.freehub_mount || raw.freehub_standard;
+            // raw.freehub is the most common field name (83/106 cassettes in DB).
+            // raw.freehub_mount and raw.freehub_standard cover the remaining variants.
+            specs.freehub_body = raw.freehub_mount || raw.freehub_standard || raw.freehub;
             specs.speeds = Number(raw.speeds);
 
             // Parse range if missing largest

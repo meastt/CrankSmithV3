@@ -136,8 +136,11 @@ function getIncompatibilityReason(component: AnyComponent, parts: any, activeTyp
     // Cassette freehub mismatch
     if (activeType === 'Cassette') {
         const cassetteFreehub = (component as any).specs?.freehub_body ||
+                                (component as any).interfaces?.freehub ||
                                 (component as any).interfaces?.freehub_mount ||
-                                (component as any).attributes?.freehub_mount || '';
+                                (component as any).interfaces?.freehub_standard ||
+                                (component as any).attributes?.freehub_standard ||
+                                '';
 
         if (selectedFreehubStandard) {
             if (!cassetteFreehub.toUpperCase().includes(selectedFreehubStandard.toUpperCase())) {
@@ -257,7 +260,14 @@ function getCompatibilitySignal(
     const c = component as any;
     if (activeType === 'Cassette') {
         const wheelFreehub = String(parts.WheelRear?.specs?.freehub_body || parts.WheelRear?.interfaces?.freehub || '').trim();
-        const cassetteFreehub = String(c.specs?.freehub_body || c.interfaces?.freehub_mount || c.attributes?.freehub_mount || '').trim();
+        const cassetteFreehub = String(
+            c.specs?.freehub_body ||
+            c.interfaces?.freehub ||
+            c.interfaces?.freehub_mount ||
+            c.interfaces?.freehub_standard ||
+            c.attributes?.freehub_standard ||
+            ''
+        ).trim();
         if (wheelFreehub && cassetteFreehub) {
             return { confidence: 'High', reason: 'Direct freehub spec available on wheel and cassette.' };
         }
@@ -815,12 +825,17 @@ export const PartSelector: React.FC = () => {
         const tempParts = { ...parts };
 
         // Add the candidate component
-        if (activeType === 'Wheel' && 'position' in component) {
-            if (component.position === 'FRONT') tempParts.WheelFront = component as any;
-            else if (component.position === 'REAR') tempParts.WheelRear = component as any;
-            else if (component.position === 'SET') {
-                tempParts.WheelFront = { ...component, position: 'FRONT' } as any;
-                tempParts.WheelRear = { ...component, position: 'REAR' } as any;
+        if (activeType === 'Wheel') {
+            // position lives in specs.position (not top-level). Normaliser defaults it to 'Set'.
+            const wheelPos = ((component as any).specs?.position || '').toUpperCase();
+            if (wheelPos === 'FRONT') {
+                tempParts.WheelFront = component as any;
+            } else if (wheelPos === 'REAR') {
+                tempParts.WheelRear = component as any;
+            } else {
+                // SET or unknown — treat as a full wheelset for validation
+                tempParts.WheelFront = { ...component, specs: { ...(component as any).specs, position: 'Front' } } as any;
+                tempParts.WheelRear  = { ...component, specs: { ...(component as any).specs, position: 'Rear'  } } as any;
             }
         } else if (activeType === 'Tire') {
             tempParts.TireFront = component as any;
@@ -1012,8 +1027,16 @@ export const PartSelector: React.FC = () => {
     // Explicit Freehub Filtering for Cassettes
     if (activeType === 'Cassette' && selectedFreehubStandard) {
         filteredComponents = filteredComponents.filter(c => {
-            // "SRAM XDR" vs "XDR" - simple check
-            const freehub = ((c as any).specs?.freehub_body || (c as any).freehub_mount || '').toUpperCase();
+            // specs.freehub_body is now populated from raw.freehub | raw.freehub_mount | raw.freehub_standard
+            // Fall back through all known storage locations in case normalization is incomplete
+            const freehub = (
+                (c as any).specs?.freehub_body ||
+                (c as any).interfaces?.freehub ||
+                (c as any).interfaces?.freehub_mount ||
+                (c as any).interfaces?.freehub_standard ||
+                (c as any).attributes?.freehub_standard ||
+                ''
+            ).toUpperCase();
             // Allow loose matching (e.g. if user picked XDR, show SRAM XDR)
             return freehub.includes(selectedFreehubStandard);
         });

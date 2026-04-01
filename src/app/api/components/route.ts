@@ -71,8 +71,24 @@ export async function GET(request: Request) {
         // Final fallback for local development if the DB connection times out/fails
         if (process.env.NODE_ENV === 'development') {
             console.warn('DB connection failed. Falling back to local CSV mode...');
-            const components = await getComponentsFromCSV(refresh);
-            return NextResponse.json(components);
+            const allComponents = await getComponentsFromCSV(refresh);
+            const isBuilderContext = context?.trim().toLowerCase() === 'builder';
+
+            let filtered = allComponents;
+            if (type) filtered = filtered.filter(c => c.type === type);
+
+            if (isBuilderContext) {
+                filtered = filtered.filter(c => {
+                    if (!c.builderEligible) return false;
+                    return c.discipline === 'gravel' || c.discipline === 'multi';
+                });
+            } else {
+                if (discipline) filtered = filtered.filter(c => c.discipline === discipline || c.discipline === 'multi');
+                const parsedBuilderEligible = builderEligible === 'true' ? true : builderEligible === 'false' ? false : undefined;
+                if (parsedBuilderEligible !== undefined) filtered = filtered.filter(c => c.builderEligible === parsedBuilderEligible);
+            }
+
+            return NextResponse.json(filtered);
         }
         
         return NextResponse.json({ error: 'Failed to fetch components' }, { status: 500 });
