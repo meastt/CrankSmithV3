@@ -106,10 +106,12 @@ export function normalizeComponent(c: any): Component {
     // Helpers
     const toStr = (v: any) => v ? String(v) : undefined;
     const toMM = (v: any) => v ? String(v).replace(/[^0-9.]/g, '') + 'mm' : undefined;
-    const toWheelSize = (v: any) => {
-        const s = String(v).toLowerCase();
-        if (s.includes('700') || s.includes('29')) return '700c';
-        if (s.includes('650') || s.includes('27.5')) return '650b';
+    const toWheelSize = (v: any): string | undefined => {
+        if (v === null || v === undefined) return undefined;
+        const s = String(v).toLowerCase().trim();
+        if (!s || s === 'undefined' || s === 'null') return undefined;
+        if (s.includes('700') || s === '29' || s === '29er') return '700c';
+        if (s.includes('650') || s === '27.5') return '650b';
         return s;
     };
 
@@ -123,14 +125,12 @@ export function normalizeComponent(c: any): Component {
             specs.seatpost_diameter = raw.seatpost_diameter;
             specs.category = raw.category; // "Road", "Gravel", "MTB"
 
-            // Frameset fork info (for Road/Gravel framesets that typically include a fork)
-            // Default to true for Road/Gravel if not explicitly set
+            // Frameset fork info (gravel framesets typically include a fork)
             const cat = (raw.category || '').toUpperCase();
             if (raw.includes_fork !== undefined) {
                 specs.includes_fork = raw.includes_fork;
             } else {
-                // Default: Road/Gravel framesets typically include fork, MTB typically doesn't
-                specs.includes_fork = cat === 'ROAD' || cat === 'GRAVEL';
+                specs.includes_fork = cat === 'GRAVEL';
             }
             specs.factory_fork_weight = raw.factory_fork_weight ? Number(raw.factory_fork_weight) : undefined;
             specs.factory_fork_name = raw.factory_fork_name;

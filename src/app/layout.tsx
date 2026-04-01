@@ -8,6 +8,7 @@ import { CapacitorInit } from "@/components/CapacitorInit";
 import { Providers } from "@/components/Providers";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { BottomNav } from "@/components/BottomNav";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -74,6 +75,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <BottomNav />
         </Providers>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-TR57T617HK"

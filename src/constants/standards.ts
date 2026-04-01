@@ -2,9 +2,7 @@
 // FILE: src/constants/standards.ts
 
 export enum FrameType {
-    ROAD = 'ROAD',
     GRAVEL = 'GRAVEL',
-    MTB = 'MTB',
 }
 
 export enum AxleStandard {

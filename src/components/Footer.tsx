@@ -28,19 +28,19 @@ function ExternalLink({ href, children, className }: { href: string; children: R
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/5 bg-stone-950 py-10 md:py-12">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* Brand */}
-          <div className="flex flex-col items-center md:items-start gap-2">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
+    <footer className="border-t border-white/5 bg-stone-950 px-4 py-8 md:py-12 pb-32 md:pb-12">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+          {/* Brand & Mission */}
+          <div className="flex flex-col items-center md:items-start gap-3 text-center md:text-left">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-primary-dark p-1.5 flex items-center justify-center shadow-lg shadow-primary/20">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
-                  className="w-4 h-4 text-white"
+                  className="w-full h-full text-white"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
@@ -48,47 +48,62 @@ export function Footer() {
                   <circle cx="12" cy="12" r="4" />
                 </svg>
               </div>
-              <span className="font-semibold text-stone-200">CrankSmith</span>
+              <span className="font-bold text-stone-100 tracking-tight text-lg">CrankSmith</span>
             </div>
-            <p className="text-sm text-stone-600">
-              © {new Date().getFullYear()} All rights reserved.
+            
+            <p className="text-xs font-medium text-stone-500 uppercase tracking-widest mt-1">
+              Precision cycling engineering
             </p>
-            <p className="text-xs text-stone-600">
-              Made by{" "}
-              <ExternalLink
-                href="https://techridgeseo.com"
-                className="text-cyan-400 hover:text-cyan-300 transition-colors"
-              >
-                Tech Ridge SEO
-              </ExternalLink>
-            </p>
-            <div className="mt-2 text-xs text-stone-600 flex flex-col gap-1">
-              <span>St. George, UT</span>
-              <a href="mailto:support@cranksmith.com" className="hover:text-primary transition-colors">support@cranksmith.com</a>
+            
+            <div className="flex flex-col gap-1.5 mt-2">
+              <p className="text-[11px] text-stone-600 leading-relaxed font-medium">
+                © {new Date().getFullYear()} CrankSmith <span className="mx-1">•</span> St. George, UT
+              </p>
+              <p className="text-[10px] text-stone-700">
+                Build v3.4.1 <span className="mx-1">•</span> All Rights Reserved
+              </p>
             </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
-            <Link href="/features/bike-compatibility-checker" className="text-stone-500 hover:text-primary transition-colors">
-              Compatibility Checker
+          {/* Desktop Navigation Link Wall (Hidden on Mobile) */}
+          <nav className="hidden md:flex flex-wrap items-center gap-x-8 gap-y-3 text-xs font-semibold uppercase tracking-wider text-stone-500">
+            <Link href="/features/bike-compatibility-checker" className="hover:text-primary transition-colors">
+              Compatibility
             </Link>
-            <Link href="/guides" className="text-stone-500 hover:text-primary transition-colors">
+            <Link href="/guides" className="hover:text-primary transition-colors">
               Guides
             </Link>
-            <Link href="/terms" className="text-stone-500 hover:text-primary transition-colors">
+            <Link href="/terms" className="hover:text-primary transition-colors">
               Terms
             </Link>
-            <Link href="/privacy" className="text-stone-500 hover:text-primary transition-colors">
+            <Link href="/privacy" className="hover:text-primary transition-colors">
               Privacy
             </Link>
             <ExternalLink
               href="https://instagram.com/cranksmithapp"
-              className="text-stone-500 hover:text-primary transition-colors"
+              className="hover:text-primary transition-colors"
             >
               Instagram
             </ExternalLink>
           </nav>
+
+          {/* Mobile-only Legal/Meta Links (Cleaner app-style list) */}
+          <div className="flex md:hidden flex-wrap justify-center gap-x-6 gap-y-2 text-[11px] font-bold text-stone-400 uppercase tracking-widest">
+            <Link href="/terms">Terms</Link>
+            <Link href="/privacy">Privacy</Link>
+            <a href="mailto:support@cranksmith.com">Support</a>
+          </div>
+
+          {/* Maker Attribution */}
+          <div className="flex flex-col items-center md:items-end gap-1.5">
+            <span className="text-[10px] text-stone-700 font-bold uppercase tracking-widest">Powered By</span>
+            <ExternalLink
+              href="https://techridgeseo.com"
+              className="px-3 py-1 rounded-lg bg-stone-900 border border-white/5 text-[10px] font-bold text-cyan-500 hover:text-cyan-400 hover:border-cyan-500/30 transition-all"
+            >
+              TECH RIDGE SEO
+            </ExternalLink>
+          </div>
         </div>
       </div>
     </footer>

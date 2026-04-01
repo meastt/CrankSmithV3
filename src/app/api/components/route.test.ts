@@ -42,16 +42,7 @@ describe('GET /api/components', () => {
       where: {
         type: 'Frame',
         builderEligible: true,
-        OR: [
-          { discipline: 'gravel' },
-          {
-            discipline: 'multi',
-            disciplineTags: {
-              contains: 'gravel',
-              mode: 'insensitive',
-            },
-          },
-        ],
+        discipline: { in: ['gravel', 'multi'] },
       },
     });
   });
@@ -97,16 +88,7 @@ describe('GET /api/components', () => {
       where: {
         type: 'Frame',
         builderEligible: true,
-        OR: [
-          { discipline: 'gravel' },
-          {
-            discipline: 'multi',
-            disciplineTags: {
-              contains: 'gravel',
-              mode: 'insensitive',
-            },
-          },
-        ],
+        discipline: { in: ['gravel', 'multi'] },
       },
     });
   });
@@ -122,16 +104,7 @@ describe('GET /api/components', () => {
       where: {
         type: 'Frame',
         builderEligible: true,
-        OR: [
-          { discipline: 'gravel' },
-          {
-            discipline: 'multi',
-            disciplineTags: {
-              contains: 'gravel',
-              mode: 'insensitive',
-            },
-          },
-        ],
+        discipline: { in: ['gravel', 'multi'] },
       },
     });
   });

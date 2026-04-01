@@ -32,16 +32,7 @@ describe('buildComponentWhereClause', () => {
     expect(where).toEqual({
       type: 'Frame',
       builderEligible: true,
-      OR: [
-        { discipline: 'gravel' },
-        {
-          discipline: 'multi',
-          disciplineTags: {
-            contains: 'gravel',
-            mode: 'insensitive',
-          },
-        },
-      ],
+      discipline: { in: ['gravel', 'multi'] },
     });
   });
 
@@ -84,16 +75,7 @@ describe('buildComponentWhereClause', () => {
     expect(where).toEqual({
       type: 'Frame',
       builderEligible: true,
-      OR: [
-        { discipline: 'gravel' },
-        {
-          discipline: 'multi',
-          disciplineTags: {
-            contains: 'gravel',
-            mode: 'insensitive',
-          },
-        },
-      ],
+      discipline: { in: ['gravel', 'multi'] },
     });
   });
 
@@ -108,16 +90,7 @@ describe('buildComponentWhereClause', () => {
     expect(where).toEqual({
       type: 'Frame',
       builderEligible: true,
-      OR: [
-        { discipline: 'gravel' },
-        {
-          discipline: 'multi',
-          disciplineTags: {
-            contains: 'gravel',
-            mode: 'insensitive',
-          },
-        },
-      ],
+      discipline: { in: ['gravel', 'multi'] },
     });
   });
 

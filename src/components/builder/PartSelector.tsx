@@ -331,7 +331,7 @@ export const PartSelector: React.FC = () => {
     const [showFreehubSelector, setShowFreehubSelector] = useState(false);
     const [pendingWheel, setPendingWheel] = useState<AnyComponent | null>(null);
 
-    // Fork Choice State (for Road/Gravel framesets that include a fork)
+    // Fork Choice State (for Gravel framesets that include a fork)
     const [showForkChoiceModal, setShowForkChoiceModal] = useState(false);
     const [pendingFrame, setPendingFrame] = useState<AnyComponent | null>(null);
 
@@ -601,15 +601,15 @@ export const PartSelector: React.FC = () => {
             setPart('BrakeRotorFront', component);
             setPart('BrakeRotorRear', component);
         } else if (activeType === 'Frame') {
-            // Check if this is a Road/Gravel frameset that includes a fork
+            // Check if this is a Gravel frameset that includes a fork
             const category = ((component as any).specs?.category ||
                              (component as any).attributes?.category || '').toUpperCase();
             const includesFork = (component as any).specs?.includes_fork ??
-                                (category === 'ROAD' || category === 'GRAVEL');
+                                (category === 'GRAVEL');
             const factoryForkWeight = (component as any).specs?.factory_fork_weight || 0;
             const factoryForkName = (component as any).specs?.factory_fork_name || null;
 
-            if (includesFork && category !== 'MTB') {
+            if (includesFork) {
                 // Store the frame and show fork choice modal
                 setPendingFrame(component);
                 setFactoryForkInfo(factoryForkWeight, factoryForkName);
@@ -617,7 +617,6 @@ export const PartSelector: React.FC = () => {
                 return; // Stop here, wait for user selection
             }
 
-            // MTB or frame without fork - proceed normally
             setPart('Frame', component);
         } else {
             setPart(activeType as any, component);
@@ -888,8 +887,7 @@ export const PartSelector: React.FC = () => {
     // Frame Category
     if (activeType === 'Frame' && frameCategory) {
         filteredComponents = filteredComponents.filter(c => {
-            // Check flattened category or attributes.category
-            const category = (c as any).category || (c as any).attributes?.category;
+            const category = (c as any).category || (c as any).attributes?.category || (c as any).specs?.category;
             return category && category.toUpperCase() === frameCategory.toUpperCase();
         });
     }
@@ -930,44 +928,16 @@ export const PartSelector: React.FC = () => {
             return false;
         };
 
-        // Helper to check if fork is suspension
-        const isSuspensionFork = (c: any): boolean => {
-            const forkTypeRaw = c.interfaces?.fork_type || c.attributes?.fork_type || '';
-            const forkType = String(Array.isArray(forkTypeRaw) ? forkTypeRaw[0] : forkTypeRaw).toUpperCase();
-            const suspTypeRaw = c.interfaces?.suspension_type || c.attributes?.suspension_type || '';
-            const suspType = String(Array.isArray(suspTypeRaw) ? suspTypeRaw[0] : suspTypeRaw).toUpperCase();
-            const travelStr = String(c.attributes?.travel || '0');
-            const travel = parseInt(travelStr.replace(/[^0-9]/g, ''));
-            return forkType === 'SUSPENSION' || suspType !== '' || travel > 0;
-        };
-
-        if (frameCategory === 'ROAD') {
-            // Road bikes: Show rigid forks only (no suspension), exclude MTB forks
-            filteredComponents = filteredComponents.filter(c => {
-                if (isMTBFork(c)) return false;
-                return !isSuspensionFork(c);
-            });
-        } else if (frameCategory === 'GRAVEL') {
-            // Gravel bikes: Show gravel forks (rigid and suspension), road forks, but NOT MTB
-            filteredComponents = filteredComponents.filter(c => {
-                // Explicitly exclude MTB forks
-                if (isMTBFork(c)) return false;
-
-                const cat = getForkCategory(c);
-                // Show gravel or road forks (both rigid and suspension for gravel)
-                // Also show forks with no category if they're not MTB
-                return cat === 'GRAVEL' || cat === 'ROAD' || cat === '';
-            });
-        } else if (frameCategory === 'MTB') {
-            // MTB: Show MTB forks only
-            filteredComponents = filteredComponents.filter(c => isMTBFork(c));
-        }
+        // Gravel: show gravel forks (rigid and suspension), uncategorised forks — no MTB
+        filteredComponents = filteredComponents.filter(c => {
+            if (isMTBFork(c)) return false;
+            const cat = getForkCategory(c);
+            return cat === 'GRAVEL' || cat === '';
+        });
     }
 
     // Tire Category Filtering (Based on Frame)
     if (activeType === 'Tire' && parts.Frame) {
-        const frameCategory = ((parts.Frame as any).category || (parts.Frame as any).attributes?.category || '').toUpperCase();
-        const maxTireWidth = parseFloat(String((parts.Frame as any).specs?.max_tire_width || (parts.Frame as any).attributes?.max_tire || '0').replace(/[^0-9.]/g, ''));
 
         // Helper to get tire type from multiple possible fields
         const getTireType = (c: any): string => {
@@ -975,47 +945,61 @@ export const PartSelector: React.FC = () => {
                     c.attributes?.purpose || c.specs?.tire_type || '').toUpperCase();
         };
 
-        // Helper to get tire width
+        // Helper to get tire width (returns mm value, or 0 if unparseable)
         const getTireWidth = (c: any): number => {
             const width = c.widthMM || c.specs?.width || c.interfaces?.width || c.attributes?.width || 0;
             if (typeof width === 'number') return width;
             return parseFloat(String(width).replace(/[^0-9.]/g, '')) || 0;
         };
 
-        if (frameCategory === 'ROAD') {
-            // Show Road tires (width <= 35mm usually, or explicit road type)
+        // Gravel: width is the primary gate (38–60mm).
+        // Type tags are only used to block clearly non-gravel tires with unknown width.
+        // ROAD-tagged wide tires (e.g. 700×47 gravel/road crossovers) are kept — width decides.
+        filteredComponents = filteredComponents.filter(c => {
+            const width = getTireWidth(c);
+
+            // Width known — let it through only if in gravel range (38–60mm)
+            if (width > 0) return width >= 38 && width <= 60;
+
+            // Width unknown — block only aggressively non-gravel types (Enduro/DH)
+            const type = getTireType(c);
+            if (['ENDURO', 'DH', 'DOWNHILL'].includes(type)) return false;
+
+            return true;
+        });
+    }
+
+    // Tire Diameter Filtering (hard filter based on selected wheel)
+    if (activeType === 'Tire' && (parts.WheelFront || parts.WheelRear)) {
+        const wheel = (parts.WheelFront || parts.WheelRear) as any;
+
+        const normDiam = (v: any): string | null => {
+            if (!v) return null;
+            const s = String(v).toLowerCase().trim();
+            if (!s || s === 'undefined' || s === 'null') return null;
+            if (s.includes('700') || s === '29' || s === '29er') return '700c';
+            if (s.includes('650') || s.includes('27.5')) return '650b';
+            return s;
+        };
+
+        const wheelDiam = normDiam(
+            wheel.specs?.diameter ||
+            wheel.interfaces?.diameter ||
+            wheel.attributes?.diameter ||
+            wheel.attributes?.wheel_size ||
+            wheel.interfaces?.wheel_size
+        );
+
+        if (wheelDiam) {
             filteredComponents = filteredComponents.filter(c => {
-                const type = getTireType(c);
-                const width = getTireWidth(c);
-                return type === 'ROAD' || (width > 0 && width <= 35);
-            });
-        } else if (frameCategory === 'GRAVEL') {
-            // Gravel tires: 38mm minimum. isCompatible will further restrict to frame's max clearance.
-            filteredComponents = filteredComponents.filter(c => {
-                const type = getTireType(c);
-                const width = getTireWidth(c);
-
-                // Width-based filter: 38mm floor enforced regardless of type tag
-                if (width >= 38 && width <= 60) return true;
-
-                // Explicit gravel type with unknown/unparseable width — let it through
-                if (type === 'GRAVEL' && width === 0) return true;
-
-                return false;
-            });
-        } else if (frameCategory === 'MTB') {
-            // Show MTB tires - check type OR larger widths
-            filteredComponents = filteredComponents.filter(c => {
-                const type = getTireType(c);
-                const width = getTireWidth(c);
-
-                // Explicit MTB types
-                if (['MTB', 'XC', 'TRAIL', 'ENDURO', 'DH', 'DOWNHILL'].includes(type)) return true;
-
-                // Width-based: MTB tires are typically 50mm+ (2.0"+)
-                if (width >= 50) return true;
-
-                return false;
+                const tireDiam = normDiam(
+                    (c as any).specs?.diameter ||
+                    (c as any).attributes?.diameter ||
+                    (c as any).interfaces?.diameter
+                );
+                // Unknown tire diameter — let through (will show as data-quality warning)
+                if (!tireDiam) return true;
+                return tireDiam === wheelDiam;
             });
         }
     }

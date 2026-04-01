@@ -31,16 +31,10 @@ export function buildComponentWhereClause(params: ComponentFilterParams): Record
 
     if (isBuilderContext) {
         where.builderEligible = true;
-        where.OR = [
-            { discipline: 'gravel' },
-            {
-                discipline: 'multi',
-                disciplineTags: {
-                    contains: 'gravel',
-                    mode: 'insensitive'
-                }
-            }
-        ];
+        // Include gravel + all multi-discipline parts.
+        // Per-type filters in PartSelector (width gates, category checks, etc.)
+        // already handle fine-grained gravel scoping — no need to double-gate here.
+        where.discipline = { in: ['gravel', 'multi'] };
     }
 
     return where;

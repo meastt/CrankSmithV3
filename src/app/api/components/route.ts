@@ -11,6 +11,7 @@ import {
     validateBuilderEligibility
 } from '@/lib/discipline';
 import { buildComponentWhereClause } from '@/lib/componentFilters';
+import { getComponentsFromCSV } from '@/lib/csvLoader';
 
 function isAdmin(userId: string): boolean {
     const adminIds = (process.env.ADMIN_USER_IDS || '').split(',').map(id => id.trim()).filter(Boolean);
@@ -23,6 +24,36 @@ export async function GET(request: Request) {
     const context = searchParams.get('context');
     const discipline = searchParams.get('discipline');
     const builderEligible = searchParams.get('builderEligible');
+    const refresh = searchParams.get('refresh') === 'true';
+
+    // Check for forced local mode or use if DB connection fails in development
+    const useLocalCSV = process.env.USE_LOCAL_CSV === 'true' || 
+                       (process.env.NODE_ENV === 'development' && !process.env.POSTGRES_URL);
+
+    if (useLocalCSV) {
+        console.log('Using local CSV data fallback (Dev Mode)');
+        const components = await getComponentsFromCSV(refresh);
+
+        const isBuilderContext = context?.trim().toLowerCase() === 'builder';
+
+        let filtered = components;
+        if (type) filtered = filtered.filter(c => c.type === type);
+
+        if (isBuilderContext) {
+            // Include gravel + multi-discipline parts that are builder-eligible.
+            // PartSelector handles fine-grained gravel scoping per component type.
+            filtered = filtered.filter(c => {
+                if (!c.builderEligible) return false;
+                return c.discipline === 'gravel' || c.discipline === 'multi';
+            });
+        } else {
+            if (discipline) filtered = filtered.filter(c => c.discipline === discipline || c.discipline === 'multi');
+            const parsedBuilderEligible = builderEligible === 'true' ? true : builderEligible === 'false' ? false : undefined;
+            if (parsedBuilderEligible !== undefined) filtered = filtered.filter(c => c.builderEligible === parsedBuilderEligible);
+        }
+
+        return NextResponse.json(filtered);
+    }
 
     try {
         const componentModel: any = prisma.component;
@@ -36,6 +67,14 @@ export async function GET(request: Request) {
         return NextResponse.json(parsedComponents);
     } catch (error) {
         console.error('Error fetching components:', error);
+        
+        // Final fallback for local development if the DB connection times out/fails
+        if (process.env.NODE_ENV === 'development') {
+            console.warn('DB connection failed. Falling back to local CSV mode...');
+            const components = await getComponentsFromCSV(refresh);
+            return NextResponse.json(components);
+        }
+        
         return NextResponse.json({ error: 'Failed to fetch components' }, { status: 500 });
     }
 }
