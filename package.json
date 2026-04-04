@@ -74,6 +74,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "overrides": {
+    "@xmldom/xmldom": "^0.8.12",
     "minimatch": "^5.0.0",
     "tar": "^7.5.13"
   }

@@ -506,6 +506,51 @@ describe('Validator.validateBuild', () => {
             expect(bbIssue).toBeDefined();
         });
 
+        it('should pass when T47_INT_68 frame pairs with T47 68mm internal BB and matching spindles', () => {
+            const build = makeBaseBuild({
+                frame: makeComponent({ id: 'f', specs: { bb_shell: 'T47_INT_68' } }),
+                bottomBracket: makeComponent({
+                    id: 'bb',
+                    specs: { bb_shell: 'T47_Internal_68mm', spindle_interface: 'DUB_28.99mm' },
+                }),
+                crankset: makeComponent({ id: 'c', specs: { spindle_type: 'DUB' } }),
+            });
+            const result = Validator.validateBuild(build);
+            const bbShellIssue = result.issues.find(
+                i =>
+                    i.componentId === 'bb' &&
+                    i.severity === 'ERROR' &&
+                    i.message.toLowerCase().includes('bottom bracket shell')
+            );
+            const spindleIssue = result.issues.find(
+                i =>
+                    i.componentId === 'c' &&
+                    i.severity === 'ERROR' &&
+                    i.message.toLowerCase().includes('spindle')
+            );
+            expect(bbShellIssue).toBeUndefined();
+            expect(spindleIssue).toBeUndefined();
+        });
+
+        it('should error when T47_INT_68 frame pairs with T47 86mm internal BB', () => {
+            const build = makeBaseBuild({
+                frame: makeComponent({ id: 'f', specs: { bb_shell: 'T47_INT_68' } }),
+                bottomBracket: makeComponent({
+                    id: 'bb',
+                    specs: { bb_shell: 'T47_Internal_86mm', spindle_interface: 'DUB_28.99mm' },
+                }),
+                crankset: makeComponent({ id: 'c', specs: { spindle_type: 'DUB' } }),
+            });
+            const result = Validator.validateBuild(build);
+            const bbIssue = result.issues.find(
+                i =>
+                    i.componentId === 'bb' &&
+                    i.severity === 'ERROR' &&
+                    i.message.toLowerCase().includes('bottom bracket shell')
+            );
+            expect(bbIssue).toBeDefined();
+        });
+
         it('should pass when BSA68 frame paired with generic BSA BB', () => {
             const build = makeBaseBuild({
                 frame: makeComponent({ id: 'f', specs: { bb_shell: 'BSA_Threaded_68mm' } }),

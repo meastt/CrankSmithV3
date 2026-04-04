@@ -316,6 +316,27 @@ async function main() {
             interfaces: JSON.stringify({ frame_shell: 'T47_Internal_86mm', crank_spindle: '30mm' }),
             attributes: JSON.stringify({ weight: 98 }),
         },
+        {
+            id: 'sram-dub-t47-68',
+            type: 'BottomBracket',
+            name: 'SRAM DUB T47 68mm (internal)',
+            interfaces: JSON.stringify({ frame_shell: 'T47_Internal_68mm', crank_spindle: 'DUB_28.99mm' }),
+            attributes: JSON.stringify({ weight: 80, note: 'T47 threaded, 68mm shell width (common on gravel/all-road)' }),
+        },
+        {
+            id: 'wheels-mfg-t47-68-shimano',
+            type: 'BottomBracket',
+            name: 'Wheels Manufacturing T47 68mm — Shimano 24mm',
+            interfaces: JSON.stringify({ frame_shell: 'T47_Internal_68mm', crank_spindle: 'Hollowtech_II_24mm' }),
+            attributes: JSON.stringify({ weight: 95, note: 'Inboard T47 cups for 68mm shell, 24mm spindle' }),
+        },
+        {
+            id: 'chris-king-t47-24i-68',
+            type: 'BottomBracket',
+            name: 'Chris King T47 24i 68mm (internal)',
+            interfaces: JSON.stringify({ frame_shell: 'T47_Internal_68mm', crank_spindle: 'Hollowtech_II_24mm' }),
+            attributes: JSON.stringify({ weight: 108, note: 'T47 internal for 68mm shell; verify fit kit with frame maker' }),
+        },
 
         // --- WHEELS ---
         {

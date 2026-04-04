@@ -66,9 +66,35 @@ function normalizeBBShell(shell: string | undefined): string {
     if (upper.includes('BB86')) return 'BB86';
     if (upper.includes('BB92')) return 'BB92';
 
-    // T47 (threaded 47mm)
+    // T47 (threaded 47mm) — shell width (68 / 86 / 73 mm) and internal vs external cups matter.
+    // Data often uses T47_INT_68 (alnum: T47INT68); older logic missed "INT" and mis-bucketed as external.
     if (upper.includes('T47')) {
-        if (upper.includes('INTERNAL') || upper.includes('86')) return 'T47INTERNAL';
+        if (upper.includes('BBRIGHT')) {
+            return 'T47BBRIGHT';
+        }
+
+        const explicitExternal = upper.includes('EXTERNAL');
+        const hasInternalCup =
+            upper.includes('INTERNAL') ||
+            upper.includes('INBOARD') ||
+            (upper.includes('INT') && !explicitExternal);
+        const threaded = upper.includes('THREADED');
+        const treatAsInternal = !explicitExternal && (hasInternalCup || threaded);
+
+        if (explicitExternal && !treatAsInternal) {
+            if (upper.includes('73')) return 'T47EXT73';
+            if (upper.includes('86')) return 'T47EXT86';
+            if (upper.includes('68')) return 'T47EXT68';
+            return 'T47EXTERNAL';
+        }
+
+        if (treatAsInternal) {
+            if (upper.includes('73')) return 'T47INT73';
+            if (upper.includes('86')) return 'T47INT86';
+            if (upper.includes('68')) return 'T47INT68';
+            return 'T47INT86';
+        }
+
         return 'T47EXTERNAL';
     }
 

@@ -7,6 +7,15 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const nextConfig: NextConfig = {
   reactCompiler: true,
 
+  // Optional: comma-separated hostnames for LAN device testing (e.g. NEXT_DEV_ALLOWED_ORIGINS=192.168.1.26)
+  ...(process.env.NODE_ENV === 'development' && process.env.NEXT_DEV_ALLOWED_ORIGINS
+    ? {
+        allowedDevOrigins: process.env.NEXT_DEV_ALLOWED_ORIGINS.split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+      }
+    : {}),
+
   async headers() {
     return [
       {
