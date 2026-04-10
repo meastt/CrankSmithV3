@@ -58,7 +58,7 @@ const blogPosts = [
         excerpt: "Optimal PSI for every width at different rider weights and terrain. Hookless rim max pressure limits. Tubeless minimums to prevent burping.",
         category: "Big Tires",
         date: "2026-04-16",
-        image: "/images/blog-tire-pressure-guide.jpg"
+        image: "/images/gravel-tire-pressure-psiby-width-2026.webp"
     },
     {
         slug: "every-gravel-frame-that-fits-2-25in-tires",
@@ -66,7 +66,7 @@ const blogPosts = [
         excerpt: "Allied Able (57mm), Lauf Seigla (50mm), 3T Extrema (54mm), Specialized Diverge 4 (55mm) — definitive list.",
         category: "Big Tires",
         date: "2026-04-17",
-        image: "/images/blog-2-25-frames.jpg"
+        image: "/images/gravel-frames-2-25-tires-2026.webp"
     },
     {
         slug: "hookless-vs-hooked-gravel-wheels-safety-guide",
@@ -74,7 +74,7 @@ const blogPosts = [
         excerpt: "ETRTO standards updated. 28mm tires on 25mm internal hookless = non-compliant. Max pressure 72.5 PSI. When hooked is non-negotiable.",
         category: "Standards",
         date: "2026-04-21",
-        image: "/images/blog-hookless-safety.jpg"
+        image: "/images/gravel-hookless-vs-hooked-safety-guide-2026.webp"
     },
     {
         slug: "rockshox-rudy-vs-rigid-gravel-suspension",
@@ -82,7 +82,7 @@ const blogPosts = [
         excerpt: "800g heavier but elite racers pair it with narrow tires instead of wide + rigid. The full trade-off analysis.",
         category: "Suspension",
         date: "2026-04-22",
-        image: "/images/blog-suspension-vs-rigid.jpg"
+        image: "/images/gravel-rockshox-rudy-vs-rigid-fork-2026.webp"
     },
     {
         slug: "gravel-tubeless-setup-guide",
@@ -90,7 +90,7 @@ const blogPosts = [
         excerpt: "Tape layers by rim width. Sealant ml by tire volume. Burping fix on hookless: lower pressure + sealant boost.",
         category: "Setup",
         date: "2026-04-24",
-        image: "/images/blog-tubeless-setup.jpg"
+        image: "/images/gravel-tubeless-setup-flowchart-2026.webp"
     },
 ];
 

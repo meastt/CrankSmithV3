@@ -70,7 +70,7 @@ const blogData: Record<string, { title: string; description: string; date: strin
         date: "2026-04-21",
         category: "Standards",
         keywords: ["hookless gravel wheels", "hookless safety", "etrto hookless standards", "hooked vs hookless gravel"],
-        image: "/images/blog-hookless-safety.webp"
+        image: "/images/gravel-hookless-vs-hooked-safety-guide-2026.webp"
     },
     "rockshox-rudy-vs-rigid-gravel-suspension": {
         title: "RockShox Rudy vs Rigid Fork: Is Gravel Suspension Worth It in 2026?",
@@ -78,7 +78,7 @@ const blogData: Record<string, { title: string; description: string; date: strin
         date: "2026-04-22",
         category: "Suspension",
         keywords: ["rockshox rudy gravel", "gravel suspension fork", "gravel fork weight"],
-        image: "/images/blog-suspension-vs-rigid.webp"
+        image: "/images/gravel-rockshox-rudy-vs-rigid-fork-2026.webp"
     },
     "gravel-tubeless-setup-guide": {
         title: "Gravel Tubeless Setup: What Seals, What Tapes, What Goes Wrong",
@@ -86,7 +86,7 @@ const blogData: Record<string, { title: string; description: string; date: strin
         date: "2026-04-24",
         category: "Setup",
         keywords: ["gravel tubeless setup", "gravel tubeless tape", "gravel tire burping", "gravel sealant amount"],
-        image: "/images/blog-tubeless-setup.webp"
+        image: "/images/gravel-tubeless-setup-flowchart-2026.webp"
     }
 };
 
@@ -151,6 +151,9 @@ export default async function BlogPostPage({ params }: Props) {
     if (slug === "unbound-gravel-2026-tire-gear-setup") return <PostUnbound2026 articleSchema={articleSchema} />;
     if (slug === "gravel-tire-psiby-width-guide-2026") return <PostTirePressureByWidth articleSchema={articleSchema} />;
     if (slug === "every-gravel-frame-that-fits-2-25in-tires") return <Post225Frames articleSchema={articleSchema} />;
+    if (slug === "hookless-vs-hooked-gravel-wheels-safety-guide") return <PostHooklessVsHooked articleSchema={articleSchema} />;
+    if (slug === "rockshox-rudy-vs-rigid-gravel-suspension") return <PostRockShoxRudy articleSchema={articleSchema} />;
+    if (slug === "gravel-tubeless-setup-guide") return <PostTubelessSetup articleSchema={articleSchema} />;
 
     /* Fallback for posts not yet written */
     return (
@@ -1109,6 +1112,471 @@ function Post225Frames({ articleSchema }: { articleSchema: object }) {
                     </div>
 
                     <BlogCTA heading="Check Frame and Tire Compatibility" sub="Enter your frame, tire size, and drivetrain. We flag clearance issues and gearing problems before you buy." />
+                    <BackLink />
+                </article>
+            </div>
+        </>
+    );
+}
+function PostHooklessVsHooked({ articleSchema }: { articleSchema: object }) {
+    const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+            {
+                "@type": "Question",
+                name: "What is the difference between hookless and hooked gravel wheels?",
+                acceptedAnswer: { "@type": "Answer", text: "Hooked wheels have a small internal lip (bead hook) that helps lock the tire bead in place. Hookless wheels have a straight, smooth inner rim profile with no bead hook. Hookless reduces weight and allows for stronger rim designs, but requires tires that are specifically hookless-approved." }
+            },
+            {
+                "@type": "Question",
+                name: "What are the ETRTO safety limits for hookless gravel wheels?",
+                acceptedAnswer: { "@type": "Answer", text: "ETRTO updated standards in 2024: 72.5 PSI (5 bar) max for 25mm internal width hookless rims, and 60 PSI for 30mm+ internal width. Hookless requires specific tire/rim combinations that pass the hookless compatibility list from ETRTO." }
+            },
+            {
+                "@type": "Question",
+                name: "Which gravel tires are hookless-approved?",
+                acceptedAnswer: { "@type": "Answer", text: "Major hookless-approved gravel tires include: WTB TCS Light/TCS Tough, Pirelli Cinturato Gravel H/T/M, Schwalbe G-One line, Continental Terra Speed/Trail, and Maxxis Rambler/Receptor. Always check the specific rim manufacturer's compatibility list before pairing." }
+            },
+            {
+                "@type": "Question",
+                name: "What happens if I run a non-hookless tire on hookless wheels?",
+                acceptedAnswer: { "@type": "Answer", text: "The tire may not seat properly; more critically, the bead can slip under hard cornering or impact, causing the tire to blow off the rim, especially at pressures over 50 PSI. Non-approved combos void the rim and tire manufacturer warranties." }
+            },
+            {
+                "@type": "Question",
+                name: "Should I buy hookless for my gravel bike in 2026?",
+                acceptedAnswer: { "@type": "Answer", text: "If you run wide tires (45mm+) at moderate pressures (25–35 PSI), hookless is safe and often lighter. If you run narrow gravel tires (35mm) at high pressures (50+ PSI) for road/gravel mixed use, stick with hooked rims for safety and flexibility." }
+            }
+        ]
+    };
+
+    return (
+        <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+            <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
+                <article className="max-w-3xl mx-auto">
+                    <BackLink />
+                    <div className="mt-2 mb-6 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-[11px] font-bold text-orange-400 uppercase tracking-widest">
+                        Standards
+                    </div>
+                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
+                        Hookless vs Hooked Gravel Wheels: The Safety Guide That Actually Matters
+                    </h1>
+                    <p className="text-gray-400 text-sm mb-6">April 21, 2026 &middot; 11 min read</p>
+
+                    <FeaturedImage
+                        src="/images/gravel-hookless-vs-hooked-safety-guide-2026.webp"
+                        alt="Cross-section diagram comparing hookless rim (smooth inner edge) to hooked rim (bead hook lip), cyan technical annotations, orange pressure warning zones, engineering schematic on dark charcoal background"
+                    />
+
+                    <div className="mt-8 text-gray-300 leading-relaxed space-y-6">
+                        <p><strong>Hookless rims are the biggest change in wheel standards since tubeless.</strong> They are lighter, potentially stronger, cheaper to manufacture — and, if you get the pairing wrong, they can send a tire flying off the rim at speed. This is not an exaggeration. ETRTO published the official compatibility list in 2024 to prevent exactly that scenario.</p>
+
+                        <p>So who are hookless rims for? And who should stick with traditional hooked rims for safety and flexibility? Here is the full breakdown, based on the 2026 gravel wheel market, verified tire compatibility lists, and real-world failure data.</p>
+
+                        <h2 className="text-white mt-12 mb-6">The Basic Difference: Bead Lock vs. Bead Cup</h2>
+
+                        <p>Hooked wheels have a small internal lip called the bead hook. When the tire inflates, the hook catches the tire bead and mechanically locks it in place. This is an extra safety measure that prevents the tire from unseating under side load, which is why hooked rims have been the standard for decades.</p>
+
+                        <p>Hookless wheels lack that hook. The tire bead sits in a cup-shaped rim channel, held in place by air pressure alone. That reduces weight by about 30–50g per rim and simplifies manufacturing, but it shifts the safety burden onto the tire's bead and the rim's tolerances — which is why hookless compatibility is picky.</p>
+
+                        <h2 className="text-white mt-12 mb-6">ETRTO 2024 Standard: The Limits</h2>
+
+                        <p>Here is what the European Tyre & Rim Technical Organisation (ETRTO) officially says in its 2024-2025 standards:</p>
+                        <ul className="space-y-1">
+                            <li><strong>Maximum pressure:</strong> 72.5 PSI (5 bar) for hookless rims with 25mm internal width.</li>
+                            <li><strong>Wider rims (30mm+ internal width):</strong> 60 PSI max.</li>
+                            <li><strong>Tire compatibility:</strong> Only tires listed in the ETRTO hookless compatibility database are safe. Non-approved tires can be installed, but the bead may not seat correctly, and the risk of sudden unseating under impact increases sharply.</li>
+                            <li><strong>Manufacturer testing:</strong> Rim and tire manufacturers must cross-certify their products in actual lab tests. A tire that is hookless-compatible with Zipp may not be compatible with DT Swiss.</li>
+                        </ul>
+
+                        <h2 className="text-white mt-12 mb-6">The Pressure Problem</h2>
+
+                        <p>Most gravel riders will never hit the 72.5 PSI hookless ceiling. If you are running 45mm tires at 28–32 PSI, you are fine.</p>
+
+                        <p>The problem arises with narrow gravel tires on mixed-road rides. A gravel racer might run 35mm tires at 55 PSI for a 60-mile gravel-road race. That is dangerously close to the hookless limit — especially if the rim is a 30mm internal width (60 PSI limit). Add a hot day, a fast descent, and a sharp rock impact, and the tire could unseat.</p>
+
+                        <h2 className="text-white mt-12 mb-6">Known Compatible Gravel Tires (2026)</h2>
+                        <p>These brands/models appear on multiple manufacturer compatibility lists:</p>
+                        <ul className="space-y-1">
+                            <li><strong>WTB:</strong> All TCS Light and TCS Tough tires (Riddler, Sendero, Nano, etc.)</li>
+                            <li><strong>Pirelli:</strong> Cinturato Gravel H, Gravel T, Gravel M (all versions)</li>
+                            <li><strong>Schwalbe:</strong> G-One RS, R, S, Allround, Speed; including the new G‑One Pro line</li>
+                            <li><strong>Continental:</strong> Terra Speed, Terra Trail, Terra Hardpack</li>
+                            <li><strong>Maxxis:</strong> Rambler, Receptor</li>
+                            <li><strong>Specialized:</strong> Pathfinder Pro, Sawtooth</li>
+                        </ul>
+
+                        <h2 className="text-white mt-12 mb-6">The Burping Risk</h2>
+                        <p>Even with a compatible tire/rim pair, hookless wheels are more likely to burp (the bead momentarily unseats, releasing air) on square-edge impacts. If you ride rocky, technical gravel at low pressures (18–25 PSI), a sharp impact can flex the rim enough for the bead to lose its seal.</p>
+
+                        <p>The fix: a few extra milliliters of sealant (60 ml vs 45 ml per tire) and a slightly higher pressure (2–3 PSI) to keep the bead seated.</p>
+
+                        <h2 className="text-white mt-12 mb-6">Who Should Go Hookless?</h2>
+                        <p>Hookless makes sense for riders who:</p>
+                        <ul className="space-y-1">
+                            <li>Run 45mm+ tires at moderate pressures (25–35 PSI)</li>
+                            <li>Use hookless-approved tires from the compatibility list</li>
+                            <li>Want the weight reduction (typically 60–80g per wheelset)</li>
+                            <li>Do not plan to mix and match tires frequently</li>
+                        </ul>
+
+                        <h2 className="text-white mt-12 mb-6">Who Should Stay Hooked?</h2>
+                        <p>Stick with hooked rims if you:</p>
+                        <ul className="space-y-2">
+                            <li>Run narrow gravel tires (35–40mm) at 45+ PSI</li>
+                            <li>Travel with the bike and might need to buy whatever replacement tire is available locally</li>
+                            <li>Frequently swap between tires (road slicks for commuting, knobbies for weekend)</li>
+                            <li>Ride rocky, high-impact terrain where burping is already a risk</li>
+                        </ul>
+
+                        <h2 className="text-white mt-12 mb-6">Quick Check: Are Your Wheels Hookless?</h2>
+                        <p>If you are not sure:</p>
+                        <ol className="list-decimal space-y-1 pl-5">
+                            <li>Look inside the rim. No internal lip? It is hookless.</li>
+                            <li>Check the rim manufacturer's website for hookless compatibility lists.</li>
+                            <li>If the rim is ENVE, Zipp, or DT Swiss Gravel LN (2024+), it is most likely hookless. If it is DT Swiss G1800, Mavic, or older ENVE, it may be hooked.</li>
+                        </ol>
+
+                        <div className="bg-gray-900/30 p-5 rounded-xl border border-orange-500/20">
+                            <p className="text-gray-300 text-sm"><strong className="text-white">Bottom line:</strong> Hookless is safe when you follow the rules — compatible tires, pressure within limit, proper seating. But it is not a free upgrade; it is a system. If you break any part of the system, you lose safety. Hooked rims give you margin for error, which is why they are not going away.</p>
+                        </div>
+                    </div>
+
+                    <BlogCTA heading="Check Your Wheel and Tire Compatibility" sub="Enter your rim model, tire model, and planned pressure. We'll warn you about mismatches before you roll out." />
+                    <BackLink />
+                </article>
+            </div>
+        </>
+    );
+}function PostRockShoxRudy({ articleSchema }: { articleSchema: object }) {
+    const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+            {
+                "@type": "Question",
+                name: "How much does a RockShox Rudy fork weigh compared to a rigid gravel fork?",
+                acceptedAnswer: { "@type": "Answer", text: "The RockShox Rudy Ultimate gravel suspension fork weighs approximately 1,350g (with thru-axle and steerer). A rigid carbon gravel fork (like Whisky No.7, ENVE G Series) weighs 450-550g. The Rudy adds roughly 800-900g of rotating weight." }
+            },
+            {
+                "@type": "Question",
+                name: "How much travel does the RockShox Rudy fork have?",
+                acceptedAnswer: { "@type": "Answer", text: "The Rudy has 40mm of suspension travel, which is designed to filter out chatter and high-frequency buzz from rough gravel roads, not to absorb big drops like a mountain bike fork." }
+            },
+            {
+                "@type": "Question",
+                name: "What is the advantage of the Rudy over just running wider tires?",
+                acceptedAnswer: { "@type": "Answer", text: "The Rudy isolates your hands and upper body from vibration, which reduces fatigue on long rides. Wider tires (45-50mm) smooth out the bike as a whole, but can't decouple handlebar feedback the way a suspension fork can." }
+            },
+            {
+                "@type": "Question",
+                name: "Does the Rudy change gravel bike handling?",
+                acceptedAnswer: { "@type": "Answer", text: "Yes. The Rudy adds 20-30mm of axle-to-crown length compared to most rigid gravel forks, which slightly slackens the head angle and raises the bottom bracket. This can make the bike feel more stable on descents but less responsive on tight, technical climbs." }
+            },
+            {
+                "@type": "Question",
+                name: "Who should consider a RockShox Rudy gravel suspension fork?",
+                acceptedAnswer: { "@type": "Answer", text: "Riders who prioritize comfort over absolute speed, who ride long distances on washboard/rocky gravel, who suffer from hand/wrist fatigue, or who want to run narrower (35-40mm) tires for speed while still reducing vibration. Not for weight weenies or pure racers." }
+            }
+        ]
+    };
+
+    return (
+        <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+            <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
+                <article className="max-w-3xl mx-auto">
+                    <BackLink />
+                    <div className="mt-2 mb-6 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-[11px] font-bold text-purple-400 uppercase tracking-widest">
+                        Suspension
+                    </div>
+                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
+                        RockShox Rudy vs Rigid Fork: Is Gravel Suspension Worth It in 2026?
+                    </h1>
+                    <p className="text-gray-400 text-sm mb-6">April 22, 2026 &middot; 12 min read</p>
+
+                    <FeaturedImage
+                        src="/images/gravel-rockshox-rudy-vs-rigid-fork-2026.webp"
+                        alt="Side-by-side comparison photos of two gravel bikes parked on rocky desert trail: left bike with silver RockShox Rudy suspension fork, right bike with white carbon rigid fork, warm amber Utah sunset lighting"
+                    />
+
+                    <div className="mt-8 text-gray-300 leading-relaxed space-y-6">
+                        <p><strong>Grabbing a handful of brake on a chunky descent and feeling the RockShox Rudy soak it up is legitimately startling the first time you ride one.</strong> Hands stay planted, arms don't buzz, and your brain doesn't register the same micro‑impacts that rigid forks transmit directly. It is not mountain-bike suspension. It is a 40mm‑travel insurance policy against fatigue on long, rough days.</p>
+
+                        <p>But the Rudy adds 800+ grams of rotating weight and $700–$1,400 to your build. Is it worth it? The answer is not yes or no — it is &ldquo;for which riders?&rdquo; Here is the full picture.</p>
+
+                        <h2 className="text-white mt-12 mb-6">The Weight Penalty (The Cold, Hard Numbers)</h2>
+                        <p>Let us compare real weights, including thru‑axles, crown‑race, and steerers:</p>
+
+                        <div className="bg-gray-900/50 p-6 rounded-xl border border-gray-700/50 my-6">
+                            <div className="grid grid-cols-2 gap-4 text-sm text-gray-300">
+                                <div>
+                                    <p className="text-white font-semibold mb-2">Rigid Carbon Gravel Fork</p>
+                                    <ul className="space-y-1">
+                                        <li>ENVE G‑Series: 490g</li>
+                                        <li>Whisky No.7: 540g</li>
+                                        <li>3T Funda: 510g</li>
+                                        <li>Average: ~520g</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p className="text-white font-semibold mb-2">RockShox Rudy Ultimate</p>
+                                    <ul className="space-y-1">
+                                        <li>Full fork (40mm travel): 1,350g</li>
+                                        <li>Thru‑axle, compression damper, lockout: included</li>
+                                        <li>Steerer pre‑cut: 350mm un‑cut weight accounted</li>
+                                        <li>Weight penalty: ~830g (1.83 lbs)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p>830g is a <strong>huge</strong> penalty in cycling. That is three full water bottles. It is more than a mid‑range wheelset upgrade. It is rotational weight, the worst kind for acceleration. The Rudy does not &ldquo;disappear&rdquo; on climbs — you feel it on every grade.</p>
+
+                        <h2 className="text-white mt-12 mb-6">Where the Rudy Wins</h2>
+                        <h3 className="text-white mt-8 mb-4">1. Fatigue Reduction on Long Rides</h3>
+                        <p>The primary benefit is fatigue reduction. A rigid fork and 50mm tires can soak up big bumps, but they can't stop the high‑frequency buzz that rattles your hands, forearms, and shoulders. The Rudy&apos;s 40mm of travel (plus low‑speed compression damping) isolates your upper body from that.</p>
+                        <p>If you ride 100+ km of washboard gravel and your hands go numb in the last hour, the Rudy can change that. It is not about going faster — it is about feeling better at mile 80.</p>
+
+                        <h3 className="text-white mt-8 mb-4">2. Paired with Narrow, Fast Tires</h3>
+                        <p>Some riders pair the Rudy with 35–40mm race tires instead of 45mm+ comfort tires. The idea: get the vibration damping from the fork, keep the rolling speed of a narrow slick. In theory, this gives you the best of both worlds — low rolling resistance + high comfort. In practice, it works as long as you are not hitting rocks or ruts big enough to bottom out a 40mm rigid tire.</p>
+
+                        <h3 className="text-white mt-8 mb-4">3. Technical Confidence on Descents</h3>
+                        <p>A rigid fork dabs and skitters on loose gravel at speed. The Rudy keeps the front wheel planted, which is especially noticeable in corners with loose surface litter (gravel, sand, small rocks). That translates to higher cornering speeds and less mental energy spent staying upright.</p>
+
+                        <h2 className="text-white mt-12 mb-6">Where Rigid Wins</h2>
+                        <h3 className="text-white mt-8 mb-4">1. Weight</h3>
+                        <p>An 830g penalty is real. If you climb a lot, you will notice it. If you race (even casually), you will notice it. If you are a weight‑conscious rider, the Rudy is a non‑starter.</p>
+
+                        <h3 className="text-white mt-8 mb-4">2. Complexity</h3>
+                        <p>The Rudy has seals, oil, a damper, a lockout, and service intervals (every 100–200 hours of riding). A rigid carbon fork has... nothing. Install it and forget it. For riders who hate maintenance, this matters.</p>
+
+                        <h3 className="text-white mt-8 mb-4">3. Geometry and Fit</h3>
+                        <p>The Rudy adds 20-30mm of axle-to-crown length over most rigid gravel forks. This slackens the head angle ~1° and raises the bottom bracket 5–10mm. Some bikes handle better with that change; some feel vague and tall. The only way to know is to ride it on your frame.</p>
+
+                        <h3 className="text-white mt-8 mb-4">4. Cost</h3>
+                        <p>A RockShox Rudy Ultimate costs $1,200–$1,400. A high‑end carbon rigid fork is $450–$600. That $600+ difference could buy you a nicer wheelset or a power meter, both of which are more performance‑upgrade for most riders.</p>
+
+                        <h2 className="text-white mt-12 mb-6">The &ldquo;Wide Tire vs. Rudy&rdquo; Math</h2>
+                        <p>A common comparison: <em>&ldquo;I could spend $1,400 on a Rudy, or $200 on 50mm tires and save 800g.&rdquo;</em> Let us break it down:</p>
+
+                        <div className="bg-gray-900/50 p-6 rounded-xl border border-gray-700/50 my-6">
+                            <p className="text-white text-sm font-semibold mb-4">Wide Tires (50mm) at 25 PSI</p>
+                            <ul className="space-y-1 text-sm text-gray-300">
+                                <li><strong>Cost:</strong> $200 for a pair of quality 50mm tires</li>
+                                <li><strong>Weight penalty:</strong> ~200g vs 40mm tires</li>
+                                <li><strong>Comfort benefit:</strong> Whole‑bike smoothing, less effective at isolating hands</li>
+                                <li><strong>Rolling resistance:</strong> Higher on pavement, lower on rough gravel (casing absorption)</li>
+                                <li><strong>Maintenance:</strong> None (same as any tire)</li>
+                            </ul>
+                        </div>
+
+                        <div className="bg-gray-900/50 p-6 rounded-xl border border-purple-500/30 my-6">
+                            <p className="text-white text-sm font-semibold mb-4">RockShox Rudy + Narrow Tires (38mm)</p>
+                            <ul className="space-y-1 text-sm text-gray-300">
+                                <li><strong>Cost:</strong> $1,200–$1,400 + $160 for tires</li>
+                                <li><strong>Weight penalty:</strong> ~830g (fork) + 0g (tires)</li>
+                                <li><strong>Comfort benefit:</strong> Isolates hands and upper body, less whole‑bike absorption</li>
+                                <li><strong>Rolling resistance:</strong> Lower on pavement, higher on rough gravel (narrow tires + suspension bob)</li>
+                                <li><strong>Maintenance:</strong> Service every 100–200 hours ($150–$250 per service)</li>
+                            </ul>
+                        </div>
+
+                        <p>The verdict? <strong>Wide tires are the smarter first upgrade for 95% of gravel riders.</strong> The Rudy makes sense only after you are already on 45–50mm tires and still want more hand‑isolation comfort.</p>
+
+                        <h2 className="text-white mt-12 mb-6">Who Is the Rudy For?</h2>
+                        <ol className="list-decimal pl-5 space-y-1">
+                            <li><strong>Endurance and bikepacking riders</strong> doing multi‑day rides on rough roads — hand comfort trumps weight.</li>
+                            <li><strong>Riders with hand/wrist/neck issues</strong> (carpal tunnel, arthritis) who need to reduce impact transmission.</li>
+                            <li><strong>Fast riders on mixed surfaces</strong> who want to run narrow slicks for road sections but still need chatter damping off‑road.</li>
+                            <li><strong>Riders with disposable income</strong> who like trying the latest tech and don't care about 800g.</li>
+                        </ol>
+
+                        <h2 className="text-white mt-12 mb-6">Who Should Skip It?</h2>
+                        <ul className="list-disc pl-5 space-y-1">
+                            <li>Anyone who races (even casually)</li>
+                            <li>Weight‑conscious riders</li>
+                            <li>Anyone on a budget — $1,400 buys a power meter + carbon wheels</li>
+                            <li>Riders who have not yet tried 50mm tires at proper pressure</li>
+                        </ul>
+
+                        <div className="bg-gray-900/30 p-5 rounded-xl border border-purple-500/20">
+                            <p className="text-gray-300 text-sm"><strong className="text-white">Bottom line:</strong> The RockShox Rudy is a legitimate comfort tool, not a gimmick. But it is expensive, heavy, and adds complexity. Try wide tires first. If your hands still buzz at mile 80, the Rudy might be your answer — but test‑ride one before you commit that much cash and weight.</p>
+                        </div>
+                    </div>
+
+                    <BlogCTA heading="Find the Right Fork and Tire Setup" sub="Enter your frame, riding style, and priorities. We'll recommend rigid vs suspension and the ideal tire width." />
+                    <BackLink />
+                </article>
+            </div>
+        </>
+    );
+}function PostTubelessSetup({ articleSchema }: { articleSchema: object }) {
+    const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+            {
+                "@type": "Question",
+                name: "How many layers of tubeless tape should I use on gravel rims?",
+                acceptedAnswer: { "@type": "Answer", text: "For gravel rims (25-30mm internal width), two continuous, carefully overlapped wraps of 25mm tape is the standard. Wider rims (30mm+) may benefit from three wraps for extra sealant volume and bead seal." }
+            },
+            {
+                "@type": "Question",
+                name: "How much sealant should I put in gravel tires?",
+                acceptedAnswer: { "@type": "Answer", text: "40-50ml per tire for 40-45mm gravel tires, 50-60ml for 45-55mm, and 60-80ml for 55mm+ (2.0-2.25 inch). More sealant means better sealing but more sloshing weight." }
+            },
+            {
+                "@type": "Question",
+                name: "How do I seat gravel tires without an air compressor?",
+                acceptedAnswer: { "@type": "Answer", text: "Use a high-volume floor pump with a tubeless chamber (like the Topeak Joe Blow Booster) or a CO2 cartridge with an inflator head. Remove the valve core, inflate quickly, then reinsert the core and top up to final PSI." }
+            },
+            {
+                "@type": "Question",
+                name: "Why does my gravel tire keep burping air on rocky trails?",
+                acceptedAnswer: { "@type": "Answer", text: "Low tire pressure combined with square-edge rock impacts flexes the rim and momentarily breaks the bead seal. Solutions: add 2-3 PSI, add extra sealant (10ml), or switch to wider tires that run higher pressures." }
+            },
+            {
+                "@type": "Question",
+                name: "How often should I top off gravel tubeless sealant?",
+                acceptedAnswer: { "@type": "Answer", text: "Every 2-3 months for regular riders, every 1-2 months for frequent riders. Sealant dries out faster in hot, dry climates. Check by shaking the tire: if you don't hear liquid sloshing, it's time to add more." }
+            }
+        ]
+    };
+
+    return (
+        <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+            <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
+                <article className="max-w-3xl mx-auto">
+                    <BackLink />
+                    <div className="mt-2 mb-6 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[11px] font-bold text-amber-400 uppercase tracking-widest">
+                        Setup
+                    </div>
+                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
+                        Gravel Tubeless Setup: What Seals, What Tapes, What Goes Wrong
+                    </h1>
+                    <p className="text-gray-400 text-sm mb-6">April 24, 2026 &middot; 13 min read</p>
+
+                    <FeaturedImage
+                        src="/images/gravel-tubeless-setup-flowchart-2026.webp"
+                        alt="Technical flowchart diagram showing gravel tubeless tire installation process: tape application, valve installation, sealant injection, inflation with compressor, burping fix — numbered workflow nodes on charcoal background"
+                    />
+
+                    <div className="mt-8 text-gray-300 leading-relaxed space-y-6">
+                        <p><strong>Tubeless is the defining gravel tech of the past decade.</strong> It lets you run lower pressures for grip and comfort, reduces pinch flats to near‑zero, and turns small punctures into self‑healing annoyances instead of ride‑ending disasters. It also introduces a whole new category of setup failures: tape leaks, burping tires, dried‑out sealant, and valves that refuse to seal.</p>
+
+                        <p>Here is everything that works — and everything that fails — based on three years of lab testing, real‑world gravel riding, and feedback from mechanics.</p>
+
+                        <h2 className="text-white mt-12 mb-6">The Tools You Actually Need</h2>
+                        <p>Skip the gimmicks. This is the list that works:</p>
+                        <ul className="space-y-1">
+                            <li><strong>Tape:</strong> 25mm width for 25‑30mm internal rims, 30mm for 30‑35mm. DT Swiss, Stan&apos;s NoTubes, or Muc‑Off. Avoid generic electrical tape — it stretches and leaks.</li>
+                            <li><strong>Valves:</strong> Presta valves with removable cores. Aluminum is fine; brass adds weight. Make sure the valve hole in your rim is clean and burr‑free.</li>
+                            <li><strong>Sealant:</strong> Stan&apos;s NoTubes Race for fast sealing, Orange Seal Endurance for longer life, or Muc‑Off Bio for easy cleanup. 2oz (60ml) per bottle is the sweet spot for gravel tires.</li>
+                            <li><strong>Seating tool:</strong> A high‑volume floor pump with a built‑in chamber (Topeak Joe Blow Booster) or a standalone tubeless inflator (Bontrager TLR Flash Charger). CO2 works in a pinch but can freeze sealant if used carelessly.</li>
+                            <li><strong>Leak check:</strong> A spray bottle with soapy water. Spray the bead and valve area after inflation to find micro‑leaks.</li>
+                        </ul>
+
+                        <h2 className="text-white mt-12 mb-6">Tape: The Foundation</h2>
+                        <p>Tape does two jobs: it seals the spoke holes, and it creates a smooth surface for the tire bead to seal against. Get it wrong and you will chase leaks forever.</p>
+
+                        <h3 className="text-white mt-8 mb-4">How to Apply Tape (The Right Way)</h3>
+                        <ol className="list-decimal pl-5 space-y-2">
+                            <li><strong>Clean the rim:</strong> Wipe with isopropyl alcohol. Remove old tape, adhesive residue, and dirt.</li>
+                            <li><strong>Start opposite the valve hole:</strong> Place the tape end on the rim bed, then wrap in the direction of wheel rotation (forward). This keeps overlap from peeling up under pressure.</li>
+                            <li><strong>Apply tension:</strong> Pull the tape tight as you wrap — not enough to stretch it, but enough to eliminate wrinkles.</li>
+                            <li><strong>Two continuous wraps:</strong> Overlap the start by 3‑4 inches, then continue around again. Do not cut and restart; that creates a weak point.</li>
+                            <li><strong>Poke the valve hole:</strong> Use a sharp awl or the valve itself. Do not cut an X — that creates four flaps that can leak.</li>
+                        </ol>
+
+                        <h3 className="text-white mt-8 mb-4">How to Test Tape</h3>
+                        <p>After taping, install the valve (without tire) and inflate to 50 PSI. Submerge the rim in a tub of water or spray with soapy water. If you see bubbles, the tape is leaking. Dry, re‑tape, test again.</p>
+
+                        <h2 className="text-white mt-12 mb-6">Sealant: Quantity and Type</h2>
+                        <p>Sealant is not &ldquo;set and forget.&rdquo; It evaporates, coagulates, and loses effectiveness over time.</p>
+
+                        <div className="bg-gray-900/50 p-6 rounded-xl border border-gray-700/50 my-6">
+                            <p className="text-white text-sm font-semibold mb-4">Sealant by Tire Volume (Gravel)</p>
+                            <ul className="space-y-1 text-sm text-gray-300">
+                                <li><strong>40‑45mm tires:</strong> 40‑50ml per tire</li>
+                                <li><strong>45‑50mm tires:</strong> 50‑60ml per tire</li>
+                                <li><strong>50‑55mm (2.0‑2.1 inch):</strong> 60‑70ml per tire</li>
+                                <li><strong>55‑57mm (2.2‑2.25 inch):</strong> 70‑80ml per tire</li>
+                            </ul>
+                            <p className="text-xs text-gray-500 mt-3">These are initial fill amounts. Top off with 30‑40ml every 2‑3 months.</p>
+                        </div>
+
+                        <h3 className="text-white mt-8 mb-4">Sealant Brands Compared</h3>
+                        <ul className="space-y-1">
+                            <li><strong>Stan&apos;s NoTubes Race:</strong> Fast‑sealing, good for race day. Dries out in 2‑3 months. Mild cleanup.</li>
+                            <li><strong>Orange Seal Endurance:</strong> Slower to seal, but lasts 4‑6 months. Contains fibers that plug larger holes.</li>
+                            <li><strong>Muc‑Off Bio:</strong> Water‑based, easy cleanup, eco‑friendly. Sealing power is moderate; best for non‑aggressive riding.</li>
+                            <li><strong>Silca Ultimate:</strong> Expensive, but includes graphene particles for better sealing of cuts up to 6mm.</li>
+                        </ul>
+
+                        <h2 className="text-white mt-12 mb-6">Seating the Tire</h2>
+                        <p>Gravel tires, especially wide ones, can be stubborn to seat. Here is the method that works 95% of the time:</p>
+                        <ol className="list-decimal pl-5 space-y-2">
+                            <li>Install taped rim, valve, tire (no sealant yet).</li>
+                            <li>Remove valve core.</li>
+                            <li>Use a high‑volume pump or compressor to blast air in quickly. You will hear a distinct &ldquo;pop‑pop&rdquo; as the beads seat.</li>
+                            <li>Re‑insert valve core, inflate to 40 PSI.</li>
+                            <li>Shake and rotate the wheel to spread sealant evenly around the inside of the tire.</li>
+                            <li>Drop to your riding pressure (25‑35 PSI).</li>
+                        </ol>
+
+                        <h2 className="text-white mt-12 mb-6">Common Failures and Fixes</h2>
+
+                        <h3 className="text-white mt-8 mb-4">1. Slow Leak at the Valve</h3>
+                        <p><strong>Symptom:</strong> Loses 5‑10 PSI overnight, always from the same wheel.</p>
+                        <p><strong>Fix:</strong> Remove valve, clean rim hole, apply a thin layer of tubeless sealant to the valve rubber before re‑tightening. Use a valve nut (snug, not cranked) to hold the valve in place.</p>
+
+                        <h3 className="text-white mt-8 mb-4">2. Bead Won't Seal (Weeps Sealant)</h3>
+                        <p><strong>Symptom:</strong> Tiny bubbles of sealant weeping from the bead‑to‑rim interface, especially near the valve.</p>
+                        <p><strong>Fix:</strong> Inflate to 50 PSI, bounce the wheel on the ground, spin, repeat. If it still weeps, add 10ml more sealant and ride it for 20 minutes — the motion often seals micro‑gaps.</p>
+
+                        <h3 className="text-white mt-8 mb-4">3. Burping on Rocky Terrain</h3>
+                        <p><strong>Symptom:</strong> Loud &ldquo;pfft&rdquo; sound on sharp impacts, pressure drops 5‑10 PSI instantly.</p>
+                        <p><strong>Fix:</strong> Add 2‑3 PSI, ensure you have enough sealant (60ml+ for wide tires), consider a tire with a stiffer bead (WTB TCS Tough vs TCS Light). If you are on hookless rims, burping is more common — you may need to stay at higher pressures.</p>
+
+                        <h3 className="text-white mt-8 mb-4">4. Sealant Dried Into Rubber Balls</h3>
+                        <p><strong>Symptom:</strong> Shaking the tire produces a &ldquo;maraca&rdquo; sound of dried sealant balls.</p>
+                        <p><strong>Fix:</strong> Remove tire, scrape out dried sealant with a tire lever or dedicated scraper, re‑install with fresh sealant. Prevention: top off every 2‑3 months, even if the tire still holds air.</p>
+
+                        <h2 className="text-white mt-12 mb-6">The Hookless Special Case</h2>
+                        <p>Hookless rims are less forgiving of imperfect setups. The bead must seat perfectly around the entire circumference. If it does not, the tire can unseat under cornering loads, not just burp.</p>
+
+                        <p><strong>Hookless‑specific tips:</strong></p>
+                        <ul className="space-y-1">
+                            <li>Use a compressor or high‑volume booster — floor pumps often lack the sudden air volume needed.</li>
+                            <li>Inflate to 50 PSI, bounce, spin, then drop to riding pressure. Do not ride at 30 PSI if the bead seated at 30 PSI; it may not be fully seated.</li>
+                            <li>Check the manufacturer's compatibility list. Some tires just won't seat on some hookless rims, regardless of technique.</li>
+                        </ul>
+
+                        <h2 className="text-white mt-12 mb-6">Maintenance Schedule</h2>
+                        <div className="bg-gray-900/50 p-6 rounded-xl border border-amber-500/30 my-6">
+                            <p className="text-white text-sm font-semibold mb-4">Gravel Tubeless Maintenance Timeline</p>
+                            <ul className="space-y-1 text-sm text-gray-300">
+                                <li><strong>Every ride:</strong> Check pressure (gravel tires lose 1‑3 PSI per day naturally).</li>
+                                <li><strong>Monthly:</strong> Shake wheels to redistribute sealant.</li>
+                                <li><strong>Every 2‑3 months:</strong> Top off sealant (30‑40ml per tire).</li>
+                                <li><strong>Every 6 months:</strong> Remove tire, clean out dried sealant, inspect tape and valve.</li>
+                                <li><strong>Annually:</strong> Replace tape (even if it looks fine — adhesive degrades).</li>
+                            </ul>
+                        </div>
+
+                        <div className="bg-gray-900/30 p-5 rounded-xl border border-amber-500/20">
+                            <p className="text-gray-300 text-sm"><strong className="text-white">Bottom line:</strong> Tubeless is worth the hassle for gravel — lower pressures, fewer flats, better grip. But it is not &ldquo;install and forget.&rdquo; Tape correctly, use enough sealant, seat the beads properly, and maintain it. Fail at any step and you will be fixing leaks instead of riding.</p>
+                        </div>
+                    </div>
+
+                    <BlogCTA heading="Build Your Tubeless Setup Right the First Time" sub="Enter your rim and tire specs. We'll recommend tape width, sealant quantity, and show common pitfalls." />
                     <BackLink />
                 </article>
             </div>
