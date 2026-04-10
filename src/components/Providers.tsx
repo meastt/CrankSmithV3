@@ -1,9 +1,12 @@
-import { ToastProvider } from '@/components/ui/Toast';
+'use client';
 
-// Clerk is not yet configured — skip it. When ready, create
-// src/components/ClerkProviderWrapper.tsx and restore the import.
-const hasClerk = false;
+import { ToastProvider } from '@/components/ui/Toast';
+import { ClerkProviderWrapper } from '@/components/ClerkProviderWrapper';
 
 export function Providers({ children }: { children: React.ReactNode }) {
-    return <ToastProvider>{children}</ToastProvider>;
+  return (
+    <ClerkProviderWrapper>
+      <ToastProvider>{children}</ToastProvider>
+    </ClerkProviderWrapper>
+  );
 }

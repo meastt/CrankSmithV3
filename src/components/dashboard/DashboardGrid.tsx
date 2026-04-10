@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
-import { useUser } from '@/lib/clerk-stub';
+import { useSafeUser } from "@/components/ClerkProviderWrapper"
 import { useRouter } from 'next/navigation';
 import { haptic } from '@/lib/haptics';
 import { trackEvent } from '@/lib/analytics';
@@ -62,7 +62,7 @@ const tools = [
 ];
 
 export const DashboardGrid = () => {
-    const { isLoaded, isSignedIn } = useUser();
+    const { isLoaded, isSignedIn } = useSafeUser();
     const router = useRouter();
     return (
         <section className="min-h-screen flex flex-col justify-center py-12 px-4 relative overflow-hidden bg-stone-950">

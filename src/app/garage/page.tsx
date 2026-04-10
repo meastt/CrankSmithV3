@@ -7,7 +7,7 @@ import { useBuildStore } from '@/store/buildStore';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Trash2, Edit3, Bike, ArrowRight, Settings, WifiOff, Loader2 } from 'lucide-react';
-import { useUser, SignInButton } from '@/lib/clerk-stub';
+import { useSafeUser, SafeSignInButton as SignInButton } from "@/components/ClerkProviderWrapper"
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
@@ -27,7 +27,7 @@ interface SavedBuild {
 
 export default function GaragePage() {
     // Default to guest view initially to prevent blocking
-    const { user, isLoaded } = useUser();
+    const { user, isLoaded } = useSafeUser();
     const [builds, setBuilds] = useState<SavedBuild[] | null>(null);
     const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
     const [loadWarning, setLoadWarning] = useState<string | null>(null);

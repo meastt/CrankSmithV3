@@ -8,7 +8,6 @@ import { Providers } from "@/components/Providers";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
-import { ToastProvider } from "@/components/ui/Toast";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -74,7 +73,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${dmSans.variable} ${spaceMono.variable} font-sans antialiased bg-[#030712] text-slate-100 flex flex-col min-h-screen`}
       >
-        <ToastProvider>
+        <Providers>
           <ServiceWorkerRegister />
           <CapacitorInit />
           <OfflineIndicator />
@@ -84,7 +83,7 @@ export default function RootLayout({
           </main>
           <Footer />
           <BottomNav />
-        </ToastProvider>
+        </Providers>
       </body>
     </html>
   );

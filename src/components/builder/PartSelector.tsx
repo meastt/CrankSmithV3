@@ -9,7 +9,7 @@ import { PartCard } from './PartCard';
 import { ShareCard } from './ShareCard';
 import { BuildSummary } from './BuildSummary';
 import { useBuildStore, AnyComponent } from '@/store/buildStore';
-import { useClerk, useUser } from '@/lib/clerk-stub';
+import { useSafeClerk, useSafeUser } from "@/components/ClerkProviderWrapper"
 import { useSettingsStore } from '@/store/settingsStore';
 import { FreehubSelector } from './FreehubSelector';
 import { ComponentPreFilter } from './ComponentPreFilter';
@@ -685,7 +685,7 @@ export const PartSelector: React.FC = () => {
     const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [saveError, setSaveError] = useState<string | null>(null);
     const [showNameDialog, setShowNameDialog] = useState(false);
-    const { isSignedIn } = useUser();
+    const { isSignedIn } = useSafeUser();
 
     useEffect(() => {
         if (currentStep === BUILD_SEQUENCE.length - 1 && parts.Seatpost) {

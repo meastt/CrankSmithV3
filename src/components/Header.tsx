@@ -1,6 +1,6 @@
 'use client';
 
-import { UserButton, SignedIn, SignedOut, SignInButton, useClerk } from '@/lib/clerk-stub';
+import { SafeUserButton, SafeSignedIn, SafeSignedOut, SafeSignInButton, useSafeClerk } from '@/components/ClerkProviderWrapper';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,7 +20,7 @@ export function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const { unitSystem, toggleUnitSystem } = useSettingsStore();
-    const { openSignIn } = useClerk();
+    const { openSignIn } = useSafeClerk();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -85,37 +85,37 @@ export function Header() {
                                 >
                                     {unitSystem === 'metric' ? 'KM/H' : 'MPH'}
                                 </button>
-                                <SignedIn>
-                                    <UserButton
+                                <SafeSignedIn>
+                                    <SafeUserButton
                                         appearance={{
                                             elements: {
                                                 avatarBox: "w-8 h-8 ring-2 ring-white/10 ring-offset-2 ring-offset-stone-950"
                                             }
                                         }}
                                     />
-                                </SignedIn>
-                                <SignedOut>
+                                </SafeSignedIn>
+                                <SafeSignedOut>
                                     <Link href="/sign-in">
                                         <button className="btn-primary px-5 py-2 text-white rounded-lg font-medium text-sm">
                                             Sign In
                                         </button>
                                     </Link>
-                                </SignedOut>
+                                </SafeSignedOut>
                             </div>
                         </nav>
 
                         {/* Mobile Menu Button */}
                         <div className="flex md:hidden items-center gap-3">
-                            <SignedIn>
-                                <UserButton
+                            <SafeSignedIn>
+                                <SafeUserButton
                                     appearance={{
                                         elements: {
                                             avatarBox: "w-8 h-8"
                                         }
                                     }}
                                 />
-                            </SignedIn>
-                            <SignedOut>
+                            </SafeSignedIn>
+                            <SafeSignedOut>
                                 <Link
                                     href="/sign-in"
                                     onClick={() => setIsMenuOpen(false)}
@@ -123,7 +123,7 @@ export function Header() {
                                 >
                                     Sign In
                                 </Link>
-                            </SignedOut>
+                            </SafeSignedOut>
                             <button
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                                 className="p-2 -mr-2 text-stone-400 hover:text-stone-100 transition-colors"
@@ -209,7 +209,7 @@ export function Header() {
                                 transition={{ delay: 0.4 }}
                                 className="mt-auto pb-12"
                             >
-                                <SignedOut>
+                                <SafeSignedOut>
                                     <Link href="/sign-in" onClick={() => setIsMenuOpen(false)}>
                                         <button
                                             className="w-full btn-primary py-4 text-white rounded-xl font-semibold text-lg"
@@ -217,7 +217,7 @@ export function Header() {
                                             Sign In
                                         </button>
                                     </Link>
-                                </SignedOut>
+                                </SafeSignedOut>
 
                                 <p className="text-center text-stone-600 text-sm mt-6">
                                     Precision engineering for cyclists

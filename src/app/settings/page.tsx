@@ -2,14 +2,14 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useClerk, useUser } from '@/lib/clerk-stub';
+import { useSafeClerk, useSafeUser } from "@/components/ClerkProviderWrapper"
 import { ArrowLeft, Trash2, AlertTriangle, Shield, Mail, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/components/ui/Toast';
 
 export default function SettingsPage() {
-    const { user, isLoaded } = useUser();
-    const { signOut } = useClerk();
+    const { user, isLoaded } = useSafeUser();
+    const { signOut } = useSafeClerk();
     const router = useRouter();
     const { toast } = useToast();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
