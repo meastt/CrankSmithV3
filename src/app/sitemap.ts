@@ -29,6 +29,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
         { path: '/offline', changeFrequency: 'yearly' as const, priority: 0.3 },
         { path: '/terms', changeFrequency: 'yearly' as const, priority: 0.3 },
         { path: '/privacy', changeFrequency: 'yearly' as const, priority: 0.3 },
+        { path: '/hubs/big-tire-revolution', changeFrequency: 'weekly' as const, priority: 0.8 },
+        { path: '/hubs/gravel-drivetrain-bible', changeFrequency: 'weekly' as const, priority: 0.8 },
+        { path: '/hubs/gravel-standards-master', changeFrequency: 'weekly' as const, priority: 0.8 },
     ];
 
     const guideSlugs = [
