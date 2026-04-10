@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { DM_Sans, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
@@ -62,6 +61,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className="dark" data-scroll-behavior="smooth">
+      <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-TR57T617HK" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TR57T617HK');`,
+          }}
+        />
+      </head>
       <body
         suppressHydrationWarning
         className={`${dmSans.variable} ${spaceMono.variable} font-sans antialiased bg-[#030712] text-slate-100 flex flex-col min-h-screen`}
@@ -77,19 +84,6 @@ export default function RootLayout({
           <Footer />
           <BottomNav />
         </Providers>
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-TR57T617HK"
-          strategy="beforeInteractive"
-        />
-        <Script id="google-analytics" strategy="beforeInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-
-            gtag('config', 'G-TR57T617HK');
-          `}
-        </Script>
       </body>
     </html>
   );
