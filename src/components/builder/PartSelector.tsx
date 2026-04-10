@@ -339,6 +339,14 @@ export const PartSelector: React.FC = () => {
     const [seatpostType, setSeatpostType] = useState<string | null>(null);
     const [selectedCranksetBrand, setSelectedCranksetBrand] = useState<string | null>(null);
     const [selectedTireBrand, setSelectedTireBrand] = useState<string | null>(null);
+    const [selectedStemBrand, setSelectedStemBrand] = useState<string | null>(null);
+    const [selectedHandlebarBrand, setSelectedHandlebarBrand] = useState<string | null>(null);
+    const [selectedSeatpostBrand, setSelectedSeatpostBrand] = useState<string | null>(null);
+    const [selectedBrakeCaliperBrand, setSelectedBrakeCaliperBrand] = useState<string | null>(null);
+    const [selectedCassetteBrand, setSelectedCassetteBrand] = useState<string | null>(null);
+    const [selectedWheelBrand, setSelectedWheelBrand] = useState<string | null>(null);
+    const [selectedRearDerailleurBrand, setSelectedRearDerailleurBrand] = useState<string | null>(null);
+    const [selectedBrakeRotorBrand, setSelectedBrakeRotorBrand] = useState<string | null>(null);
 
     // Freehub Selection State
     const [showFreehubSelector, setShowFreehubSelector] = useState(false);
@@ -484,6 +492,14 @@ export const PartSelector: React.FC = () => {
         setSeatpostType(null);
         setSelectedCranksetBrand(null);
         setSelectedTireBrand(null);
+        setSelectedStemBrand(null);
+        setSelectedHandlebarBrand(null);
+        setSelectedSeatpostBrand(null);
+        setSelectedBrakeCaliperBrand(null);
+        setSelectedCassetteBrand(null);
+        setSelectedWheelBrand(null);
+        setSelectedRearDerailleurBrand(null);
+        setSelectedBrakeRotorBrand(null);
     }, []);
 
     // Scroll to top when step changes
@@ -1224,8 +1240,72 @@ export const PartSelector: React.FC = () => {
         });
     }
 
+    // Wheel brand pre-filter
+    if (activeType === 'Wheel' && selectedWheelBrand && selectedWheelBrand !== 'all') {
+        filteredComponents = filteredComponents.filter(c => {
+            const brand = c.brand || '';
+            return brand.toLowerCase() === selectedWheelBrand.toLowerCase();
+        });
+    }
+
+    // RearDerailleur brand pre-filter
+    if (activeType === 'RearDerailleur' && selectedRearDerailleurBrand && selectedRearDerailleurBrand !== 'all') {
+        filteredComponents = filteredComponents.filter(c => {
+            const brand = c.brand || '';
+            return brand.toLowerCase() === selectedRearDerailleurBrand.toLowerCase();
+        });
+    }
+
+    // BrakeRotor brand pre-filter
+    if (activeType === 'BrakeRotor' && selectedBrakeRotorBrand && selectedBrakeRotorBrand !== 'all') {
+        filteredComponents = filteredComponents.filter(c => {
+            const brand = c.brand || '';
+            return brand.toLowerCase() === selectedBrakeRotorBrand.toLowerCase();
+        });
+    }
+
+    // Seatpost brand pre-filter
+    if (activeType === 'Seatpost' && selectedSeatpostBrand && selectedSeatpostBrand !== 'all') {
+        filteredComponents = filteredComponents.filter(c => {
+            const brand = c.brand || '';
+            return brand.toLowerCase() === selectedSeatpostBrand.toLowerCase();
+        });
+    }
+
+    // Stem brand pre-filter
+    if (activeType === 'Stem' && selectedStemBrand && selectedStemBrand !== 'all') {
+        filteredComponents = filteredComponents.filter(c => {
+            const brand = c.brand || '';
+            return brand.toLowerCase() === selectedStemBrand.toLowerCase();
+        });
+    }
+
+    // Handlebar brand pre-filter
+    if (activeType === 'Handlebar' && selectedHandlebarBrand && selectedHandlebarBrand !== 'all') {
+        filteredComponents = filteredComponents.filter(c => {
+            const brand = c.brand || '';
+            return brand.toLowerCase() === selectedHandlebarBrand.toLowerCase();
+        });
+    }
+
+    // BrakeCaliper brand pre-filter
+    if (activeType === 'BrakeCaliper' && selectedBrakeCaliperBrand && selectedBrakeCaliperBrand !== 'all') {
+        filteredComponents = filteredComponents.filter(c => {
+            const brand = c.brand || '';
+            return brand.toLowerCase() === selectedBrakeCaliperBrand.toLowerCase();
+        });
+    }
+
+    // Cassette brand pre-filter
+    if (activeType === 'Cassette' && selectedCassetteBrand && selectedCassetteBrand !== 'all') {
+        filteredComponents = filteredComponents.filter(c => {
+            const brand = c.brand || '';
+            return brand.toLowerCase() === selectedCassetteBrand.toLowerCase();
+        });
+    }
+
     // Generic brand filter (for parts not handled above)
-    if (selectedBrand && !['Frame', 'Crankset', 'Tire'].includes(activeType)) {
+    if (selectedBrand && !['Frame', 'Crankset', 'Tire', 'Wheel', 'RearDerailleur', 'BrakeRotor', 'Seatpost', 'Stem', 'Handlebar', 'BrakeCaliper', 'Cassette'].includes(activeType)) {
         filteredComponents = filteredComponents.filter(c => c.brand === selectedBrand);
     }
 
@@ -1251,10 +1331,34 @@ export const PartSelector: React.FC = () => {
                 if (tireSizeRange === null) return 0;
                 if (selectedTireBrand === null) return 1;
                 return -1;
-            case 'Wheel':          return wheelMaterial === null ? 0 : -1;
-            case 'RearDerailleur': return drivetrainElectronic === null ? 0 : -1;
-            case 'BrakeRotor':     return rotorSize === null ? 0 : -1;
-            case 'Seatpost':       return seatpostType === null ? 0 : -1;
+            case 'Wheel':
+                if (wheelMaterial === null) return 0;
+                if (selectedWheelBrand === null) return 1;
+                return -1;
+            case 'RearDerailleur':
+                if (drivetrainElectronic === null) return 0;
+                if (selectedRearDerailleurBrand === null) return 1;
+                return -1;
+            case 'BrakeRotor':
+                if (rotorSize === null) return 0;
+                if (selectedBrakeRotorBrand === null) return 1;
+                return -1;
+            case 'Seatpost':
+                if (seatpostType === null) return 0;
+                if (selectedSeatpostBrand === null) return 1;
+                return -1;
+            case 'Stem':
+                if (selectedStemBrand === null) return 0;
+                return -1;
+            case 'Handlebar':
+                if (selectedHandlebarBrand === null) return 0;
+                return -1;
+            case 'BrakeCaliper':
+                if (selectedBrakeCaliperBrand === null) return 0;
+                return -1;
+            case 'Cassette':
+                if (selectedCassetteBrand === null) return 0;
+                return -1;
             default:               return -1;
         }
     };
@@ -1275,10 +1379,22 @@ export const PartSelector: React.FC = () => {
             case 'Tire':
                 if (step === 0) setTireSizeRange(value);
                 else setSelectedTireBrand(value); break;
-            case 'Wheel':          setWheelMaterial(value); break;
-            case 'RearDerailleur': setDrivetrainElectronic(value); break;
-            case 'BrakeRotor':     setRotorSize(value); break;
-            case 'Seatpost':       setSeatpostType(value); break;
+            case 'Wheel':
+                if (step === 0) setWheelMaterial(value);
+                else setSelectedWheelBrand(value); break;
+            case 'RearDerailleur':
+                if (step === 0) setDrivetrainElectronic(value);
+                else setSelectedRearDerailleurBrand(value); break;
+            case 'BrakeRotor':
+                if (step === 0) setRotorSize(value);
+                else setSelectedBrakeRotorBrand(value); break;
+            case 'Seatpost':
+                if (step === 0) setSeatpostType(value);
+                else setSelectedSeatpostBrand(value); break;
+            case 'Stem':         setSelectedStemBrand(value); break;
+            case 'Handlebar':    setSelectedHandlebarBrand(value); break;
+            case 'BrakeCaliper': setSelectedBrakeCaliperBrand(value); break;
+            case 'Cassette':     setSelectedCassetteBrand(value); break;
         }
     };
 
@@ -1296,10 +1412,22 @@ export const PartSelector: React.FC = () => {
             case 'Tire':
                 if (step === 0) setTireSizeRange('all');
                 else setSelectedTireBrand('all'); break;
-            case 'Wheel':          setWheelMaterial('all'); break;
-            case 'RearDerailleur': setDrivetrainElectronic('all'); break;
-            case 'BrakeRotor':     setRotorSize('all'); break;
-            case 'Seatpost':       setSeatpostType('all'); break;
+            case 'Wheel':
+                if (step === 0) setWheelMaterial('all');
+                else setSelectedWheelBrand('all'); break;
+            case 'RearDerailleur':
+                if (step === 0) setDrivetrainElectronic('all');
+                else setSelectedRearDerailleurBrand('all'); break;
+            case 'BrakeRotor':
+                if (step === 0) setRotorSize('all');
+                else setSelectedBrakeRotorBrand('all'); break;
+            case 'Seatpost':
+                if (step === 0) setSeatpostType('all');
+                else setSelectedSeatpostBrand('all'); break;
+            case 'Stem':         setSelectedStemBrand('all'); break;
+            case 'Handlebar':    setSelectedHandlebarBrand('all'); break;
+            case 'BrakeCaliper': setSelectedBrakeCaliperBrand('all'); break;
+            case 'Cassette':     setSelectedCassetteBrand('all'); break;
         }
     };
 
@@ -1338,6 +1466,28 @@ export const PartSelector: React.FC = () => {
                 setRotorSize(null);
             } else if (activeType === 'Seatpost' && seatpostType) {
                 setSeatpostType(null);
+            } else if (activeType === 'Wheel' && selectedWheelBrand) {
+                setSelectedWheelBrand(null);
+            } else if (activeType === 'Wheel' && wheelMaterial) {
+                setWheelMaterial(null);
+            } else if (activeType === 'RearDerailleur' && selectedRearDerailleurBrand) {
+                setSelectedRearDerailleurBrand(null);
+            } else if (activeType === 'RearDerailleur' && drivetrainElectronic) {
+                setDrivetrainElectronic(null);
+            } else if (activeType === 'BrakeRotor' && selectedBrakeRotorBrand) {
+                setSelectedBrakeRotorBrand(null);
+            } else if (activeType === 'BrakeRotor' && rotorSize) {
+                setRotorSize(null);
+            } else if (activeType === 'Seatpost' && selectedSeatpostBrand) {
+                setSelectedSeatpostBrand(null);
+            } else if (activeType === 'Stem' && selectedStemBrand) {
+                setSelectedStemBrand(null);
+            } else if (activeType === 'Handlebar' && selectedHandlebarBrand) {
+                setSelectedHandlebarBrand(null);
+            } else if (activeType === 'BrakeCaliper' && selectedBrakeCaliperBrand) {
+                setSelectedBrakeCaliperBrand(null);
+            } else if (activeType === 'Cassette' && selectedCassetteBrand) {
+                setSelectedCassetteBrand(null);
             } else if (frameCategory) {
                 setFrameCategory(FrameType.GRAVEL);
             } else if (currentStep > 0) {
@@ -1359,6 +1509,22 @@ export const PartSelector: React.FC = () => {
                 case 'Tire':
                     if (step === 1) { setSelectedTireBrand(null); }
                     else if (step === 0) { setTireSizeRange(null); }
+                    break;
+                case 'Wheel':
+                    if (step === 1) { setSelectedWheelBrand(null); }
+                    else if (step === 0) { setWheelMaterial(null); }
+                    break;
+                case 'RearDerailleur':
+                    if (step === 1) { setSelectedRearDerailleurBrand(null); }
+                    else if (step === 0) { setDrivetrainElectronic(null); }
+                    break;
+                case 'BrakeRotor':
+                    if (step === 1) { setSelectedBrakeRotorBrand(null); }
+                    else if (step === 0) { setRotorSize(null); }
+                    break;
+                case 'Seatpost':
+                    if (step === 1) { setSelectedSeatpostBrand(null); }
+                    else if (step === 0) { setSeatpostType(null); }
                     break;
             }
         }
