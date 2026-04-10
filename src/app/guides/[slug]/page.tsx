@@ -83,6 +83,44 @@ export default async function GuidePage({ params }: Props) {
 
     // --- GUIDE 1: GRAVEL GROUPSETS ---
     if (slug === "gravel-groupsets-explained") {
+        const faqSchema = {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": "Is 1x or 2x better for gravel biking?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "It depends on your terrain. 1x (one-by) drivetrains offer simplicity, better chain retention with a Narrow-Wide chainring, and massive range up to 10-52t (520%). They are ideal for technical trails and bikepacking where reliability matters. 2x (two-by) setups provide tighter gear steps for maintaining optimal cadence on flat and rolling terrain, but with increased chain drop risk and reduced rear tire clearance due to the front derailleur cage."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "What is a Mullet drivetrain on a gravel bike?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "A Mullet drivetrain combines road or gravel shifters with a mountain bike rear derailleur and cassette. This unlocks MTB gearing range (like 10-52t) while keeping drop-bar ergonomics. With SRAM AXS, the wireless ecosystem makes this native—any AXS Road shifter pairs directly with any AXS MTB derailleur. For Shimano, a cable pull converter like the Wolf Tooth Tanpan is required for mechanical setups."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Can you mix SRAM AXS road shifters with MTB derailleurs?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Yes. SRAM AXS is designed around universal wireless compatibility. Any AXS Road shifter (Force AXS, Rival AXS, Red AXS, or XPLR) pairs directly with any AXS MTB derailleur (Eagle XX1, X01, GX). Just be sure to use a 12-speed Eagle chain, as Flattop road chains are not compatible with Eagle pulleys and cassettes."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "How do you mix Shimano GRX with mountain bike derailleurs?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "For electronic setups (Di2), you can mix XT Di2 rear derailleurs with GRX Di2 shifters if you resolve E-Tube project compatibility, which may require specific display or junction units. For mechanical setups, the cable pull ratios differ between road and MTB, so you need a cable pull converter like the Wolf Tooth Tanpan to make a road lever properly actuate an MTB derailleur."
+                    }
+                }
+            ]
+        };
         return (
             <>
                 {articleSchema && (
@@ -91,6 +129,10 @@ export default async function GuidePage({ params }: Props) {
                         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
                     />
                 )}
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+                />
                 <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
                     <article className="container mx-auto max-w-3xl">
                         <div className="mb-12 text-center">
@@ -192,6 +234,44 @@ export default async function GuidePage({ params }: Props) {
 
     // --- GUIDE 2: BOTTOM BRACKETS ---
     if (slug === "bottom-bracket-standards") {
+        const faqSchema = {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": "What is the difference between T47 and PF30 bottom brackets?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "T47 and PF30 share the same 46mm shell diameter but differ in how bearings interface. PF30 uses a press-fit design where bearings are pressed directly into the frame shell, prone to creaking and misalignment. T47 adds threads to the same 46mm diameter, eliminating creak issues and ensuring parallel bearing alignment. T47 is widely considered the best modern bottom bracket standard."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Is BSA or PF30 better for bottom brackets?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "BSA (English threaded) is far more reliable and easier to service than PF30. Threaded bottom brackets do not creak from tolerance stack-up and are simple to install and remove with basic tools. However, BSA has a smaller 34.8mm inner diameter which limits spindle options to 24mm typically. PF30 allows 30mm spindles for stiffness but suffers from creaking and bearing alignment issues."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "What spindle diameter should I choose for my crankset?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "24mm (Shimano Hollowtech II) is the most durable and durable standard, fitting almost any shell. 30mm spindles provide maximum stiffness but leave very little room for bearings in narrow shells like BSA or BB86, leading to fast wear—they are best paired with PF30 or T47 frames. SRAM DUB at 28.99mm is a practical compromise, fitting slightly better in BSA shells than 30mm while being stiffer than 24mm."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Will a 30mm spindle work in a BSA bottom bracket shell?",
+                    "acceptedAnswer": {
+                        "text": "Yes, but it is not ideal. A BSA shell at 34.8mm inner diameter leaves very little room for bearing cup walls when accommodating a 30mm spindle. This means smaller bearings that wear faster. For 30mm spindles, PF30 or T47 are the preferred shell standards because their larger 46mm diameter allows full-size bearings. If you must run 30mm in BSA, expect to replace bearings more frequently.",
+                        "@type": "Answer"
+                    }
+                }
+            ]
+        };
         return (
             <>
                 {articleSchema && (
@@ -200,6 +280,10 @@ export default async function GuidePage({ params }: Props) {
                         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
                     />
                 )}
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+                />
                 <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
                     <article className="container mx-auto max-w-3xl">
                         <div className="mb-12 text-center">
@@ -288,6 +372,52 @@ export default async function GuidePage({ params }: Props) {
 
     // --- GUIDE 3: BRAKE MOUNTS ---
     if (slug === "brake-mount-standards") {
+        const faqSchema = {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": "What is the difference between Flat Mount and Post Mount disc brakes?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Flat Mount is the modern standard for road and gravel bikes. The caliper sits flush against the frame or fork, with bolts passing through the frame. It is compact and aerodynamic. Post Mount is the mountain bike standard with two threaded posts sticking out of the frame at 74mm spacing. Calipers bolt directly to these posts. Flat Mount is more aesthetic and integrated, while Post Mount is simpler and easier to adjust."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Can you put flat mount brake calipers on a post mount frame?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Generally no. There is not enough room for a flat mount caliper body to fit around a post mount frame tab. There are rare and expensive niche adapters that attempt it, but the practical option is to use post mount calipers directly on a post mount frame."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Can you put post mount brake calipers on a flat mount frame?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Yes. Adapters exist that allow post mount calipers to be mounted on flat mount frames. However, the result looks bulky and defeats the clean integrated aesthetic of flat mount. It is usually more practical to use flat mount calipers unless you already own quality post mount calipers."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Can I use a smaller rotor than what my brake mount is designed for?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "No. Adapters push the caliper outward to fit larger rotors, but you cannot reduce the effective mount size. If your fork is native 160mm Post Mount, you cannot fit a 140mm rotor because the caliper would hit the mount. To run a smaller rotor, you must change to a frame or fork with a smaller native mount standard, or use an IS-to-smaller adapter which is rare."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "What is IS (International Standard) brake mount?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "IS (International Standard) is a legacy brake mount design with unthreaded tabs sticking out from the frame. You cannot bolt a caliper directly to IS tabs—an adapter is always required. Common adapters include IS-to-Post Mount and IS-to-Flat Mount. It was the earliest disc brake mounting standard and is mostly found on older mountain bikes and adventure frames."
+                    }
+                }
+            ]
+        };
         return (
             <>
                 {articleSchema && (
@@ -296,6 +426,10 @@ export default async function GuidePage({ params }: Props) {
                         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
                     />
                 )}
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+                />
                 <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
                     <article className="container mx-auto max-w-3xl">
                         <div className="mb-12 text-center">
