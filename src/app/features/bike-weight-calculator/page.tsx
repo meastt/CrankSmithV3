@@ -7,8 +7,28 @@ export const metadata: Metadata = {
 };
 
 export default function BikeWeightCalculatorFeaturePage() {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "CrankSmith Bike Weight Calculator",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Web",
+    "description": "Estimate your bike's total weight and simulate upgrade savings across components.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "url": "https://cranksmith.com/features/bike-weight-calculator"
+  };
+
   return (
-    <div className="min-h-screen bg-stone-950 text-white px-4 py-16">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      <div className="min-h-screen bg-stone-950 text-white px-4 py-16">
       <article className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold mb-4">Bike Weight Calculator</h1>
         <p className="text-stone-300 mb-8">Import your current build, estimate total system weight, and simulate upgrade paths before spending money.</p>

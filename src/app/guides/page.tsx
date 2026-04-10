@@ -41,7 +41,43 @@ const guides = [
 ];
 
 export default function GuidesIndexPage() {
+    const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is a mullet drivetrain?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A mullet drivetrain combines road or gravel shifters with a mountain bike rear derailleur and cassette. This gives you drop-bar ergonomics with MTB-level climbing range (10-52t)."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What is the difference between T47 and PF30?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "T47 and PF30 share the same 47mm shell diameter, but T47 is threaded (eliminating creaking) while PF30 is press-fit. T47 is widely considered an improved successor to PF30."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I mount brake calipers directly to IS (International Standard) tabs?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. IS standard uses unthreaded tabs and always requires an adapter to mount brake calipers. You need either an IS-to-Post Mount or IS-to-Flat Mount adapter."
+                }
+            }
+        ]
+    };
+
     return (
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+            />
         <div className="min-h-screen bg-gray-950 pt-24 pb-12 px-4">
             <div className="container mx-auto max-w-5xl">
                 <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">Technical Guides</h1>

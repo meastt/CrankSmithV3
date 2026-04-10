@@ -7,23 +7,77 @@ export const metadata: Metadata = {
 };
 
 export default function GearRatioCalculatorFeaturePage() {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "CrankSmith Gear Ratio Calculator",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Web",
+    "description": "Compare chainring and cassette setups for speed, cadence, and climbing potential. Free drivetrain analysis tool for road, gravel, and MTB cyclists.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "url": "https://cranksmith.com/features/gear-ratio-calculator",
+    "featureList": [
+      "Compare chainring and cassette combinations",
+      "Calculate speed at given cadence",
+      "Evaluate climbing potential and gear inches",
+      "Road compact vs semi-compact drivetrain comparison"
+    ]
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is a good gear ratio for cycling?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A good gear ratio depends on your terrain. For flat road riding, a 53/39 chainring with an 11-28 cassette is common. For gravel, a 40t or 42t 1x setup with a 10-42 or 10-52 cassette provides better climbing range."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between 1x and 2x drivetrains?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 1x (one-by) drivetrain has a single chainring with a wide-range cassette, offering simplicity and chain retention. A 2x (two-by) drivetrain uses two chainrings for tighter gear steps and better cadence maintenance on flat terrain."
+        }
+      }
+    ]
+  };
+
   return (
-    <div className="min-h-screen bg-stone-950 text-white px-4 py-16">
-      <article className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-4">Gear Ratio Calculator</h1>
-        <p className="text-stone-300 mb-8">Test chainring + cassette combinations and compare speed curves, cadence outcomes, and climbing limits before changing your drivetrain.</p>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <div className="min-h-screen bg-stone-950 text-white px-4 py-16">
+        <article className="max-w-3xl mx-auto">
+          <h1 className="text-4xl font-bold mb-4">Gear Ratio Calculator</h1>
+          <p className="text-stone-300 mb-8">Test chainring + cassette combinations and compare speed curves, cadence outcomes, and climbing limits before changing your drivetrain.</p>
 
-        <div className="p-6 rounded-2xl border border-white/10 bg-white/5 mb-8">
-          <h2 className="text-xl font-semibold mb-3">Use cases</h2>
-          <ul className="list-disc pl-5 text-stone-300 space-y-1">
-            <li>Road compact vs semi-compact comparison</li>
-            <li>Gravel 1x vs 2x optimization</li>
-            <li>Mullet drivetrain viability checks</li>
-          </ul>
-        </div>
+          <div className="p-6 rounded-2xl border border-white/10 bg-white/5 mb-8">
+            <h2 className="text-xl font-semibold mb-3">Use cases</h2>
+            <ul className="list-disc pl-5 text-stone-300 space-y-1">
+              <li>Road compact vs semi-compact comparison</li>
+              <li>Gravel 1x vs 2x optimization</li>
+              <li>Mullet drivetrain viability checks</li>
+            </ul>
+          </div>
 
-        <Link href="/performance" className="inline-flex px-5 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 font-semibold">Open Drivetrain Lab</Link>
-      </article>
-    </div>
+          <Link href="/performance" className="inline-flex px-5 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 font-semibold">Open Drivetrain Lab</Link>
+        </article>
+      </div>
+    </>
   );
 }
