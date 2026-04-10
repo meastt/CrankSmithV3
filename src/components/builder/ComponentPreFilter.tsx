@@ -134,6 +134,10 @@ export interface ComponentPreFilterProps {
     activeType: string;
     /** Only needed for crankset sub-step routing */
     drivetrainType: '1x' | '2x' | null;
+    /** Current pre-filter step for this activeType (0 = first filter screen) */
+    step: number;
+    /** All available brand names for brand-filter screens */
+    brands?: string[];
     onSelect: (value: string) => void;
     onSkip: () => void;
 }
@@ -141,10 +145,115 @@ export interface ComponentPreFilterProps {
 export function ComponentPreFilter({
     activeType,
     drivetrainType,
+    step,
+    brands,
     onSelect,
     onSkip,
 }: ComponentPreFilterProps) {
     const base = '/filter-cards';
+
+    // ── FRAME — Tire Clearance (step 1, after material) ──────────────────────
+    if (activeType === 'Frame' && step === 1) {
+        return (
+            <PreFilterScreen
+                question="What tire clearance do you need?"
+                subtitle="Measured in mm — check your terrain and riding style"
+                columns={2}
+                onSelect={onSelect}
+                onSkip={onSkip}
+                cards={[
+                    {
+                        value: '40',
+                        label: 'Up to 40mm',
+                        description: 'Road-biased gravel — fast, efficient, smooth terrain',
+                        imagePath: `${base}/tire-38-40.webp`,
+                        emoji: '🏎️',
+                    },
+                    {
+                        value: '45',
+                        label: 'Up to 45mm',
+                        description: 'The new sweet spot — mixed surfaces, daily riders',
+                        imagePath: `${base}/tire-41-45.webp`,
+                        emoji: '🌄',
+                    },
+                    {
+                        value: '50',
+                        label: 'Up to 50mm',
+                        description: 'Adventure-ready — chunky gravel, bikepacking, loaded builds',
+                        imagePath: `${base}/tire-46-50.webp`,
+                        emoji: '🏔️',
+                    },
+                    {
+                        value: '57+',
+                        label: '57mm +',
+                        description: 'Monster clearance — mountain gravel, technical singletrack',
+                        imagePath: `${base}/tire-51plus.webp`,
+                        emoji: '🦏',
+                    },
+                ]}
+            />
+        );
+    }
+
+    // ── FRAME — Brand (step 2, after clearance) ─────────────────────────────
+    if (activeType === 'Frame' && step === 2 && brands && brands.length > 0) {
+        return (
+            <PreFilterScreen
+                question="What brand are you looking for?"
+                subtitle="Narrow your frame search by manufacturer"
+                columns={2}
+                onSelect={onSelect}
+                onSkip={onSkip}
+                cards={brands.map(brand => ({
+                    value: brand,
+                    label: brand,
+                    description: `Gravel frames from ${brand}`,
+                    imagePath: `${base}/brand-${brand.toLowerCase().replace(/\s+/g, '-')}.webp`,
+                    emoji: '🚲',
+                }))}
+            />
+        );
+    }
+
+    // ── CRANKSET — Brand (step 2, after speed) ───────────────────────────────
+    if (activeType === 'Crankset' && step === 2 && brands && brands.length > 0) {
+        return (
+            <PreFilterScreen
+                question="What crankset brand?"
+                subtitle="Pick your drivetrain ecosystem"
+                columns={2}
+                onSelect={onSelect}
+                onSkip={onSkip}
+                cards={brands.map(brand => ({
+                    value: brand,
+                    label: brand,
+                    description: `${brand} cranksets — ${(brand.includes('SRAM') || brand.includes('sram')) ? 'wide-range XD/XDR compatible' : (brand.includes('Shimano') || brand.includes('shimano') ? 'HG compatibility' : 'premium drivetrain components')}`,
+                    imagePath: `${base}/brand-${brand.toLowerCase().replace(/\s+/g, '-')}.webp`,
+                    emoji: '⚙️',
+                }))}
+            />
+        );
+    }
+
+    // ── TIRE — Brand (step 1, after size range) ──────────────────────────────
+    if (activeType === 'Tire' && step === 1 && brands && brands.length > 0) {
+        return (
+            <PreFilterScreen
+                question="What tire brand?"
+                subtitle="Choose your preferred tire manufacturer"
+                columns={2}
+                onSelect={onSelect}
+                onSkip={onSkip}
+                cards={brands.map((brand, i) => ({
+                    value: brand,
+                    label: brand,
+                    description: `${brand} gravel tires — ${(brand.includes('WTB') || brand.includes('Panaracer')) ? 'proven gravel specialists' : (brand.includes('Schwalbe') || brand.includes('Pirelli') ? 'European engineering, tubeless experts' : 'performance tires')}`,
+                    imagePath: `${base}/brand-${brand.toLowerCase().replace(/\s+/g, '-')}.webp`,
+                    emoji: ['🔵','🟢','🔴','🟡','🟠','⚪'][i % 6],
+                }))}
+            />
+        );
+    }
 
     // ── FRAME ────────────────────────────────────────────────────────────────
     if (activeType === 'Frame') {
