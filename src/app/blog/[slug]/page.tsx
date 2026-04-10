@@ -366,6 +366,7 @@ function PostMullet({ articleSchema }: { articleSchema: object }) {
                         <p>The mullet trend has tripped up more builders than any other gravel modification in the past year. SRAM makes it easy, but Shimano requires careful part selection. And even with SRAM, you need to verify that your chosen shifter firmware version supports the MTB derailleur, that your chainline works with your crankset, and that your derailleur hanger is compatible with modern wide-range cassettes.</p>
                         <p>CrankSmith checks all of this automatically. Select your frame, shifter, derailleur, cassette, and crank, and the builder will flag any incompatibilities before you spend hundreds on parts that don&apos;t work together.</p>
                         <p>Running wider tires with your mullet setup? Your <Link href="/blog/how-tire-width-changes-gravel-gear-ratio" className="text-cyan-400 hover:underline">effective gearing shifts taller</Link> with every extra mm of tire width. And for loose-surface PSI at events like Mid South or Unbound, the <a href="https://ebikepsi.com/calculate" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">eBikePSI calculator</a> gives personalized recommendations.</p>
+                        <p>For the full technical deep-dive on all modern gravel drivetrain standards, check our <Link href="/guides/gravel-groupsets-explained" className="text-cyan-400 hover:underline">Gravel Drivetrain & Groupset Configurations guide</Link> covering BSA vs PF30, T47, and bearing choices.</p>
                     </div>
 
                     <BlogCTA heading="Verify Your Mullet Setup" sub="Select your shifter, derailleur, cassette, and crank. CrankSmith will flag any incompatibilities before you buy." />
@@ -582,6 +583,7 @@ function PostHowTireWidthGearing({ articleSchema }: { articleSchema: object }) {
 
                         <h3 className="text-white mt-8 mb-4">Option B: Bigger Cassette</h3>
                         <p>Upgrade to a 10-44t (SRAM XDR) or 10-52t. If you are running a 2x crankset, front derailleur clearance may limit cassette size -- another reason <Link href="/blog/the-gravel-mullet-road-shifter-mtb-derailleur" className="text-cyan-400 hover:underline">mullet drivetrains are so popular</Link>.</p>
+                        <p>For a comprehensive breakdown of all modern gravel groupset options including the full 1x vs 2x landscape, see our <Link href="/guides/gravel-groupsets-explained" className="text-cyan-400 hover:underline">Gravel Drivetrain & Groupset Configurations guide</Link>.</p>
 
                         <h3 className="text-white mt-8 mb-4">Option C: Accept It (The Fast Approach)</h3>
                         <p>Many Unbound racers run big gearing because they prioritize top speed on the rolling Flint Hills. If you are strong and your courses are more rolling than mountainous, you might be fine.</p>
@@ -1064,6 +1066,7 @@ function Post225Frames({ articleSchema }: { articleSchema: object }) {
                         <h2 className="text-white mt-12 mb-6">Why 650b, Not 700c?</h2>
 
                         <p>A 650b wheel with a 57mm tire has roughly the same <em>outer diameter</em> as a 700c wheel with a 37mm tire. That means your bike's geometry — bottom bracket height, trail, stack — all stay in the intended range. Run a 57mm tire on a 700c wheel and your bottom bracket rises nearly 20mm, the bike handles completely differently, and toe overlap becomes a real risk.</p>
+                        <p>Concerned about bottom bracket clearance with 2.25" tires? Our <Link href="/guides/bottom-bracket-standards" className="text-cyan-400 hover:underline">Bottom Bracket Standards guide</Link> covers BSA, PF30, and T47 — including how spindle diameter affects chainring clearance and ground clearance.</p>
 
                         <p>If you are building around 2.25-inch tires, buy a 650b wheelset. Period.</p>
 
@@ -1575,6 +1578,8 @@ function PostHooklessVsHooked({ articleSchema }: { articleSchema: object }) {
                             <p className="text-gray-300 text-sm"><strong className="text-white">Bottom line:</strong> Tubeless is worth the hassle for gravel — lower pressures, fewer flats, better grip. But it is not &ldquo;install and forget.&rdquo; Tape correctly, use enough sealant, seat the beads properly, and maintain it. Fail at any step and you will be fixing leaks instead of riding.</p>
                         </div>
                     </div>
+
+                    <p>Want to understand more about bicycle standards and compatibility? Check our <Link href="/guides/brake-mount-standards" className="text-cyan-400 hover:underline">Disc Brake Mounting Systems guide</Link> for Flat Mount, Post Mount, and IS adapter logic.</p>
 
                     <BlogCTA heading="Build Your Tubeless Setup Right the First Time" sub="Enter your rim and tire specs. We'll recommend tape width, sealant quantity, and show common pitfalls." />
                     <BackLink />

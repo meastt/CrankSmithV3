@@ -220,6 +220,23 @@ export default async function GuidePage({ params }: Props) {
                         </div>
 
                         <div className="mt-16 border-t border-white/10 pt-12 clear-both">
+                            <div className="mb-12">
+                                <h3 className="text-xl font-bold text-white mb-4">Further Reading from the Blog</h3>
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <Link href="/blog/the-gravel-mullet-road-shifter-mtb-derailleur" className="block p-4 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/50 transition-colors group">
+                                        <span className="text-cyan-400 text-sm font-bold group-hover:translate-x-1 transition-transform">The Gravel Mullet →</span>
+                                        <p className="text-stone-400 text-sm mt-1">Road shifter + MTB derailleur: the full compatibility guide</p>
+                                    </Link>
+                                    <Link href="/blog/1x-vs-2x-gravel-2026-numbers" className="block p-4 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/50 transition-colors group">
+                                        <span className="text-cyan-400 text-sm font-bold group-hover:translate-x-1 transition-transform">1x vs 2x Gravel 2026 →</span>
+                                        <p className="text-stone-400 text-sm mt-1">Gear range analysis — real numbers, not opinions</p>
+                                    </Link>
+                                    <Link href="/blog/how-tire-width-changes-gravel-gear-ratio" className="block p-4 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/50 transition-colors group">
+                                        <span className="text-cyan-400 text-sm font-bold group-hover:translate-x-1 transition-transform">Tire Width Changes Gearing →</span>
+                                        <p className="text-stone-400 text-sm mt-1">How bigger tires effectively change your gear ratio</p>
+                                    </Link>
+                                </div>
+                            </div>
                             <Link href="/builder" className="block p-8 rounded-2xl bg-gradient-to-br from-blue-900/40 to-cyan-900/40 border border-cyan-500/30 hover:border-cyan-400 transition-all group">
                                 <h3 className="text-2xl font-bold text-white mb-2">Build Your Groupset</h3>
                                 <p className="text-cyan-200 mb-4">Validate your 1x, 2x, or Mullet drivetrain ideas in our compatibility engine.</p>
@@ -364,6 +381,20 @@ export default async function GuidePage({ params }: Props) {
                                 <li><strong>28.99mm (SRAM DUB):</strong> A compromise. Fits slightly better in BSA shells than 30mm while being stiffer than 24mm.</li>
                             </ul>
                         </div>
+
+                        <div className="mt-16 border-t border-white/10 pt-12 clear-both">
+                            <h3 className="text-xl font-bold text-white mb-4">Further Reading from the Blog</h3>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <Link href="/blog/every-gravel-frame-that-fits-2-25in-tires" className="block p-4 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/50 transition-colors group">
+                                    <span className="text-cyan-400 text-sm font-bold group-hover:translate-x-1 transition-transform">Every Frame That Fits 2.25" Tires →</span>
+                                    <p className="text-stone-400 text-sm mt-1">2026 frame-by-frame tire clearance database</p>
+                                </Link>
+                                <Link href="/blog/gravel-tubeless-setup-guide" className="block p-4 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/50 transition-colors group">
+                                    <span className="text-cyan-400 text-sm font-bold group-hover:translate-x-1 transition-transform">Gravel Tubeless Setup Guide →</span>
+                                    <p className="text-stone-400 text-sm mt-1">Tape, sealant, common failures, and fixes</p>
+                                </Link>
+                            </div>
+                        </div>
                     </article>
                 </div>
             </>
@@ -492,6 +523,20 @@ export default async function GuidePage({ params }: Props) {
 
                             <p><strong>Can I put Flat Mount calipers on a Post Mount frame?</strong><br />No. There is no room for the caliper body. (Exception: Some rare expensive niche adapters exists, but generally no).</p>
                             <p><strong>Can I put Post Mount calipers on a Flat Mount frame?</strong><br />Yes, adapters exist, but it looks bulky.</p>
+                        </div>
+
+                        <div className="mt-16 border-t border-white/10 pt-12 clear-both">
+                            <h3 className="text-xl font-bold text-white mb-4">Further Reading from the Blog</h3>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <Link href="/blog/rockshox-rudy-vs-rigid-gravel-suspension" className="block p-4 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/50 transition-colors group">
+                                    <span className="text-cyan-400 text-sm font-bold group-hover:translate-x-1 transition-transform">RockShox Rudy vs Rigid Fork →</span>
+                                    <p className="text-stone-400 text-sm mt-1">Weight vs speed trade-off — the data-driven answer</p>
+                                </Link>
+                                <Link href="/blog/every-gravel-frame-that-fits-2-25in-tires" className="block p-4 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/50 transition-colors group">
+                                    <span className="text-cyan-400 text-sm font-bold group-hover:translate-x-1 transition-transform">Every Frame That Fits 2.25" Tires →</span>
+                                    <p className="text-stone-400 text-sm mt-1">2026 frame-by-frame tire clearance database</p>
+                                </Link>
+                            </div>
                         </div>
                     </article>
                 </div>
