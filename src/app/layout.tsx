@@ -8,6 +8,7 @@ import { Providers } from "@/components/Providers";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
+import { ToastProvider } from "@/components/ui/Toast";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
