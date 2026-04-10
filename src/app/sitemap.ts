@@ -32,6 +32,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         { path: '/hubs/big-tire-revolution', changeFrequency: 'weekly' as const, priority: 0.8 },
         { path: '/hubs/gravel-drivetrain-bible', changeFrequency: 'weekly' as const, priority: 0.8 },
         { path: '/hubs/gravel-standards-master', changeFrequency: 'weekly' as const, priority: 0.8 },
+        { path: '/infographics', changeFrequency: 'monthly' as const, priority: 0.7 },
     ];
 
     const guideSlugs = [
@@ -76,6 +77,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
         })),
         ...guideSlugs.map((slug) => ({
             url: `${baseUrl}/guides/${slug}`,
+            lastModified: now,
+            changeFrequency: 'monthly' as const,
+            priority: 0.75,
+        })),
+        ...[
+            'gravel-tire-comparison',
+            'mullet-drivetrain-compatibility',
+            '1x-vs-2x-gear-range',
+            'hookless-vs-hooked-safety',
+            'gravel-frame-tire-clearance',
+            'rockshox-rudy-vs-rigid-fork',
+            'gravel-tubeless-setup-flowchart',
+        ].map((slug) => ({
+            url: `${baseUrl}/infographics/${slug}`,
             lastModified: now,
             changeFrequency: 'monthly' as const,
             priority: 0.75,
