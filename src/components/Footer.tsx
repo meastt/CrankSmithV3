@@ -70,6 +70,9 @@ export function Footer() {
             <Link href="/features/bike-compatibility-checker" className="hover:text-primary transition-colors">
               Compatibility
             </Link>
+            <Link href="/blog" className="hover:text-primary transition-colors">
+              Blog
+            </Link>
             <Link href="/guides" className="hover:text-primary transition-colors">
               Guides
             </Link>
@@ -89,6 +92,8 @@ export function Footer() {
 
           {/* Mobile-only Legal/Meta Links (Cleaner app-style list) */}
           <div className="flex md:hidden flex-wrap justify-center gap-x-6 gap-y-2 text-[11px] font-bold text-stone-400 uppercase tracking-widest">
+            <Link href="/blog">Blog</Link>
+            <Link href="/guides">Guides</Link>
             <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>
             <a href="mailto:support@cranksmith.com">Support</a>

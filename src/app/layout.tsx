@@ -73,7 +73,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${dmSans.variable} ${spaceMono.variable} font-sans antialiased bg-[#030712] text-slate-100 flex flex-col min-h-screen`}
       >
-        <Providers>
+        <ToastProvider>
           <ServiceWorkerRegister />
           <CapacitorInit />
           <OfflineIndicator />
@@ -83,7 +83,7 @@ export default function RootLayout({
           </main>
           <Footer />
           <BottomNav />
-        </Providers>
+        </ToastProvider>
       </body>
     </html>
   );

@@ -1,10 +1,18 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 const isProtectedRoute = createRouteMatcher([]);
 
-export default clerkMiddleware(async (auth, req) => {
-    if (isProtectedRoute(req)) await auth.protect()
-});
+// Skip Clerk entirely during static build (no real keys available)
+const SKIP_CLERK = !process.env.CLERK_SECRET_KEY || process.env.CLERK_SECRET_KEY.startsWith("sk_test_DUMMY");
+
+const middleware = SKIP_CLERK
+    ? async () => NextResponse.next()
+    : clerkMiddleware(async (auth, req) => {
+        if (isProtectedRoute(req)) await auth.protect()
+      });
+
+export default middleware;
 
 export const config = {
     matcher: [
