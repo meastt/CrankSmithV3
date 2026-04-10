@@ -45,5 +45,6 @@ export default function BikeWeightCalculatorFeaturePage() {
         <Link href="/weight" className="inline-flex px-5 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 font-semibold">Open Weight Tool</Link>
       </article>
     </div>
+    </>
   );
 }

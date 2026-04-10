@@ -117,5 +117,6 @@ export default function GuidesIndexPage() {
                 </div>
             </div>
         </div>
+        </>
     );
 }
