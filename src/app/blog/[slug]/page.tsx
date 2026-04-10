@@ -14,7 +14,7 @@ const blogData: Record<string, { title: string; description: string; date: strin
         date: "2026-04-10",
         category: "Big Tires",
         keywords: ["gravel tire width 2026", "45mm gravel tire", "minimum gravel tire size", "wide gravel tires", "gravel tire clearance"],
-        image: "/images/blog-45mm-minimum.jpg"
+        image: "/images/gravel-tire-width-45mm-minimum-2026.webp"
     },
     "the-gravel-mullet-road-shifter-mtb-derailleur": {
         title: "The Gravel Mullet: Road Shifter + MTB Derailleur — Every Combo That Actually Works",
@@ -22,7 +22,7 @@ const blogData: Record<string, { title: string; description: string; date: strin
         date: "2026-04-11",
         category: "Drivetrain",
         keywords: ["gravel mullet drivetrain", "road shifter mtb derailleur", "sram axs mullet", "shimano grx xt", "wolf tooth tanpan"],
-        image: "/images/blog-gravel-mullet.jpg"
+        image: "/images/gravel-mullet-drivetrain-compatibility-2026.webp"
     },
     "1x-vs-2x-gravel-2026-numbers": {
         title: "1x vs 2x on Gravel in 2026: The Actual Numbers",
@@ -30,7 +30,7 @@ const blogData: Record<string, { title: string; description: string; date: strin
         date: "2026-04-12",
         category: "Drivetrain",
         keywords: ["1x vs 2x gravel", "gravel drivetrain range", "gravel gear ratio", "single ring gravel"],
-        image: "/images/blog-1x-vs-2x.jpg"
+        image: "/images/gravel-1x-vs-2x-gear-range-comparison-2026.webp"
     },
     "how-tire-width-changes-gravel-gear-ratio": {
         title: "How Your Bigger Gravel Tire Changes Your Actual Gear Ratio",
@@ -38,7 +38,7 @@ const blogData: Record<string, { title: string; description: string; date: strin
         date: "2026-04-14",
         category: "Drivetrain",
         keywords: ["tire circumference gearing", "gravel tire gear inches", "wider tire gear ratio"],
-        image: "/images/blog-tire-gearing.jpg"
+        image: "/images/blog-tire-gearing.webp"
     },
     "unbound-gravel-2026-tire-gear-setup": {
         title: "Unbound Gravel 2026: The Ultimate Tire & Gear Setup Guide",
@@ -46,7 +46,7 @@ const blogData: Record<string, { title: string; description: string; date: strin
         date: "2026-04-15",
         category: "Racing",
         keywords: ["unbound gravel 2026", "unbound tire setup", "unbound gearing", "emporia gravel"],
-        image: "/images/blog-unbound-2026.jpg"
+        image: "/images/blog-unbound-2026.webp"
     },
     "gravel-tire-psiby-width-guide-2026": {
         title: "Gravel Tire Pressure by Width: The Definitive Guide (40mm to 2.25\")",
@@ -54,7 +54,7 @@ const blogData: Record<string, { title: string; description: string; date: strin
         date: "2026-04-16",
         category: "Big Tires",
         keywords: ["gravel tire pressure guide", "gravel tire psi", "hookless max pressure", "gravel tire pressure by width"],
-        image: "/images/blog-tire-pressure-guide.jpg"
+        image: "/images/blog-tire-pressure-guide.webp"
     },
     "every-gravel-frame-that-fits-2-25in-tires": {
         title: "Every 2026 Gravel Frame That Fits 2.25-Inch Tires",
@@ -62,7 +62,7 @@ const blogData: Record<string, { title: string; description: string; date: strin
         date: "2026-04-17",
         category: "Big Tires",
         keywords: ["gravel frame 2.25 tire clearance", "57mm tire gravel", "mtb tire on gravel bike"],
-        image: "/images/blog-2-25-frames.jpg"
+        image: "/images/blog-2-25-frames.webp"
     },
     "hookless-vs-hooked-gravel-wheels-safety-guide": {
         title: "Hookless vs Hooked Gravel Wheels: The Safety Guide That Actually Matters",
@@ -70,7 +70,7 @@ const blogData: Record<string, { title: string; description: string; date: strin
         date: "2026-04-21",
         category: "Standards",
         keywords: ["hookless gravel wheels", "hookless safety", "etrto hookless standards", "hooked vs hookless gravel"],
-        image: "/images/blog-hookless-safety.jpg"
+        image: "/images/blog-hookless-safety.webp"
     },
     "rockshox-rudy-vs-rigid-gravel-suspension": {
         title: "RockShox Rudy vs Rigid Fork: Is Gravel Suspension Worth It in 2026?",
@@ -78,7 +78,7 @@ const blogData: Record<string, { title: string; description: string; date: strin
         date: "2026-04-22",
         category: "Suspension",
         keywords: ["rockshox rudy gravel", "gravel suspension fork", "gravel fork weight"],
-        image: "/images/blog-suspension-vs-rigid.jpg"
+        image: "/images/blog-suspension-vs-rigid.webp"
     },
     "gravel-tubeless-setup-guide": {
         title: "Gravel Tubeless Setup: What Seals, What Tapes, What Goes Wrong",
@@ -86,7 +86,7 @@ const blogData: Record<string, { title: string; description: string; date: strin
         date: "2026-04-24",
         category: "Setup",
         keywords: ["gravel tubeless setup", "gravel tubeless tape", "gravel tire burping", "gravel sealant amount"],
-        image: "/images/blog-tubeless-setup.jpg"
+        image: "/images/blog-tubeless-setup.webp"
     }
 };
 
@@ -194,6 +194,20 @@ function BackLink() {
         </div>
     );
 }
+function FeaturedImage({ src, alt, priority = true }: { src: string; alt: string; priority?: boolean }) {
+    return (
+        <div className="mb-8 rounded-2xl overflow-hidden border border-white/10">
+            <Image
+                src={src}
+                alt={alt}
+                width={1280}
+                height={720}
+                className="w-full h-auto"
+                priority={priority}
+            />
+        </div>
+    );
+}
 
 /* ═══════════════════════════════════════════════════════════
  * POST 1 — 45mm Is the New Minimum Gravel Tire
@@ -223,17 +237,25 @@ function Post45mm({ articleSchema }: { articleSchema: object }) {
                         <p className="text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto">Every major 2026 gravel frame clears 50mm+. Riders are pushing past 40mm and never looking back. The data backs it up.</p>
                     </div>
 
+                    <FeaturedImage
+                        src="/images/gravel-tire-width-45mm-minimum-2026.webp"
+                        alt="45mm gravel tire cross-section technical blueprint with dimension callouts and PSI ranges — CrankSmith compatibility guide"
+                    />
+
                     <div className="prose prose-invert prose-lg max-w-none text-stone-300">
                         <p className="lead text-xl text-stone-200">
                             If you&apos;re still running 35mm or 40mm tires on your gravel bike, you&apos;re riding on last decade&apos;s setup. <strong>45mm has become the accepted minimum for general gravel riding</strong>, and for good reason. The combination of rolling efficiency, puncture protection, and the ability to run lower pressures for grip makes wider tires objectively faster on most real-world gravel surfaces.
                         </p>
 
                         <h2 className="text-white mt-12 mb-6">What Changed?</h2>
+                        <p className="text-sm text-gray-500 -mt-4 mb-4"><em>Related reading: <a href="https://www.bikeradar.com/features/opinion/dont-buy-a-gravel-bike-without-50mm-tyre-clearance" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">BikeRadar: &quot;Don&apos;t Buy a Gravel Bike Without 50mm Tyre Clearance&quot;</a> • <a href="https://www.cyclingweekly.com/news/the-next-big-things-in-gravel-2026-2027-tech-predictions" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">CyclingWeekly&apos;s 2026-27 Gravel Tech Predictions</a></em></p>
+
                         <p>The 2026 gravel frame market has shifted. Where 40mm clearance was once considered generous, <strong>50mm is now the baseline expectation</strong> for new gravel bikes. The Specialized Diverge clears 55mm. The Allied Able handles 57mm. Even mid-range carbon frames are opening up their chainstays and fork crowns to accommodate 50mm+ rubber.</p>
-                        <p>This isn&apos;t just manufacturer marketing — it reflects real rider behavior. On Reddit and gravel forums, riders who switch from 35mm or 40mm to 45mm consistently report faster times on rough gravel, fewer flats, and a more comfortable ride without a measurable speed penalty on pavement. The physics: at lower pressures (20-30 PSI range for wider tires), the tire deforms around obstacles instead of bouncing off them, maintaining momentum.</p>
+
+                        <p>This isn&apos;t just manufacturer marketing — it reflects real rider behavior. On Reddit and gravel forums, riders who switch from 35mm or 40mm to 45mm consistently report faster times on rough gravel, fewer flats, and a more comfortable ride without a measurable speed penalty on pavement. The physics: at lower pressures (20-30 PSI range for wider tires), the tire deforms around obstacles instead of bouncing off them, maintaining momentum. For personalized PSI recommendations by weight and tire width, try the <a href="https://ebikepsi.com/calculate" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">eBikePSI Tire Pressure Calculator</a>.</p>
 
                         <h2 className="text-white mt-12 mb-6">The Rolling Resistance Reality</h2>
-                        <p>Independent testing has confirmed what gravel racers already knew: <strong>wider tires often roll faster than narrow tires on rough surfaces</strong>. A 45mm tire at 30 PSI will outperform a 35mm tire at 50 PSI on anything but perfectly smooth tarmac. The energy lost to suspension (your body vibrating) far exceeds the marginal increase in tire deformation.</p>
+                        <p>Independent testing has confirmed what gravel racers already knew: <strong>wider tires often roll faster than narrow tires on rough surfaces</strong>. A 45mm tire at 30 PSI will outperform a 35mm tire at 50 PSI on anything but perfectly smooth tarmac. The energy lost to suspension (your body vibrating) far exceeds the marginal increase in tire deformation. See <a href="https://www.bikeradar.com/advice/technical/wider-tyres-are-faster" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">BikeRadar&apos;s independent tire testing</a> for the full data.</p>
 
                         <div className="my-6 bg-white/5 p-6 rounded-xl border border-white/10">
                             <h3 className="text-white font-bold text-lg mb-2">Real-World Tire Width Feedback (2026)</h3>
@@ -248,6 +270,9 @@ function Post45mm({ articleSchema }: { articleSchema: object }) {
                         <h2 className="text-white mt-12 mb-6">So What Should You Run?</h2>
                         <p>For most gravel riders in 2026, <strong>45mm is the sweet spot</strong>. It&apos;s wide enough to excel on real gravel while still feeling planted on hard-pack and pavement. If you&apos;re racing or riding technical terrain, 50mm is increasingly the choice. Only drop to 40mm or below if your rides are predominantly pavement with occasional gravel sections.</p>
                         <p>The real question isn&apos;t &ldquo;how wide can I go&rdquo; — it&apos;s &ldquo;does my frame actually fit the tire I want?&rdquo; That&apos;s where CrankSmith comes in. Enter your frame model and target tire size, and the builder checks real clearance data including room for mud, which most manufacturers don&apos;t publish.</p>
+
+                        <h2 className="text-white mt-12 mb-6">Going Even Wider?</h2>
+                        <p>If 45mm isn&apos;t enough for your terrain, some 2026 frames officially clear <Link href="/blog/every-gravel-frame-that-fits-2-25in-tires" className="text-cyan-400 hover:underline">2.25-inch (57mm) MTB tires</Link>. And if you&apos;re running wider tires, your <Link href="/blog/how-tire-width-changes-gravel-gear-ratio" className="text-cyan-400 hover:underline">effective gearing changes too</Link> — wider tires = larger circumference = taller gears. CrankSmith calculates all of this automatically.</p>
                     </div>
 
                     <BlogCTA heading="Check Your Frame&apos;s Clearance" sub="Enter your gravel frame and tire size to validate fitment — including mud clearance." />
@@ -286,7 +311,14 @@ function PostMullet({ articleSchema }: { articleSchema: object }) {
                         <p className="text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto">SRAM AXS makes it native. Shimano needs a converter. Here is the full compatibility matrix so you can build yours without guesswork.</p>
                     </div>
 
+                    <FeaturedImage
+                        src="/images/gravel-mullet-drivetrain-compatibility-2026.webp"
+                        alt="SRAM AXS mullet drivetrain exploded view showing road shifter to MTB derailleur cable routing — CrankSmith compatibility guide"
+                    />
+
                     <div className="prose prose-invert prose-lg max-w-none text-stone-300">
+                        <p className="text-sm text-gray-500 -mt-4 mb-6"><em>Related reading: <a href="https://www.sram.com/en/sram/models/hd-axs-air-b1" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">SRAM AXS Compatibility Documentation</a> • <a href="https://wolftoothcomponents.com/collections/roadlink" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">Wolf Tooth RoadLink & Tanpan</a></em></p>
+
                         <p className="lead text-xl text-stone-200">
                             A &ldquo;mullet&rdquo; drivetrain is the most popular gravel build trend of the last three years: <strong>road or gravel shifters up front, mountain bike derailleur and cassette out back</strong>. The result? Drop-bar ergonomics with MTB gearing range — up to 10-52t (520%). If you&apos;ve ever ground to a halt on a steep gravel climb wishing for one more gear, this is your answer.
                         </p>
@@ -311,6 +343,7 @@ function PostMullet({ articleSchema }: { articleSchema: object }) {
                         <p>For Di2 electronic, it&apos;s more promising but less plug-and-play. You can mix XT Di2 rear derailleurs with GRX Di2 shifters <em>if</em> you resolve the E-Tube project compatibility checks, which often requires a specific display unit or SC-MT800 junction box. Not elegant, but it works once configured.</p>
 
                         <h2 className="text-white mt-12 mb-6">Real-World Mullet Setups From the 2026 Scene</h2>
+
                         <div className="my-6 bg-white/5 p-6 rounded-xl border border-white/10">
                             <h3 className="text-white font-bold text-lg mb-2">Mid South 2026 Pro Setups</h3>
                             <ul className="list-disc pl-4 space-y-2 text-sm">
@@ -325,6 +358,7 @@ function PostMullet({ articleSchema }: { articleSchema: object }) {
                         <h2 className="text-white mt-12 mb-6">Does Your Build Actually Work Together?</h2>
                         <p>The mullet trend has tripped up more builders than any other gravel modification in the past year. SRAM makes it easy, but Shimano requires careful part selection. And even with SRAM, you need to verify that your chosen shifter firmware version supports the MTB derailleur, that your chainline works with your crankset, and that your derailleur hanger is compatible with modern wide-range cassettes.</p>
                         <p>CrankSmith checks all of this automatically. Select your frame, shifter, derailleur, cassette, and crank, and the builder will flag any incompatibilities before you spend hundreds on parts that don&apos;t work together.</p>
+                        <p>Running wider tires with your mullet setup? Your <Link href="/blog/how-tire-width-changes-gravel-gear-ratio" className="text-cyan-400 hover:underline">effective gearing shifts taller</Link> with every extra mm of tire width. And for loose-surface PSI at events like Mid South or Unbound, the <a href="https://ebikepsi.com/calculate" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">eBikePSI calculator</a> gives personalized recommendations.</p>
                     </div>
 
                     <BlogCTA heading="Verify Your Mullet Setup" sub="Select your shifter, derailleur, cassette, and crank. CrankSmith will flag any incompatibilities before you buy." />
@@ -363,7 +397,14 @@ function Post1xVs2x({ articleSchema }: { articleSchema: object }) {
                         <p className="text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto">Gear range percentages, cadence gap sizes, chain drop risk, and who really needs which setup.</p>
                     </div>
 
+                    <FeaturedImage
+                        src="/images/gravel-1x-vs-2x-gear-range-comparison-2026.webp"
+                        alt="1x vs 2x gravel drivetrain gear range comparison chart showing 520% vs 480% range with cassette layouts — CrankSmith gear lab"
+                    />
+
                     <div className="prose prose-invert prose-lg max-w-none text-stone-300">
+                        <p className="text-sm text-gray-500 -mt-4 mb-6"><em>Related: <a href="https://www.bikeradar.com/features/opinion/2026-the-year-of-the-affordable-gravel-bike" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">BikeRadar: &quot;2026: The Year of the Affordable Gravel Bike&quot;</a> • <Link href="/blog/the-gravel-mullet-road-shifter-mtb-derailleur" className="text-cyan-400 hover:underline">The Gravel Mullet Drivetrain Guide</Link></em></p>
+
                         <p className="lead text-xl text-stone-200">
                             The 2x drivetrain is dying for gravel. That&apos;s not opinion — it&apos;s the trajectory of every major product launch in 2026. SRAM has made 1x AXS the gravel standard. Shimano CUES 1x is replacing entry-level 2x mechanical on new bikes. Bikeradar called 2026 &ldquo;the year of the affordable gravel bike&rdquo; and almost every sub-$3K complete now ships 1x out of the box. But the real question isn&apos;t what the industry is selling — it&apos;s what works for your riding.
                         </p>
@@ -394,7 +435,7 @@ function Post1xVs2x({ articleSchema }: { articleSchema: object }) {
 
                         <h2 className="text-white mt-12 mb-6">The Cadence Gap Problem</h2>
                         <p>The biggest legitimate case for 2x is gear step size. On a 10-52t cassette, shifting from 18t to 21t is a noticeable 16% jump in gear ratio. On flat terrain, that feels like a big cadence change. On a 11-34t 2x cassette, the same shift is roughly 10% — much smoother. For road-to-gravel crossover riders who care about maintaining an optimal cadence, this matters.</p>
-                        <p>For everyone else — bikepackers, technical trail riders, gravel race starters — <strong>range matters more than steps</strong>. Having a sub-20 gear inch ratio for steep climbs is more valuable than fine cadence control on the flat bits.</p>
+                        <p>For everyone else — bikepackers, technical trail riders, gravel race starters — <strong>range matters more than steps</strong>. Having a sub-20 gear inch ratio for steep climbs is more valuable than fine cadence control on the flat bits. And remember: removing that front derailleur opens up <Link href="/blog/45mm-is-the-new-minimum-gravel-tire" className="text-cyan-400 hover:underline">wider tire options</Link> on frames where the FD cage was the limiting factor.</p>
 
                         <h2 className="text-white mt-12 mb-6">The Budget Angle</h2>
                         <p>2026 is the year of affordable 1x gravel. Budget options that actually work:</p>
