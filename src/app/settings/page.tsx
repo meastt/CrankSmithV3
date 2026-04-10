@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useClerk, useUser } from '@clerk/nextjs';
+import { useClerk, useUser } from '@/lib/clerk-stub';
 import { ArrowLeft, Trash2, AlertTriangle, Shield, Mail, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/components/ui/Toast';

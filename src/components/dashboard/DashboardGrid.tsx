@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@/lib/clerk-stub';
 import { useRouter } from 'next/navigation';
 import { haptic } from '@/lib/haptics';
 import { trackEvent } from '@/lib/analytics';

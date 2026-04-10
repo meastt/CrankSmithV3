@@ -1,6 +1,6 @@
 'use client';
 
-import { UserButton, SignedIn, SignedOut, SignInButton, useClerk } from '@clerk/nextjs';
+import { UserButton, SignedIn, SignedOut, SignInButton, useClerk } from '@/lib/clerk-stub';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';

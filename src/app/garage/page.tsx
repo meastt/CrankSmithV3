@@ -7,7 +7,7 @@ import { useBuildStore } from '@/store/buildStore';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Trash2, Edit3, Bike, ArrowRight, Settings, WifiOff, Loader2 } from 'lucide-react';
-import { useUser, SignInButton } from '@clerk/nextjs';
+import { useUser, SignInButton } from '@/lib/clerk-stub';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';

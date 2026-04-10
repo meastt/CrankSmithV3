@@ -9,7 +9,7 @@ import { PartCard } from './PartCard';
 import { ShareCard } from './ShareCard';
 import { BuildSummary } from './BuildSummary';
 import { useBuildStore, AnyComponent } from '@/store/buildStore';
-import { useClerk, useUser } from '@clerk/nextjs';
+import { useClerk, useUser } from '@/lib/clerk-stub';
 import { useSettingsStore } from '@/store/settingsStore';
 import { FreehubSelector } from './FreehubSelector';
 import { ComponentPreFilter } from './ComponentPreFilter';
