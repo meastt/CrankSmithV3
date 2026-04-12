@@ -92,6 +92,14 @@ const blogPosts = [
         date: "2026-04-24",
         image: "/images/gravel-tubeless-setup-flowchart-2026.webp"
     },
+    {
+        slug: "2026-gravel-bike-new-releases-april",
+        title: "2026 Gravel Bike New Releases: Obed GVR, State All-Road V2, Giant Revolt Advanced 0",
+        excerpt: "April 2026 gravel bike refresh: Obed GVR (2.2\" clearance), State V2 (T47+UDH under $2K), Giant Revolt Advanced 0, Trek Checkpoint, OPEN U.P. 2.0. Builder compatibility breakdown.",
+        category: "News",
+        date: "2026-04-11",
+        image: "/images/gravel-bike-new-releases-2026.webp"
+    },
 ];
 
 export default function BlogIndexPage() {
