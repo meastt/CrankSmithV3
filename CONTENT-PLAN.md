@@ -223,8 +223,8 @@ Publish as capacity allows.
 
 | Metric | Status |
 |--------|--------|
-| Blog posts live | 11 of 29 |
-| Blog posts remaining | 18 (4 priority 1, 8 priority 2, 6 bonus) |
+| Blog posts written | **29 of 29 — COMPLETE** |
+| Blog posts remaining | 0 |
 | Hub pages | 3 of 3 — done |
 | Guides | 3 of 3 — done |
 | Standards pages | 4 of 4 — done |
@@ -233,3 +233,10 @@ Publish as capacity allows.
 | RSS feed | live at /feed.xml |
 | Sitemap | all blog posts indexed |
 | Blog architecture | modular (per-post files + registry) |
+
+**All 18 remaining posts written April 13, 2026.**
+
+> [!NOTE]
+> 3 bonus post images (700c vs 650b, gravel racing comparison, budget groupsets) reused
+> existing images due to image generation quota exhaustion. Queue refreshes in ~4.7h.
+> Unique images can be generated and swapped in at that time.
