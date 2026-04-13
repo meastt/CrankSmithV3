@@ -1129,16 +1129,19 @@ export const PartSelector: React.FC = () => {
     }
 
     // Frame tire clearance pre-filter
+    // Buckets are "up to Xmm" — we show frames whose max_tire_width is AT LEAST the
+    // minimum for that bucket. This way a frame spec'd at 48mm shows for both the
+    // "45" and "50" buckets (it can run both). Frames with no clearance data pass through.
     if (activeType === 'Frame' && frameTireClearance && frameTireClearance !== 'all') {
         filteredComponents = filteredComponents.filter(c => {
             const maxTire = (c as any).specs?.max_tire_width || (c as any).specs?.tire_clearance || (c as any).attributes?.max_tire || '';
             const num = parseFloat(String(maxTire).replace(/[^0-9.]/g, ''));
-            if (isNaN(num) || num === 0) return true;
+            if (isNaN(num) || num === 0) return true; // No data — let through
             switch (frameTireClearance) {
-                case '40':  return num >= 38 && num <= 42;
-                case '45':  return num > 42 && num <= 48;
-                case '50':  return num > 48 && num <= 55;
-                case '57+': return num > 55;
+                case '40':  return num >= 38;          // "Up to 40mm" — frame clears 38mm+
+                case '45':  return num >= 40;          // "Up to 45mm" — frame clears 40mm+
+                case '50':  return num >= 46;          // "Up to 50mm" — frame clears 46mm+
+                case '57+': return num >= 55;          // "57mm+" — frame clears 55mm+
                 default:    return true;
             }
         });
