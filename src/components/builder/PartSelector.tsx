@@ -1157,13 +1157,18 @@ export const PartSelector: React.FC = () => {
 
     // Frame material pre-filter
     if (activeType === 'Frame' && frameMaterial && frameMaterial !== 'all') {
+        console.log('[DEBUG Frame Material] filter active:', frameMaterial, '| before:', filteredComponents.length);
         filteredComponents = filteredComponents.filter(c => {
             const mat = ((c as any).attributes?.material || '').toUpperCase();
             const target = frameMaterial.toUpperCase();
             if (target === 'ALUMINUM') return mat.includes('ALUMINUM') || mat.includes('ALLOY') || mat === 'AL';
             if (target === 'TITANIUM') return mat.includes('TITANIUM') || mat === 'TI';
-            return mat.includes(target);
+            const match = mat.includes(target);
+            if (!match && mat) console.log('[DEBUG Frame Material]   excluded:', c.name, '| material:', mat);
+            if (!mat) console.log('[DEBUG Frame Material]   NO MATERIAL DATA:', c.name);
+            return match;
         });
+        console.log('[DEBUG Frame Material] after:', filteredComponents.length);
     }
 
     // Wheel material pre-filter
@@ -1314,7 +1319,7 @@ export const PartSelector: React.FC = () => {
         filteredComponents = filteredComponents.filter(c => c.brand === selectedBrand);
     }
 
-    const uniqueBrands = Array.from(new Set(components.map(c => c.brand).filter(Boolean) as string[])).sort();
+    const uniqueBrands = Array.from(new Set(filteredComponents.map(c => c.brand).filter(Boolean) as string[])).sort();
     const showCategorySelection = activeType === 'Frame' && !frameCategory;
 
     // Multi-step pre-filter tracker
@@ -1368,6 +1373,25 @@ export const PartSelector: React.FC = () => {
         }
     };
     const showPreFilter = getPreFilterStep() >= 0;
+
+    // Determine whether the current pre-filter step is the brand step for this type
+    const isBrandStep = (): boolean => {
+        const step = getPreFilterStep();
+        switch (activeType) {
+            case 'Frame':           return step === 2;
+            case 'Crankset':        return step === 2;
+            case 'Tire':            return step === 1;
+            case 'Wheel':           return step === 1;
+            case 'RearDerailleur':  return step === 1;
+            case 'BrakeRotor':      return step === 1;
+            case 'Seatpost':        return step === 1;
+            case 'Stem':            return step === 0;
+            case 'Handlebar':       return step === 0;
+            case 'BrakeCaliper':    return step === 0;
+            case 'Cassette':        return step === 0;
+            default:                return false;
+        }
+    };
 
     // Handler called when user picks a filter card option
     const handlePreFilterSelect = (value: string) => {
@@ -1445,47 +1469,58 @@ export const PartSelector: React.FC = () => {
     const handleBack = () => {
         const step = getPreFilterStep();
         if (step < 0) {
-            // Not in pre-filter, walk through existing back logic
-            if (selectedBrand) {
+            // Not in pre-filter — reverse through filter states, most recent first.
+            // For multi-step types: brand → middle steps → first step.
+
+            // Frame: brand → tire clearance → material
+            if (activeType === 'Frame' && selectedBrand) {
                 setSelectedBrand(null);
-            } else if (activeType === 'Tire' && selectedTireBrand) {
-                setSelectedTireBrand(null);
-            } else if (activeType === 'Crankset' && selectedCranksetBrand) {
-                setSelectedCranksetBrand(null);
             } else if (activeType === 'Frame' && frameTireClearance) {
                 setFrameTireClearance(null);
             } else if (activeType === 'Frame' && frameMaterial) {
                 setFrameMaterial(null);
-            } else if (activeType === 'Wheel' && wheelMaterial) {
-                setWheelMaterial(null);
-            } else if (activeType === 'Tire' && tireSizeRange) {
-                setTireSizeRange(null);
+            }
+            // Crankset: brand → speed → type
+            else if (activeType === 'Crankset' && selectedCranksetBrand) {
+                setSelectedCranksetBrand(null);
             } else if (activeType === 'Crankset' && drivetrainSpeed && !cranksetSkipped) {
                 setDrivetrainSpeed(null);
             } else if (activeType === 'Crankset' && (drivetrainType || cranksetSkipped)) {
                 setDrivetrainType(null);
                 setCranksetSkipped(false);
-            } else if (activeType === 'RearDerailleur' && drivetrainElectronic) {
-                setDrivetrainElectronic(null);
-            } else if (activeType === 'BrakeRotor' && rotorSize) {
-                setRotorSize(null);
-            } else if (activeType === 'Seatpost' && seatpostType) {
-                setSeatpostType(null);
-            } else if (activeType === 'Wheel' && selectedWheelBrand) {
+            }
+            // Tire: brand → size range
+            else if (activeType === 'Tire' && selectedTireBrand) {
+                setSelectedTireBrand(null);
+            } else if (activeType === 'Tire' && tireSizeRange) {
+                setTireSizeRange(null);
+            }
+            // Wheel: brand → material
+            else if (activeType === 'Wheel' && selectedWheelBrand) {
                 setSelectedWheelBrand(null);
             } else if (activeType === 'Wheel' && wheelMaterial) {
                 setWheelMaterial(null);
-            } else if (activeType === 'RearDerailleur' && selectedRearDerailleurBrand) {
+            }
+            // RearDerailleur: brand → electronic/mechanical
+            else if (activeType === 'RearDerailleur' && selectedRearDerailleurBrand) {
                 setSelectedRearDerailleurBrand(null);
             } else if (activeType === 'RearDerailleur' && drivetrainElectronic) {
                 setDrivetrainElectronic(null);
-            } else if (activeType === 'BrakeRotor' && selectedBrakeRotorBrand) {
+            }
+            // BrakeRotor: brand → size
+            else if (activeType === 'BrakeRotor' && selectedBrakeRotorBrand) {
                 setSelectedBrakeRotorBrand(null);
             } else if (activeType === 'BrakeRotor' && rotorSize) {
                 setRotorSize(null);
-            } else if (activeType === 'Seatpost' && selectedSeatpostBrand) {
+            }
+            // Seatpost: brand → type
+            else if (activeType === 'Seatpost' && selectedSeatpostBrand) {
                 setSelectedSeatpostBrand(null);
-            } else if (activeType === 'Stem' && selectedStemBrand) {
+            } else if (activeType === 'Seatpost' && seatpostType) {
+                setSeatpostType(null);
+            }
+            // Single-step types: brand only
+            else if (activeType === 'Stem' && selectedStemBrand) {
                 setSelectedStemBrand(null);
             } else if (activeType === 'Handlebar' && selectedHandlebarBrand) {
                 setSelectedHandlebarBrand(null);
@@ -1493,7 +1528,9 @@ export const PartSelector: React.FC = () => {
                 setSelectedBrakeCaliperBrand(null);
             } else if (activeType === 'Cassette' && selectedCassetteBrand) {
                 setSelectedCassetteBrand(null);
-            } else if (frameCategory) {
+            }
+            // Fallbacks
+            else if (frameCategory) {
                 setFrameCategory(FrameType.GRAVEL);
             } else if (currentStep > 0) {
                 setCurrentStep(prev => prev - 1);
@@ -1914,13 +1951,7 @@ export const PartSelector: React.FC = () => {
                                 activeType={activeType}
                                 drivetrainType={drivetrainType}
                                 step={getPreFilterStep()}
-                                brands={activeType === 'Frame' && getPreFilterStep() === 2
-                                    ? uniqueBrands
-                                    : activeType === 'Crankset' && getPreFilterStep() === 2
-                                    ? uniqueBrands
-                                    : activeType === 'Tire' && getPreFilterStep() === 1
-                                    ? uniqueBrands
-                                    : undefined}
+                                brands={isBrandStep() ? uniqueBrands : undefined}
                                 onSelect={handlePreFilterSelect}
                                 onSkip={handlePreFilterSkip}
                             />

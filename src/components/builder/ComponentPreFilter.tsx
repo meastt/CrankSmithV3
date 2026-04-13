@@ -298,8 +298,8 @@ export function ComponentPreFilter({
         );
     }
 
-    // ── WHEEL ────────────────────────────────────────────────────────────────
-    if (activeType === 'Wheel') {
+    // ── WHEEL — Material (step 0 only) ────────────────────────────────────
+    if (activeType === 'Wheel' && step === 0) {
         return (
             <PreFilterScreen
                 question="Carbon or alloy wheels?"
@@ -442,8 +442,8 @@ export function ComponentPreFilter({
         );
     }
 
-    // ── REAR DERAILLEUR ───────────────────────────────────────────────────────
-    if (activeType === 'RearDerailleur') {
+    // ── REAR DERAILLEUR — Electronic/Mechanical (step 0 only) ──────────────
+    if (activeType === 'RearDerailleur' && step === 0) {
         return (
             <PreFilterScreen
                 question="Electronic or mechanical shifting?"
@@ -471,8 +471,8 @@ export function ComponentPreFilter({
         );
     }
 
-    // ── BRAKE ROTOR ───────────────────────────────────────────────────────────
-    if (activeType === 'BrakeRotor') {
+    // ── BRAKE ROTOR — Rotor size (step 0 only) ─────────────────────────────
+    if (activeType === 'BrakeRotor' && step === 0) {
         return (
             <PreFilterScreen
                 question="What rotor size?"
@@ -514,8 +514,8 @@ export function ComponentPreFilter({
         );
     }
 
-    // ── SEATPOST ──────────────────────────────────────────────────────────────
-    if (activeType === 'Seatpost') {
+    // ── SEATPOST — Standard/Dropper (step 0 only) ──────────────────────────
+    if (activeType === 'Seatpost' && step === 0) {
         return (
             <PreFilterScreen
                 question="Standard or dropper post?"
@@ -539,6 +539,34 @@ export function ComponentPreFilter({
                         emoji: '📉',
                     },
                 ]}
+            />
+        );
+    }
+
+    // ── GENERIC BRAND FALLBACK ─────────────────────────────────────────────
+    // Covers any component type that reaches this point with a populated
+    // brands array (Wheel step 1, RearDerailleur step 1, BrakeRotor step 1,
+    // Seatpost step 1, Stem step 0, Handlebar step 0, BrakeCaliper step 0,
+    // Cassette step 0).
+    if (brands && brands.length > 0) {
+        const typeLabel = activeType
+            .replace(/([a-z])([A-Z])/g, '$1 $2')
+            .toLowerCase();
+
+        return (
+            <PreFilterScreen
+                question={`What brand of ${typeLabel}?`}
+                subtitle={`Narrow your ${typeLabel} search by manufacturer`}
+                columns={2}
+                onSelect={onSelect}
+                onSkip={onSkip}
+                cards={brands.map(brand => ({
+                    value: brand,
+                    label: brand,
+                    description: `${brand} ${typeLabel} components`,
+                    imagePath: `${base}/brand-${brand.toLowerCase().replace(/\s+/g, '-')}.webp`,
+                    emoji: '\u2699\uFE0F',
+                }))}
             />
         );
     }
