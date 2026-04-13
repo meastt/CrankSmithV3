@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next'
 import { STANDARDS } from '@/app/compatibility/standards';
 import templates from '@/data/templates.json';
+import { slugs as blogSlugs } from '@/app/blog/_posts/registry';
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const baseUrl = 'https://cranksmith.com';
@@ -13,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         { path: '/performance', changeFrequency: 'weekly' as const, priority: 0.85 },
         { path: '/tire-pressure', changeFrequency: 'weekly' as const, priority: 0.85 },
         { path: '/weight', changeFrequency: 'weekly' as const, priority: 0.85 },
+        { path: '/blog', changeFrequency: 'weekly' as const, priority: 0.85 },
         { path: '/guides', changeFrequency: 'weekly' as const, priority: 0.8 },
         { path: '/contact', changeFrequency: 'monthly' as const, priority: 0.7 },
         { path: '/features', changeFrequency: 'monthly' as const, priority: 0.75 },
@@ -74,6 +76,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
             lastModified: now,
             changeFrequency: route.changeFrequency,
             priority: route.priority,
+        })),
+        ...blogSlugs.map((slug) => ({
+            url: `${baseUrl}/blog/${slug}`,
+            lastModified: now,
+            changeFrequency: 'weekly' as const,
+            priority: 0.8,
         })),
         ...guideSlugs.map((slug) => ({
             url: `${baseUrl}/guides/${slug}`,

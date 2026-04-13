@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
+import { posts } from "./_posts/registry";
 
 export const metadata: Metadata = {
     title: "CrankSmith Blog — Gravel Bike Builds, Compatibility & Tech",
@@ -11,96 +12,14 @@ export const metadata: Metadata = {
     }
 };
 
-const blogPosts = [
-    {
-        slug: "45mm-is-the-new-minimum-gravel-tire",
-        title: "45mm Is the New Minimum Gravel Tire — Here's Why",
-        excerpt: "Every 2026 frame clears 50mm+. Riders are pushing past 40mm and never looking back. The data backs it up.",
-        category: "Big Tires",
-        date: "2026-04-10",
-        image: "/images/blog-45mm-minimum.jpg"
-    },
-    {
-        slug: "the-gravel-mullet-road-shifter-mtb-derailleur",
-        title: "The Gravel Mullet: Road Shifter + MTB Derailleur — Every Combo That Actually Works",
-        excerpt: "SRAM AXS (native), Shimano GRX × XT/XTR (cable pull ratios), Wolf Tooth Tanpan. Full compatibility matrix.",
-        category: "Drivetrain",
-        date: "2026-04-11",
-        image: "/images/blog-gravel-mullet.jpg"
-    },
-    {
-        slug: "1x-vs-2x-gravel-2026-numbers",
-        title: "1x vs 2x on Gravel in 2026: The Actual Numbers",
-        excerpt: "Gear range percentages, cadence gap sizes, chain drop risk, and who really needs which setup.",
-        category: "Drivetrain",
-        date: "2026-04-12",
-        image: "/images/blog-1x-vs-2x.jpg"
-    },
-    {
-        slug: "how-tire-width-changes-gravel-gear-ratio",
-        title: "How Your Bigger Gravel Tire Changes Your Actual Gear Ratio",
-        excerpt: "45mm vs 35mm changes your effective gear inches by ~6%. CrankSmith calculates this automatically.",
-        category: "Drivetrain",
-        date: "2026-04-14",
-        image: "/images/blog-tire-gearing.jpg"
-    },
-    {
-        slug: "unbound-gravel-2026-tire-gear-setup",
-        title: "Unbound Gravel 2026: The Ultimate Tire & Gear Setup Guide",
-        excerpt: "World's most iconic gravel race. May 28-31, Emporia KS. What pros ran vs what works for the rest of us.",
-        category: "Racing",
-        date: "2026-04-15",
-        image: "/images/blog-unbound-2026.jpg"
-    },
-    {
-        slug: "gravel-tire-psiby-width-guide-2026",
-        title: "Gravel Tire Pressure by Width: The Definitive Guide (40mm to 2.25\")",
-        excerpt: "Optimal PSI for every width at different rider weights and terrain. Hookless rim max pressure limits. Tubeless minimums to prevent burping.",
-        category: "Big Tires",
-        date: "2026-04-16",
-        image: "/images/gravel-tire-pressure-psiby-width-2026.webp"
-    },
-    {
-        slug: "every-gravel-frame-that-fits-2-25in-tires",
-        title: "Every 2026 Gravel Frame That Fits 2.25-Inch Tires",
-        excerpt: "Allied Able (57mm), Lauf Seigla (50mm), 3T Extrema (54mm), Specialized Diverge 4 (55mm) — definitive list.",
-        category: "Big Tires",
-        date: "2026-04-17",
-        image: "/images/gravel-frames-2-25-tires-2026.webp"
-    },
-    {
-        slug: "hookless-vs-hooked-gravel-wheels-safety-guide",
-        title: "Hookless vs Hooked Gravel Wheels: The Safety Guide That Actually Matters",
-        excerpt: "ETRTO standards updated. 28mm tires on 25mm internal hookless = non-compliant. Max pressure 72.5 PSI. When hooked is non-negotiable.",
-        category: "Standards",
-        date: "2026-04-21",
-        image: "/images/gravel-hookless-vs-hooked-safety-guide-2026.webp"
-    },
-    {
-        slug: "rockshox-rudy-vs-rigid-gravel-suspension",
-        title: "RockShox Rudy vs Rigid Fork: Is Gravel Suspension Worth It in 2026?",
-        excerpt: "800g heavier but elite racers pair it with narrow tires instead of wide + rigid. The full trade-off analysis.",
-        category: "Suspension",
-        date: "2026-04-22",
-        image: "/images/gravel-rockshox-rudy-vs-rigid-fork-2026.webp"
-    },
-    {
-        slug: "gravel-tubeless-setup-guide",
-        title: "Gravel Tubeless Setup: What Seals, What Tapes, What Goes Wrong",
-        excerpt: "Tape layers by rim width. Sealant ml by tire volume. Burping fix on hookless: lower pressure + sealant boost.",
-        category: "Setup",
-        date: "2026-04-24",
-        image: "/images/gravel-tubeless-setup-flowchart-2026.webp"
-    },
-    {
-        slug: "2026-gravel-bike-new-releases-april",
-        title: "2026 Gravel Bike New Releases: Obed GVR, State All-Road V2, Giant Revolt Advanced 0",
-        excerpt: "April 2026 gravel bike refresh: Obed GVR (2.2\" clearance), State V2 (T47+UDH under $2K), Giant Revolt Advanced 0, Trek Checkpoint, OPEN U.P. 2.0. Builder compatibility breakdown.",
-        category: "News",
-        date: "2026-04-11",
-        image: "/images/gravel-bike-new-releases-2026.webp"
-    },
-];
+const blogPosts = Object.entries(posts).map(([slug, { metadata: meta }]) => ({
+    slug,
+    title: meta.title,
+    excerpt: meta.excerpt,
+    category: meta.category,
+    date: meta.date,
+    image: meta.image,
+})).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 export default function BlogIndexPage() {
     return (
