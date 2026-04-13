@@ -15,11 +15,17 @@ export function normalizeComponent(c: any): Component {
     // Protocol Normalization — canonicalize stored values to the inference names
     protocol = protocol.map((p: string) => {
         if (p === 'AXS') return 'SRAM_AXS';
-        if (p === 'SRAM_AXS_(13s)') return 'SRAM_AXS_13s';
+        // BUG 8 fix: SRAM T-Type / Transmission (13-speed AXS) collapses to SRAM_AXS
+        // so it matches against SRAM AXS derailleurs/shifters inferred from name.
+        if (p === 'SRAM_AXS_(13s)' || p === 'SRAM_AXS_13s') return 'SRAM_AXS';
         // Shimano 12-speed mechanical — multiple stored names, all mean the same thing
         if (p === 'Shimano_Road_12s' || p === 'Shimano_Road_12s_Mech') return 'Shimano_12s_Mech';
         // Shimano 11-speed mechanical
         if (p === 'Shimano_Road_11s' || p === 'Shimano_Road_11s_Mech') return 'Shimano_11s_Mech';
+        // BUG 6 fix: Shimano Di2 speed-aware variants collapse to the base Shimano_Di2 tag
+        // so they match components whose protocol is inferred from the name (which only
+        // ever produces 'Shimano_Di2', never 'Shimano_Di2_12s').
+        if (p === 'Shimano_Di2_12s' || p === 'Shimano_Di2_11s') return 'Shimano_Di2';
         return p;
     });
 
@@ -165,7 +171,10 @@ export function normalizeComponent(c: any): Component {
             break;
 
         case 'Tire':
-            specs.diameter = toWheelSize(raw.diameter || raw.size_label || '700c'); // Fallback often needed for parsing "700x28c"
+            // BUG (650b false-default) fix: removed '700c' hardcoded fallback.
+            // A tire with no diameter field gets undefined rather than a false '700c' tag,
+            // which was causing diameter-mismatch errors on all 650b tires without explicit diameter.
+            specs.diameter = toWheelSize(raw.diameter || raw.size_label);
             specs.width = toMM(raw.width || raw.width_mm);
             specs.tubeless_ready = raw.tubeless || raw.tubeless_ready;
 

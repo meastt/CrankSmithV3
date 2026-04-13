@@ -1195,7 +1195,9 @@ export const PartSelector: React.FC = () => {
     // Electronic / mechanical pre-filter (RearDerailleur + auto-applies to Shifter)
     if ((activeType === 'RearDerailleur' || activeType === 'Shifter') && drivetrainElectronic && drivetrainElectronic !== 'all') {
         filteredComponents = filteredComponents.filter(c => {
-            const isElectronic = (c as any).attributes?.electronic === true;
+            // BUG fix: DB may store `electronic` as boolean true OR string "true" or "1".
+            const rawElectronic = (c as any).attributes?.electronic;
+            const isElectronic = rawElectronic === true || rawElectronic === 'true' || rawElectronic === 1 || rawElectronic === '1';
             return drivetrainElectronic === 'electronic' ? isElectronic : !isElectronic;
         });
     }

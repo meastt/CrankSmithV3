@@ -336,8 +336,21 @@ function validateRollingChassis(build: any, issues: ValidationIssue[]) {
         if (hasSpecValue(forkFrontAxle) && hasSpecValue(wheelFrontAxle) && !isCompatibleValue(forkFrontAxle, wheelFrontAxle)) {
             addIssue(issues, frontWheel.id, `Front wheel axle (${frontWheel.specs?.axle}) does not match fork (${fork.specs?.front_axle})`, 'ERROR', fork.id);
         }
-        // Wheel Size
-        if (fork.specs?.max_tire_width) {
+        // Wheel Size — bidirectional: warn if fork and front wheel wheel-sizes conflict
+        if (fork.specs?.wheel_size && frontWheel.specs?.diameter) {
+            const normWheelSize = (v: string) => {
+                const s = v.toLowerCase();
+                if (s.includes('700') || s === '29') return '700c';
+                if (s.includes('650') || s.includes('27.5')) return '650b';
+                return s;
+            };
+            const forkWs = normWheelSize(fork.specs.wheel_size);
+            const wheelWs = normWheelSize(frontWheel.specs.diameter);
+            if (forkWs && wheelWs && forkWs !== wheelWs) {
+                addIssue(issues, frontWheel.id, `Front wheel size (${frontWheel.specs.diameter}) does not match fork (${fork.specs.wheel_size})`, 'WARNING', fork.id);
+            }
+        } else if (fork.specs?.max_tire_width) {
+            // Fallback: use max_tire_width hint as before (700c-specific forks)
             const val = normalize(fork.specs.max_tire_width);
             const wheelSize = normalize(frontWheel.specs?.diameter);
             if (val.includes('700') && wheelSize.includes('650')) {
@@ -403,12 +416,22 @@ function validateRollingChassis(build: any, issues: ValidationIssue[]) {
             }
         }
 
-        // Width Check
+        // Frame width check
         if (frame && frame.specs?.max_tire_width) {
             const maxMm = parseFloat(String(frame.specs.max_tire_width).replace(/[^0-9.]/g, ''));
             const tireMm = parseFloat(String(tire.specs?.width || '0').replace(/[^0-9.]/g, ''));
             if (maxMm && tireMm && tireMm > maxMm) {
                 addIssue(issues, tire.id, `Tire width (${tireMm}mm) exceeds frame clearance (${maxMm}mm)`, 'ERROR', frame.id);
+            }
+        }
+
+        // Fork width check (BUG 2 fix: fork clearance was never validated against tires)
+        const tirePosition = getPosition(tire);
+        if (fork && fork.specs?.max_tire_width && (tirePosition === 'front' || tirePosition === 'set' || tirePosition === 'unknown')) {
+            const forkMaxMm = parseFloat(String(fork.specs.max_tire_width).replace(/[^0-9.]/g, ''));
+            const tireMm = parseFloat(String(tire.specs?.width || '0').replace(/[^0-9.]/g, ''));
+            if (forkMaxMm && tireMm && tireMm > forkMaxMm) {
+                addIssue(issues, tire.id, `Tire width (${tireMm}mm) exceeds fork clearance (${forkMaxMm}mm)`, 'ERROR', fork.id);
             }
         }
     });
@@ -424,7 +447,9 @@ function validateEngineRoom(build: any, issues: ValidationIssue[]) {
     // 1. Frame <-> BB shell compatibility
     if (frame && bottomBracket) {
         const frameShell = frame.specs?.bb_shell || frame.attributes?.bottom_bracket_shell;
-        const bbShell = bottomBracket.specs?.bb_shell || bottomBracket.specs?.type ||
+        // BUG 4 fix: removed bb.specs?.type as a fallback — it is too broad (e.g. "Threaded"
+        // would normalise to BSA68 even for T47 or BB30 frames). Use only explicit shell fields.
+        const bbShell = bottomBracket.specs?.bb_shell ||
                         bottomBracket.attributes?.frame_shell;
 
         if (!hasSpecValue(frameShell) || !hasSpecValue(bbShell)) {
@@ -543,11 +568,14 @@ function validateDrivetrain(build: any, issues: ValidationIssue[]) {
         // Get wheel freehub (may be array or comma-separated string)
         const wheelFreehub = rearWheel.specs?.freehub_body ||
                              rearWheel.interfaces?.freehub;
+        // BUG 7 fix: added attributes.freehub as final fallback — some cassettes store
+        // the freehub standard under attributes rather than interfaces or specs.
         const cassetteFreehub = cassette.specs?.freehub_body ||
                                 cassette.interfaces?.freehub_mount ||
                                 cassette.interfaces?.freehub_standard ||
                                 cassette.attributes?.freehub_mount ||
-                                cassette.attributes?.freehub_standard;
+                                cassette.attributes?.freehub_standard ||
+                                cassette.attributes?.freehub;
 
         if (wheelFreehub && cassetteFreehub) {
             const wheelList = normalizeFreehubList(wheelFreehub);
@@ -759,19 +787,23 @@ function validateBrakes(build: any, issues: ValidationIssue[]) {
     });
 
     // 1. BRAKE FLUID COMPATIBILITY (CRITICAL SAFETY CHECK)
-    // Check shifter/lever fluid vs caliper fluid
-    if (shifter && brakeCaliperFront) {
+    // BUG 11 fix: check both front AND rear calipers (was front-only).
+    // If any caliper's fluid conflicts with the lever, raise an error.
+    if (shifter) {
         const leverFluid = getFluidType(shifter);
-        const caliperFluid = getFluidType(brakeCaliperFront);
-
-        if (leverFluid && caliperFluid && leverFluid !== caliperFluid) {
-            addIssue(
-                issues,
-                shifter.id,
-                `SAFETY CRITICAL: Brake fluid mismatch! Lever uses ${leverFluid} but caliper uses ${caliperFluid}. Mixing fluids destroys seals and causes brake failure.`,
-                'ERROR',
-                brakeCaliperFront.id
-            );
+        const allCalipers = [brakeCaliperFront, brakeCaliperRear].filter(Boolean);
+        for (const caliper of allCalipers) {
+            const caliperFluid = getFluidType(caliper);
+            if (leverFluid && caliperFluid && leverFluid !== caliperFluid) {
+                addIssue(
+                    issues,
+                    shifter.id,
+                    `SAFETY CRITICAL: Brake fluid mismatch! Lever uses ${leverFluid} but caliper uses ${caliperFluid}. Mixing fluids destroys seals and causes brake failure.`,
+                    'ERROR',
+                    caliper.id
+                );
+                break; // One error is enough — both calipers are same in practice
+            }
         }
     }
 
