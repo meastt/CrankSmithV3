@@ -6,6 +6,7 @@ import { ValuePropStrip } from './ValuePropStrip';
 import { ToolsGrid } from './ToolsGrid';
 import { GarageCard } from './GarageCard';
 import { GravelMouthNewsletter } from './GravelMouthNewsletter';
+import { CommunityBanner } from './CommunityBanner';
 import { SignInCTA } from './SignInCTA';
 
 export const DashboardGrid = () => {
@@ -18,6 +19,7 @@ export const DashboardGrid = () => {
             <ToolsGrid />
             <GarageCard />
             <GravelMouthNewsletter />
+            <CommunityBanner />
             <SignInCTA isLoaded={isLoaded} isSignedIn={isSignedIn} />
         </div>
     );
