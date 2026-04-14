@@ -1,6 +1,6 @@
 'use client';
 
-import { SafeUserButton, SafeSignedIn, SafeSignedOut, SafeSignInButton, useSafeClerk } from '@/components/ClerkProviderWrapper';
+import { SafeUserButton, SafeSignedIn, SafeSignedOut, useSafeClerk } from '@/components/ClerkProviderWrapper';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -46,7 +46,7 @@ export function Header() {
         <>
             <header
                 className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 pt-safe ${scrolled
-                    ? 'bg-stone-950/90 backdrop-blur-xl border-b border-white/5'
+                    ? 'bg-stone-950/80 backdrop-blur-2xl border-b border-white/[0.06] shadow-lg shadow-black/20'
                     : 'bg-transparent'
                     }`}
             >
@@ -56,32 +56,36 @@ export function Header() {
                         {/* Logo */}
                         <Link
                             href="/"
-                            className="flex items-center hover:opacity-80 transition-opacity"
+                            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
                             onClick={() => setIsMenuOpen(false)}
                         >
-                            <img 
-                                src="/images/logo.webp" 
-                                alt="CrankSmith Logo" 
-                                className="h-8 md:h-10 w-auto"
+                            <img
+                                src="/images/logo.webp"
+                                alt="CrankSmith Logo"
+                                className="h-8 md:h-9 w-auto"
                             />
+                            <span className="hidden sm:block text-sm font-bold text-white tracking-tight">
+                                Crank<span className="text-cyan-400">Smith</span>
+                            </span>
                         </Link>
 
                         {/* Desktop Navigation */}
-                        <nav className="hidden md:flex items-center gap-1">
+                        <nav className="hidden md:flex items-center gap-0.5">
                             {navLinks.map((link) => (
                                 <Link
                                     key={link.href}
                                     href={link.href}
-                                    className="px-4 py-2 text-sm font-medium text-stone-400 hover:text-stone-100 hover:bg-white/5 rounded-lg transition-all"
+                                    className="relative px-3.5 py-2 text-[13px] font-medium text-stone-400 hover:text-white rounded-lg transition-all group"
                                 >
-                                    {link.label}
+                                    <span className="relative z-10">{link.label}</span>
+                                    <span className="absolute inset-0 bg-white/0 group-hover:bg-white/[0.06] rounded-lg transition-colors" />
                                 </Link>
                             ))}
 
-                            <div className="ml-4 pl-4 border-l border-white/10 flex items-center gap-3">
+                            <div className="ml-3 pl-3 border-l border-white/[0.08] flex items-center gap-2.5">
                                 <button
                                     onClick={toggleUnitSystem}
-                                    className="px-3 py-1.5 text-xs font-mono font-bold text-stone-500 hover:text-white border border-white/10 rounded uppercase transition-colors"
+                                    className="px-2.5 py-1.5 text-[11px] font-mono font-bold text-stone-500 hover:text-cyan-400 border border-white/[0.08] hover:border-cyan-400/30 rounded-md uppercase transition-all"
                                 >
                                     {unitSystem === 'metric' ? 'KM/H' : 'MPH'}
                                 </button>
@@ -96,7 +100,7 @@ export function Header() {
                                 </SafeSignedIn>
                                 <SafeSignedOut>
                                     <Link href="/sign-in">
-                                        <button className="btn-primary px-5 py-2 text-white rounded-lg font-medium text-sm">
+                                        <button className="px-4 py-2 text-sm font-semibold text-white bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/20 hover:border-cyan-400/40 rounded-lg transition-all">
                                             Sign In
                                         </button>
                                     </Link>
@@ -105,7 +109,7 @@ export function Header() {
                         </nav>
 
                         {/* Mobile Menu Button */}
-                        <div className="flex md:hidden items-center gap-3">
+                        <div className="flex md:hidden items-center gap-2.5">
                             <SafeSignedIn>
                                 <SafeUserButton
                                     appearance={{
@@ -119,7 +123,7 @@ export function Header() {
                                 <Link
                                     href="/sign-in"
                                     onClick={() => setIsMenuOpen(false)}
-                                    className="btn-primary px-4 py-1.5 text-white rounded-lg font-medium text-xs flex items-center justify-center"
+                                    className="px-3.5 py-1.5 text-xs font-semibold text-white bg-cyan-500/15 border border-cyan-400/20 rounded-lg transition-all"
                                 >
                                     Sign In
                                 </Link>
@@ -130,9 +134,9 @@ export function Header() {
                                 aria-label="Toggle menu"
                             >
                                 {isMenuOpen ? (
-                                    <X className="w-6 h-6" />
+                                    <X className="w-5 h-5" />
                                 ) : (
-                                    <Menu className="w-6 h-6" />
+                                    <Menu className="w-5 h-5" />
                                 )}
                             </button>
                         </div>
@@ -155,72 +159,73 @@ export function Header() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-stone-950/95 backdrop-blur-xl"
+                            className="absolute inset-0 bg-stone-950/98 backdrop-blur-2xl"
                             onClick={() => setIsMenuOpen(false)}
                         />
 
                         {/* Menu Content */}
                         <motion.nav
-                            initial={{ opacity: 0, y: -20 }}
+                            initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.3, delay: 0.1 }}
-                            className="relative h-full flex flex-col pt-40 px-6"
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.25, delay: 0.05 }}
+                            className="relative h-full flex flex-col pt-28 px-6"
                         >
-                            <div className="space-y-1">
+                            <div className="space-y-0.5">
                                 {navLinks.map((link, index) => (
                                     <motion.div
                                         key={link.href}
-                                        initial={{ opacity: 0, x: -20 }}
+                                        initial={{ opacity: 0, x: -15 }}
                                         animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.1 + index * 0.05 }}
+                                        transition={{ delay: 0.08 + index * 0.04 }}
                                     >
                                         <Link
                                             href={link.href}
                                             onClick={() => setIsMenuOpen(false)}
-                                            className="flex items-center gap-4 px-4 py-4 text-xl font-medium text-stone-300 hover:text-stone-100 hover:bg-white/5 rounded-xl transition-all active:scale-[0.98]"
+                                            className="flex items-center gap-4 px-4 py-4 text-lg font-medium text-stone-300 hover:text-white hover:bg-white/[0.04] rounded-xl transition-all active:scale-[0.98]"
                                         >
-                                            <link.icon className="w-6 h-6 text-primary" />
+                                            <link.icon className="w-5 h-5 text-cyan-400/70" />
                                             {link.label}
                                         </Link>
                                     </motion.div>
                                 ))}
-                                <motion.div
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.3 }}
-                                    className="px-4 py-4"
-                                >
-                                    <button
-                                        onClick={toggleUnitSystem}
-                                        className="w-full flex items-center justify-between px-4 py-3 text-lg font-medium text-stone-300 hover:text-stone-100 bg-white/5 rounded-xl transition-all"
-                                    >
-                                        <span>Units</span>
-                                        <span className="font-mono font-bold text-primary">
-                                            {unitSystem === 'metric' ? 'Metric (KM/H)' : 'Imperial (MPH)'}
-                                        </span>
-                                    </button>
-                                </motion.div>
                             </div>
 
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
+                                transition={{ delay: 0.3 }}
+                                className="mt-6 px-4"
+                            >
+                                <div className="border-t border-white/[0.06] pt-5">
+                                    <button
+                                        onClick={toggleUnitSystem}
+                                        className="w-full flex items-center justify-between px-4 py-3.5 text-sm font-medium text-stone-400 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] rounded-xl transition-all"
+                                    >
+                                        <span>Unit System</span>
+                                        <span className="font-mono font-bold text-cyan-400 text-xs">
+                                            {unitSystem === 'metric' ? 'METRIC' : 'IMPERIAL'}
+                                        </span>
+                                    </button>
+                                </div>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
                                 transition={{ delay: 0.4 }}
-                                className="mt-auto pb-12"
+                                className="mt-auto pb-12 px-4"
                             >
                                 <SafeSignedOut>
                                     <Link href="/sign-in" onClick={() => setIsMenuOpen(false)}>
-                                        <button
-                                            className="w-full btn-primary py-4 text-white rounded-xl font-semibold text-lg"
-                                        >
-                                            Sign In
+                                        <button className="w-full py-3.5 text-white rounded-xl font-semibold text-base bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 transition-all shadow-lg shadow-cyan-500/20">
+                                            Sign In to CrankSmith
                                         </button>
                                     </Link>
                                 </SafeSignedOut>
 
-                                <p className="text-center text-stone-600 text-sm mt-6">
-                                    Precision engineering for cyclists
+                                <p className="text-center text-stone-700 text-xs mt-5 font-medium tracking-wide uppercase">
+                                    Precision cycling engineering
                                 </p>
                             </motion.div>
                         </motion.nav>

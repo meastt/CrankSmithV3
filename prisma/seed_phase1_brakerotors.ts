@@ -234,6 +234,89 @@ async function main() {
     );
 
     // ==========================================
+    // SWISSSTOP ROTORS
+    // ==========================================
+    // Source: https://www.swissstop.ch
+    // Weights verified from: https://www.bikerumor.com/swissstop-catalyst-rotors
+
+    // Catalyst (2-piece, 1.8mm)
+    components.push(
+        createBrakeRotor('SwissStop', 'Catalyst', 140, 'CENTERLOCK', 87, 65),
+        createBrakeRotor('SwissStop', 'Catalyst', 160, 'CENTERLOCK', 107, 70),
+        createBrakeRotor('SwissStop', 'Catalyst', 180, 'CENTERLOCK', 137, 75),
+        createBrakeRotor('SwissStop', 'Catalyst', 203, 'CENTERLOCK', 170, 80),
+        createBrakeRotor('SwissStop', 'Catalyst', 140, '6BOLT', 82, 65),
+        createBrakeRotor('SwissStop', 'Catalyst', 160, '6BOLT', 102, 70),
+        createBrakeRotor('SwissStop', 'Catalyst', 180, '6BOLT', 132, 75),
+        createBrakeRotor('SwissStop', 'Catalyst', 203, '6BOLT', 165, 80)
+    );
+
+    // ==========================================
+    // CAMPAGNOLO ROTORS
+    // ==========================================
+    // Source: https://www.campagnolo.com
+    // Weights verified from: https://weightweenies.starbike.com
+
+    // 03 (Road, AFS, Centerlock)
+    components.push(
+        createBrakeRotor('Campagnolo', '03', 140, 'CENTERLOCK', 96, 55),
+        createBrakeRotor('Campagnolo', '03', 160, 'CENTERLOCK', 118, 60)
+    );
+
+    // 05 (Gravel/All-Road, Centerlock)
+    components.push(
+        createBrakeRotor('Campagnolo', '05', 140, 'CENTERLOCK', 110, 45),
+        createBrakeRotor('Campagnolo', '05', 160, 'CENTERLOCK', 130, 50)
+    );
+
+    // ==========================================
+    // JAGWIRE ROTORS
+    // ==========================================
+    // Source: https://jagwire.com
+    // Weights verified from: retailer specs and cycling forums
+
+    // Pro LR2 (6-Bolt, lightweight)
+    components.push(
+        createBrakeRotor('Jagwire', 'Pro LR2', 140, '6BOLT', 89, 35),
+        createBrakeRotor('Jagwire', 'Pro LR2', 160, '6BOLT', 109, 40),
+        createBrakeRotor('Jagwire', 'Pro LR2', 180, '6BOLT', 139, 45),
+        createBrakeRotor('Jagwire', 'Pro LR2', 203, '6BOLT', 172, 50)
+    );
+
+    // Sport SR1 (Centerlock, budget)
+    components.push(
+        createBrakeRotor('Jagwire', 'Sport SR1', 140, 'CENTERLOCK', 105, 25),
+        createBrakeRotor('Jagwire', 'Sport SR1', 160, 'CENTERLOCK', 125, 28),
+        createBrakeRotor('Jagwire', 'Sport SR1', 180, 'CENTERLOCK', 155, 32)
+    );
+
+    // ==========================================
+    // TRICKSTUFF ROTORS
+    // ==========================================
+    // Source: https://trickstuff.de
+    // Weights verified from: https://weightweenies.starbike.com
+
+    // Dächle (ultra-premium, 6-Bolt)
+    components.push(
+        createBrakeRotor('Trickstuff', 'Dachle', 160, '6BOLT', 82, 190),
+        createBrakeRotor('Trickstuff', 'Dachle', 180, '6BOLT', 100, 200),
+        createBrakeRotor('Trickstuff', 'Dachle', 203, '6BOLT', 130, 210)
+    );
+
+    // ==========================================
+    // BRAKCO ROTORS
+    // ==========================================
+    // Source: https://brakco.com.tw
+    // Weights verified from: retailer specs
+
+    // DB-700 (budget MTB, 6-Bolt)
+    components.push(
+        createBrakeRotor('Brakco', 'DB-700', 160, '6BOLT', 140, 15),
+        createBrakeRotor('Brakco', 'DB-700', 180, '6BOLT', 170, 18),
+        createBrakeRotor('Brakco', 'DB-700', 203, '6BOLT', 200, 20)
+    );
+
+    // ==========================================
     // UPSERT ALL COMPONENTS
     // ==========================================
     for (const component of components) {
