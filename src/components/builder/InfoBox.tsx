@@ -74,6 +74,11 @@ export const BUILD_STEP_INFO: Record<string, { type: 'info' | 'warning' | 'tip';
         title: 'Wheelset Weight Distribution',
         content: 'Rear wheels are typically heavier than front (~55/45 split) due to the freehub and extra spokes. We account for this in weight calculations.'
     },
+    FreehubBody: {
+        type: 'tip',
+        title: 'Freehub Body',
+        content: 'Most quality wheelsets (ENVE, DT Swiss, Hunt, Zipp) ship with swappable freehub bodies. Your choice here determines which cassettes are shown. Swapping typically costs $40–120 for a replacement body.'
+    },
     Tire: {
         type: 'info',
         title: 'Tire Sizing',

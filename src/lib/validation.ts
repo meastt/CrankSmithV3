@@ -584,8 +584,8 @@ function validateDrivetrain(build: any, issues: ValidationIssue[]) {
             // Check if any wheel freehub option matches the cassette
             if (wheelList.length > 0 && cassetteStd && !wheelList.some(w => freehubsCompatible(w, cassetteStd))) {
                 addIssue(issues, cassette.id,
-                    `Cassette freehub (${cassetteFreehub}) not compatible with wheel (${wheelFreehub})`,
-                    'ERROR', rearWheel.id);
+                    `This cassette requires a ${cassetteFreehub} freehub body. Your wheel ships with ${wheelFreehub} — a swap body may be needed (sold separately).`,
+                    'WARNING', rearWheel.id);
             }
         }
     }

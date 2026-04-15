@@ -11,7 +11,7 @@ import { BuildSummary } from './BuildSummary';
 import { useBuildStore, AnyComponent } from '@/store/buildStore';
 import { useSafeClerk, useSafeUser } from "@/components/ClerkProviderWrapper"
 import { useSettingsStore } from '@/store/settingsStore';
-import { FreehubSelector } from './FreehubSelector';
+import { FreehubBodyStep } from './FreehubBodyStep';
 import { ComponentPreFilter } from './ComponentPreFilter';
 import { ForkChoiceModal } from './ForkChoiceModal';
 import { InputDialog } from '@/components/ui/InputDialog';
@@ -33,6 +33,7 @@ const BUILD_SEQUENCE = [
     { type: 'Frame', label: 'Frame', icon: Bike, description: 'Start with your foundation' },
     { type: 'Fork', label: 'Fork', icon: GitBranch, description: 'Steering and front suspension' },
     { type: 'Wheel', label: 'Wheels', icon: CircleDot, description: 'Choose your rolling stock' },
+    { type: 'FreehubBody', label: 'Freehub', icon: Cog, description: 'Choose your freehub body standard' },
     { type: 'Tire', label: 'Tires', icon: Circle, description: 'Rubber meets road' },
     { type: 'Crankset', label: 'Crankset', icon: Settings, description: 'Your power input' },
     { type: 'BottomBracket', label: 'BB', icon: Disc, description: 'Matches frame & crank' },
@@ -348,10 +349,6 @@ export const PartSelector: React.FC = () => {
     const [selectedRearDerailleurBrand, setSelectedRearDerailleurBrand] = useState<string | null>(null);
     const [selectedBrakeRotorBrand, setSelectedBrakeRotorBrand] = useState<string | null>(null);
 
-    // Freehub Selection State
-    const [showFreehubSelector, setShowFreehubSelector] = useState(false);
-    const [pendingWheel, setPendingWheel] = useState<AnyComponent | null>(null);
-
     // Fork Choice State (for Gravel framesets that include a fork)
     const [showForkChoiceModal, setShowForkChoiceModal] = useState(false);
     const [pendingFrame, setPendingFrame] = useState<AnyComponent | null>(null);
@@ -517,6 +514,12 @@ export const PartSelector: React.FC = () => {
 
     // Fetch components when step changes
     useEffect(() => {
+        if (activeType === 'FreehubBody') {
+            setLoading(false);
+            setComponents([]);
+            return;
+        }
+
         setLoading(true);
         setError(null);
         resetFilters();
@@ -561,19 +564,9 @@ export const PartSelector: React.FC = () => {
                 if (pos === 'FRONT') setPart('WheelFront', component);
                 else if (pos === 'REAR') setPart('WheelRear', component);
                 else if (pos === 'SET') {
-                    // Check if we need to ask for freehub standard
-                    const freehub = (component as any).specs?.freehub_body || (component as any).freehub || (component as any).interfaces?.freehub;
+                    // Clear freehub selection so user re-confirms in the FreehubBody step
+                    setFreehubStandard(null);
 
-                    // If multiple freehubs are supported (comma separated or array), ask user
-                    const isAmbiguous = typeof freehub === 'string' && freehub.includes(',');
-
-                    if (isAmbiguous) {
-                        setPendingWheel(component);
-                        setShowFreehubSelector(true);
-                        return; // Stop here, wait for user selection
-                    }
-
-                    // Otherwise proceed normally
                     const halfWeight = component.weightGrams ? Math.round(component.weightGrams / 2) : 0;
 
                     // Create Front Wheel
@@ -766,48 +759,6 @@ export const PartSelector: React.FC = () => {
             setSaveStatus('error');
         } finally {
             setIsSaving(false);
-        }
-    };
-
-    const handleFreehubSelect = (standard: string) => {
-        setFreehubStandard(standard === 'UNKNOWN' ? null : standard);
-        setShowFreehubSelector(false);
-
-        if (pendingWheel) {
-            const component = pendingWheel;
-            setPendingWheel(null);
-
-            // Proceed with setting the wheel
-            const halfWeight = component.weightGrams ? Math.round(component.weightGrams / 2) : 0;
-
-            const frontWheel = {
-                ...component,
-                id: `${component.id}-F`,
-                name: `${component.name} (Front)`,
-                weightGrams: halfWeight,
-                interfaces: { ...component.interfaces, position: 'FRONT' }
-            };
-
-            const rearWheel = {
-                ...component,
-                id: `${component.id}-R`,
-                name: `${component.name} (Rear)`,
-                weightGrams: halfWeight,
-                interfaces: { ...component.interfaces, position: 'REAR' }
-            };
-
-            setBuild({
-                WheelFront: frontWheel as any,
-                WheelRear: rearWheel as any
-            });
-
-            // Auto-advance
-            setTimeout(() => {
-                if (currentStep < BUILD_SEQUENCE.length - 1) {
-                    setCurrentStep(prev => prev + 1);
-                    resetFilters();
-                }
-            }, 300);
         }
     };
 
@@ -1141,7 +1092,7 @@ export const PartSelector: React.FC = () => {
                 case '40':  return num >= 38;          // "Up to 40mm" — frame clears 38mm+
                 case '45':  return num >= 40;          // "Up to 45mm" — frame clears 40mm+
                 case '50':  return num >= 46;          // "Up to 50mm" — frame clears 46mm+
-                case '57+': return num >= 55;          // "57mm+" — frame clears 55mm+
+                case '51+': return num >= 50;          // "51mm+" — frame clears 50mm+
                 default:    return true;
             }
         });
@@ -1203,9 +1154,18 @@ export const PartSelector: React.FC = () => {
     // Electronic / mechanical pre-filter (RearDerailleur + auto-applies to Shifter)
     if ((activeType === 'RearDerailleur' || activeType === 'Shifter') && drivetrainElectronic && drivetrainElectronic !== 'all') {
         filteredComponents = filteredComponents.filter(c => {
-            // BUG fix: DB may store `electronic` as boolean true OR string "true" or "1".
-            const rawElectronic = (c as any).attributes?.electronic;
-            const isElectronic = rawElectronic === true || rawElectronic === 'true' || rawElectronic === 1 || rawElectronic === '1';
+            // DB stores electronic signal in multiple fields depending on which seed file was used:
+            // seed.ts:                interfaces.protocol = 'AXS' | cable_pull = 'Di2_12s_Wireless'
+            // ingest-missing-parts:   attributes.electronic = true, interfaces.actuation = 'Wireless Electronic'
+            const protocol  = String((c as any).interfaces?.protocol  || '').toUpperCase();
+            const cablePull = String((c as any).interfaces?.cable_pull || '').toUpperCase();
+            const actuation = String((c as any).interfaces?.actuation  || '').toUpperCase();
+            const attrElec  = (c as any).attributes?.electronic;
+            const isElectronic =
+                ['AXS', 'DI2', 'EPS', 'ELECTRONIC', 'WIRELESS'].some(p => protocol.includes(p)) ||
+                cablePull.includes('WIRELESS') || cablePull.includes('DI2') ||
+                actuation.includes('WIRELESS') || actuation.includes('ELECTRONIC') ||
+                attrElec === true || attrElec === 'true' || attrElec === 1 || attrElec === '1';
             return drivetrainElectronic === 'electronic' ? isElectronic : !isElectronic;
         });
     }
@@ -1213,7 +1173,8 @@ export const PartSelector: React.FC = () => {
     // Brake rotor size pre-filter
     if (activeType === 'BrakeRotor' && rotorSize && rotorSize !== 'all') {
         filteredComponents = filteredComponents.filter(c => {
-            const size = parseInt(String((c as any).attributes?.rotor_size || (c as any).specs?.rotor_size || 0));
+            // DB stores rotor size in attributes.size (not attributes.rotor_size)
+            const size = parseInt(String((c as any).attributes?.size || (c as any).attributes?.rotor_size || (c as any).specs?.rotor_size || 0));
             switch (rotorSize) {
                 case '140':  return size === 140;
                 case '160':  return size === 160;
@@ -1321,6 +1282,7 @@ export const PartSelector: React.FC = () => {
 
     const uniqueBrands = Array.from(new Set(filteredComponents.map(c => c.brand).filter(Boolean) as string[])).sort();
     const showCategorySelection = activeType === 'Frame' && !frameCategory;
+    const showFreehubBodyStep = activeType === 'FreehubBody';
 
     // Multi-step pre-filter tracker
     const getPreFilterStep = (): number => {
@@ -1536,38 +1498,42 @@ export const PartSelector: React.FC = () => {
                 setCurrentStep(prev => prev - 1);
             }
         } else {
-            // In pre-filter — go back one sub-step
+            // In pre-filter — go back one sub-step.
+            // When AT step N (about to select N), going back means undoing step N-1's selection.
+            // At step 0 (nothing selected yet), go to the previous build step.
             switch (activeType) {
                 case 'Frame':
-                    if (step === 2) { setSelectedBrand(null); }
-                    else if (step === 1) { setFrameTireClearance(null); }
-                    else if (step === 0) { setFrameMaterial(null); }
+                    if (step === 2) { setFrameTireClearance(null); }      // undo clearance, back to step 1
+                    else if (step === 1) { setFrameMaterial(null); }       // undo material, back to step 0
+                    else { setCurrentStep(prev => prev - 1); }             // step 0: previous build step
                     break;
                 case 'Crankset':
-                    if (step === 2) { setSelectedCranksetBrand(null); }
-                    else if (step === 1) { setDrivetrainSpeed(null); }
-                    else if (step === 0) { setDrivetrainType(null); }
+                    if (step === 2) { setDrivetrainSpeed(null); }          // undo speed, back to step 1
+                    else if (step === 1) { setDrivetrainType(null); setCranksetSkipped(false); } // undo type
+                    else { setCurrentStep(prev => prev - 1); }
                     break;
                 case 'Tire':
-                    if (step === 1) { setSelectedTireBrand(null); }
-                    else if (step === 0) { setTireSizeRange(null); }
+                    if (step === 1) { setTireSizeRange(null); }            // undo size range, back to step 0
+                    else { setCurrentStep(prev => prev - 1); }
                     break;
                 case 'Wheel':
-                    if (step === 1) { setSelectedWheelBrand(null); }
-                    else if (step === 0) { setWheelMaterial(null); }
+                    if (step === 1) { setWheelMaterial(null); }            // undo material, back to step 0
+                    else { setCurrentStep(prev => prev - 1); }
                     break;
                 case 'RearDerailleur':
-                    if (step === 1) { setSelectedRearDerailleurBrand(null); }
-                    else if (step === 0) { setDrivetrainElectronic(null); }
+                    if (step === 1) { setDrivetrainElectronic(null); }     // undo electronic, back to step 0
+                    else { setCurrentStep(prev => prev - 1); }
                     break;
                 case 'BrakeRotor':
-                    if (step === 1) { setSelectedBrakeRotorBrand(null); }
-                    else if (step === 0) { setRotorSize(null); }
+                    if (step === 1) { setRotorSize(null); }                // undo size, back to step 0
+                    else { setCurrentStep(prev => prev - 1); }
                     break;
                 case 'Seatpost':
-                    if (step === 1) { setSelectedSeatpostBrand(null); }
-                    else if (step === 0) { setSeatpostType(null); }
+                    if (step === 1) { setSeatpostType(null); }             // undo type, back to step 0
+                    else { setCurrentStep(prev => prev - 1); }
                     break;
+                default:
+                    if (currentStep > 0) { setCurrentStep(prev => prev - 1); }
             }
         }
     };
@@ -1618,18 +1584,6 @@ export const PartSelector: React.FC = () => {
                     </>
                 )}
             </AnimatePresence>
-
-            {/* Freehub Selector Modal */}
-            <FreehubSelector
-                isOpen={showFreehubSelector}
-                onClose={() => setShowFreehubSelector(false)}
-                onSelect={handleFreehubSelect}
-                availableStandards={
-                    pendingWheel && (pendingWheel as any).specs?.freehub_body
-                        ? (pendingWheel as any).specs.freehub_body.split(',').map((s: string) => s.trim())
-                        : undefined
-                }
-            />
 
             {/* Fork Choice Modal (for Road/Gravel framesets) */}
             <ForkChoiceModal
@@ -1836,7 +1790,7 @@ export const PartSelector: React.FC = () => {
             <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pb-40 lg:pb-6">
                 <div className="p-4 md:p-6">
                     {/* Contextual Constraints Banner */}
-                    {!loading && !showCategorySelection && !showCranksetPreFilter && (() => {
+                    {!loading && !showCategorySelection && !showCranksetPreFilter && !showFreehubBodyStep && (() => {
                         const constraints = getActiveConstraints(parts, activeType, selectedFreehubStandard);
                         if (constraints.length === 0) return null;
                         return (
@@ -1853,7 +1807,7 @@ export const PartSelector: React.FC = () => {
                     })()}
 
                     {/* Freehub/Ecosystem Reminder Banner (green accent) - dismissible */}
-                    {!loading && !showCategorySelection && !showCranksetPreFilter && (
+                    {!loading && !showCategorySelection && !showCranksetPreFilter && !showFreehubBodyStep && (
                         <div className="mb-4 p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
                             <p className="text-xs text-cyan-200">
                                 <span className="font-semibold">Gravel-only Builder Mode:</span> this builder surfaces only gravel-eligible components.
@@ -1862,7 +1816,7 @@ export const PartSelector: React.FC = () => {
                     )}
 
                     {/* Freehub/Ecosystem Reminder Banner (green accent) - dismissible */}
-                    {!loading && !showCategorySelection && !showCranksetPreFilter && selectedFreehubStandard && !freehubReminderDismissed &&
+                    {!loading && !showCategorySelection && !showCranksetPreFilter && !showFreehubBodyStep && selectedFreehubStandard && !freehubReminderDismissed &&
                      ['BottomBracket', 'Crankset', 'Cassette', 'RearDerailleur', 'Shifter'].includes(activeType) && (
                         <motion.div
                             initial={{ opacity: 0, y: -10 }}
@@ -1902,7 +1856,7 @@ export const PartSelector: React.FC = () => {
                     )}
 
                     {/* Step-specific Info Box - dismissible */}
-                    {!loading && !showCategorySelection && !showCranksetPreFilter && BUILD_STEP_INFO[activeType] && !dismissedInfoBoxes.has(activeType) && (
+                    {!loading && !showCategorySelection && !showCranksetPreFilter && !showFreehubBodyStep && BUILD_STEP_INFO[activeType] && !dismissedInfoBoxes.has(activeType) && (
                         <div className="mb-4 relative group">
                             <InfoBox
                                 type={BUILD_STEP_INFO[activeType].type}
@@ -1933,6 +1887,33 @@ export const PartSelector: React.FC = () => {
                                 <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                                 <p className="text-sm text-stone-500">Loading...</p>
                             </div>
+                        ) : showFreehubBodyStep ? (
+                            <FreehubBodyStep
+                                wheelFreehubHint={
+                                    (parts.WheelRear as any)?.specs?.freehub_body ||
+                                    (parts.WheelRear as any)?.interfaces?.freehub ||
+                                    null
+                                }
+                                currentSelection={selectedFreehubStandard}
+                                onSelect={(standard) => {
+                                    setFreehubStandard(standard);
+                                    setTimeout(() => {
+                                        if (currentStep < BUILD_SEQUENCE.length - 1) {
+                                            setCurrentStep(prev => prev + 1);
+                                            resetFilters();
+                                        }
+                                    }, 300);
+                                }}
+                                onSkip={() => {
+                                    setFreehubStandard(null);
+                                    setTimeout(() => {
+                                        if (currentStep < BUILD_SEQUENCE.length - 1) {
+                                            setCurrentStep(prev => prev + 1);
+                                            resetFilters();
+                                        }
+                                    }, 300);
+                                }}
+                            />
                         ) : showCategorySelection ? (
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {FRAME_CATEGORIES.map(cat => (

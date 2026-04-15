@@ -4,6 +4,151 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 
+// ─── Brand logo lookup ────────────────────────────────────────────────────────
+// Maps brand names (as they appear in the DB) to their logo file in /brand-logos/.
+// Brands not listed here get an initials fallback.
+const BRAND_LOGOS: Record<string, string> = {
+    '3T':                '/brand-logos/3t.logo.webp',
+    'Allied':            '/brand-logos/allied.logo.webp',
+    'Argon':             '/brand-logos/Argon18logo.webp',   // "Argon 18" — normalization extracts first word
+    'Argon 18':          '/brand-logos/Argon18logo.webp',
+    'Bianchi':           '/brand-logos/bianchi.webp',
+    'BlackHeart':        '/brand-logos/blackheart.webp',
+    'BMC':               '/brand-logos/bmc.webp',
+    'BWC':               '/brand-logos/bwclogo.webp',
+    'Cannondale':        '/brand-logos/cannondalelogo.webp',
+    'Cervélo':           '/brand-logos/cervelologo.webp',
+    'Cervelo':           '/brand-logos/cervelologo.webp',
+    'Factor':            '/brand-logos/factorlogo.webp',
+    'Fairlight':         '/brand-logos/fairlight.webp',
+    'Focus':             '/brand-logos/focuslogo.webp',
+    'Giant':             '/brand-logos/giant.logo.webp',
+    'Lauf':              '/brand-logos/lauf.webp',
+    'Mosaic':            '/brand-logos/mosaiclogo.webp',
+    'Niner':             '/brand-logos/ninerlogo.webp',
+    'Norco':             '/brand-logos/norcologo.webp',
+    'Open':              '/brand-logos/openlogo.webp',
+    'Orbea':             '/brand-logos/orbealogo.webp',
+    'Ridley':            '/brand-logos/ridleylogo.webp',
+    'Ritchey':           '/brand-logos/ritchey.webp',
+    'Rondo':             '/brand-logos/rondologo.webp',
+    'Salsa':             '/brand-logos/salsalogo.webp',
+    'Santa':             '/brand-logos/santacruzlogo.webp', // "Santa Cruz" — normalization extracts first word
+    'Santa Cruz':        '/brand-logos/santacruzlogo.webp',
+    'Scott':             '/brand-logos/Scot.logo.webp',
+    'Specialized':       '/brand-logos/specialized_logo.webp',
+    'State':             '/brand-logos/statelogo.webp',
+    'State Bicycle Co.': '/brand-logos/statelogo.webp',
+    'Trek':              '/brand-logos/Trek_logo.webp',
+    'Wilier':            '/brand-logos/wilder.webp',        // Wilier Triestina — file named wilder.webp
+    'Wilder':            '/brand-logos/wilder.webp',
+};
+
+// ─── Brand logo card ──────────────────────────────────────────────────────────
+function BrandLogoCard({ brand, onSelect, index }: { brand: string; onSelect: (v: string) => void; index: number }) {
+    const [imgError, setImgError] = useState(false);
+    const logoSrc = BRAND_LOGOS[brand] ?? null;
+    const initials = brand.split(/[\s-]+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    const showLogo = logoSrc && !imgError;
+
+    return (
+        <motion.button
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.03, type: 'spring', stiffness: 380, damping: 26 }}
+            onClick={() => onSelect(brand)}
+            className="group relative w-full rounded-xl border border-white/8 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all duration-200 overflow-hidden hover:scale-[1.03] active:scale-[0.97] cursor-pointer"
+        >
+            {/* Aspect-ratio wrapper — same pattern as FilterCardButton */}
+            <div className="relative w-full bg-stone-900 overflow-hidden" style={{ paddingBottom: '43.75%' /* 7/16 = 43.75% */ }}>
+                <div className="absolute inset-0 flex items-center justify-center">
+                    {showLogo ? (
+                        <img
+                            src={logoSrc}
+                            alt={brand}
+                            className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                            onError={() => setImgError(true)}
+                        />
+                    ) : (
+                        <div className="flex flex-col items-center gap-1 px-2">
+                            <span className="text-lg font-bold text-stone-400 group-hover:text-primary transition-colors leading-none">
+                                {initials}
+                            </span>
+                            <span className="text-[10px] text-stone-500 group-hover:text-stone-300 transition-colors text-center leading-tight">
+                                {brand}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            </div>
+            {/* Hover border glow */}
+            <div className="absolute inset-0 rounded-xl ring-0 group-hover:ring-1 group-hover:ring-primary/40 transition-all duration-200 pointer-events-none" />
+        </motion.button>
+    );
+}
+
+// ─── Brand picker ─────────────────────────────────────────────────────────────
+// Logo cards in a 4-column grid (2 on small screens). Brands with logos get
+// a landscape card; brands without get an initials fallback at the same size.
+function BrandPicker({
+    question,
+    subtitle,
+    brands,
+    onSelect,
+    onSkip,
+}: {
+    question: string;
+    subtitle?: string;
+    brands: string[];
+    onSelect: (v: string) => void;
+    onSkip: () => void;
+}) {
+    return (
+        <motion.div
+            key={question}
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            className="space-y-4"
+        >
+            <div>
+                <motion.h2
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-xl font-bold text-stone-100 mb-1"
+                >
+                    {question}
+                </motion.h2>
+                {subtitle && (
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.1 }}
+                        className="text-sm text-stone-500"
+                    >
+                        {subtitle}
+                    </motion.p>
+                )}
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                {brands.map((brand, i) => (
+                    <BrandLogoCard key={brand} brand={brand} onSelect={onSelect} index={i} />
+                ))}
+            </div>
+
+            <div className="text-center pt-1">
+                <button
+                    onClick={onSkip}
+                    className="text-xs text-stone-600 hover:text-stone-400 transition-colors underline underline-offset-2"
+                >
+                    Skip — show all brands
+                </button>
+            </div>
+        </motion.div>
+    );
+}
+
 interface FilterCard {
     value: string;
     label: string;
@@ -184,8 +329,8 @@ export function ComponentPreFilter({
                         emoji: '🏔️',
                     },
                     {
-                        value: '57+',
-                        label: '57mm +',
+                        value: '51+',
+                        label: '51mm +',
                         description: 'Monster clearance — mountain gravel, technical singletrack',
                         imagePath: `${base}/tire-51plus.webp`,
                         emoji: '🦏',
@@ -198,19 +343,12 @@ export function ComponentPreFilter({
     // ── FRAME — Brand (step 2, after clearance) ─────────────────────────────
     if (activeType === 'Frame' && step === 2 && brands && brands.length > 0) {
         return (
-            <PreFilterScreen
+            <BrandPicker
                 question="What brand are you looking for?"
                 subtitle="Narrow your frame search by manufacturer"
-                columns={2}
+                brands={brands}
                 onSelect={onSelect}
                 onSkip={onSkip}
-                cards={brands.map(brand => ({
-                    value: brand,
-                    label: brand,
-                    description: `Gravel frames from ${brand}`,
-                    imagePath: `${base}/brand-${brand.toLowerCase().replace(/\s+/g, '-')}.webp`,
-                    emoji: '🚲',
-                }))}
             />
         );
     }
@@ -218,19 +356,12 @@ export function ComponentPreFilter({
     // ── CRANKSET — Brand (step 2, after speed) ───────────────────────────────
     if (activeType === 'Crankset' && step === 2 && brands && brands.length > 0) {
         return (
-            <PreFilterScreen
+            <BrandPicker
                 question="What crankset brand?"
                 subtitle="Pick your drivetrain ecosystem"
-                columns={2}
+                brands={brands}
                 onSelect={onSelect}
                 onSkip={onSkip}
-                cards={brands.map(brand => ({
-                    value: brand,
-                    label: brand,
-                    description: `${brand} cranksets — ${(brand.includes('SRAM') || brand.includes('sram')) ? 'wide-range XD/XDR compatible' : (brand.includes('Shimano') || brand.includes('shimano') ? 'HG compatibility' : 'premium drivetrain components')}`,
-                    imagePath: `${base}/brand-${brand.toLowerCase().replace(/\s+/g, '-')}.webp`,
-                    emoji: '⚙️',
-                }))}
             />
         );
     }
@@ -238,19 +369,12 @@ export function ComponentPreFilter({
     // ── TIRE — Brand (step 1, after size range) ──────────────────────────────
     if (activeType === 'Tire' && step === 1 && brands && brands.length > 0) {
         return (
-            <PreFilterScreen
+            <BrandPicker
                 question="What tire brand?"
                 subtitle="Choose your preferred tire manufacturer"
-                columns={2}
+                brands={brands}
                 onSelect={onSelect}
                 onSkip={onSkip}
-                cards={brands.map((brand, i) => ({
-                    value: brand,
-                    label: brand,
-                    description: `${brand} gravel tires — ${(brand.includes('WTB') || brand.includes('Panaracer')) ? 'proven gravel specialists' : (brand.includes('Schwalbe') || brand.includes('Pirelli') ? 'European engineering, tubeless experts' : 'performance tires')}`,
-                    imagePath: `${base}/brand-${brand.toLowerCase().replace(/\s+/g, '-')}.webp`,
-                    emoji: ['🔵','🟢','🔴','🟡','🟠','⚪'][i % 6],
-                }))}
             />
         );
     }
@@ -554,19 +678,12 @@ export function ComponentPreFilter({
             .toLowerCase();
 
         return (
-            <PreFilterScreen
+            <BrandPicker
                 question={`What brand of ${typeLabel}?`}
                 subtitle={`Narrow your ${typeLabel} search by manufacturer`}
-                columns={2}
+                brands={brands}
                 onSelect={onSelect}
                 onSkip={onSkip}
-                cards={brands.map(brand => ({
-                    value: brand,
-                    label: brand,
-                    description: `${brand} ${typeLabel} components`,
-                    imagePath: `${base}/brand-${brand.toLowerCase().replace(/\s+/g, '-')}.webp`,
-                    emoji: '\u2699\uFE0F',
-                }))}
             />
         );
     }
