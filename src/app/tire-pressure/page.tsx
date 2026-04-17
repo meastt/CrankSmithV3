@@ -26,9 +26,9 @@ export default function TirePressurePage() {
 
             <main className="px-4 py-12">
                 <div className="max-w-5xl mx-auto mb-12 text-center">
-                    <h1 className="text-3xl md:text-5xl font-bold mb-4">Tire Pressure Calculator</h1>
+                    <h1 className="text-3xl md:text-5xl font-bold mb-4">Bike Tire Pressure Calculator</h1>
                     <p className="text-stone-400 max-w-2xl mx-auto">
-                        Don't guess. Calculate the optimal pressure for your specific rim width, casing, and terrain.
+                        Gravel-ready PSI in minutes—then validate your tire + rim compatibility and drivetrain choices in CrankSmith.
                     </p>
                 </div>
 
@@ -37,7 +37,7 @@ export default function TirePressurePage() {
                     <div className="rounded-3xl p-6 sm:p-8 bg-stone-900/60 border border-white/10 shadow-2xl">
                         <h2 className="text-xl font-bold mb-2">Next step: build the right bike setup</h2>
                         <p className="text-stone-400 mb-5">
-                            Use the calculator to set comfortable/fast pressure for your tire + terrain—then lock in compatible wheels and drivetrain choices.
+                            Get a starting PSI from the calculator, then move to standards + drivetrain matching so your pressure actually works with your wheels, tires, and gearing.
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-3">
