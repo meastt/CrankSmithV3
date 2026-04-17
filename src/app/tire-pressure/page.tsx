@@ -83,6 +83,9 @@ export default function TirePressurePage() {
                                 <h4 className="font-semibold">What PSI should I run for gravel?</h4>
                                 <p className="text-stone-400">
                                     Start by selecting gravel conditions, your tire width, and rim width. Heavier riders and chunkier gravel typically benefit from slightly higher pressure for support, while smoother gravel and lighter loads usually allow lower PSI for grip and comfort.
+                                    <span className="block mt-2">
+                                        Then dial in your setup with <Link href="/hubs/gravel-standards-master" className="text-cyan-300 hover:text-cyan-200 underline underline-offset-4">Gravel Standards</Link>.
+                                    </span>
                                 </p>
                             </div>
 
@@ -90,6 +93,9 @@ export default function TirePressurePage() {
                                 <h4 className="font-semibold">Bike tire pressure calculator: what inputs matter most?</h4>
                                 <p className="text-stone-400">
                                     The biggest drivers are tire width + rim inner width (how your tire supports), rider (and bike) weight (load), and terrain/conditions (surface firmness). Tubeless vs tube changes how you can safely run pressure.
+                                    <span className="block mt-2">
+                                        Use those numbers to <Link href="/builder" className="text-cyan-300 hover:text-cyan-200 underline underline-offset-4">build the right bike</Link>.
+                                    </span>
                                 </p>
                             </div>
 
@@ -97,6 +103,9 @@ export default function TirePressurePage() {
                                 <h4 className="font-semibold">Tubeless gravel: what pressure should I start with?</h4>
                                 <p className="text-stone-400">
                                     Use your tire width, rim width, and gravel conditions to get a first-pass recommendation—then adjust based on traction feel. If you’re getting harsh impacts or losing stability, increase pressure a small amount; if traction is great and the ride feels harsh, you can decrease slightly.
+                                    <span className="block mt-2">
+                                        Confirm compatibility with your components in <Link href="/hubs/gravel-drivetrain-bible" className="text-cyan-300 hover:text-cyan-200 underline underline-offset-4">Gravel Bible</Link>.
+                                    </span>
                                 </p>
                             </div>
 
@@ -104,6 +113,9 @@ export default function TirePressurePage() {
                                 <h4 className="font-semibold">How does tire width change PSI recommendations?</h4>
                                 <p className="text-stone-400">
                                     Wider tires generally support more volume at lower PSI, improving comfort and grip on gravel. Narrower tires typically need higher pressure to avoid excessive squirm and bottoming.
+                                    <span className="block mt-2">
+                                        Pair your tire choice with the right setup using <Link href="/hubs/gravel-standards-master" className="text-cyan-300 hover:text-cyan-200 underline underline-offset-4">Gravel Standards</Link>.
+                                    </span>
                                 </p>
                             </div>
 
@@ -111,6 +123,9 @@ export default function TirePressurePage() {
                                 <h4 className="font-semibold">Front vs rear tire pressure on gravel—same or different?</h4>
                                 <p className="text-stone-400">
                                     Usually not identical. Rider weight distribution often means the rear tire sees more load, so recommended pressure can be slightly different front vs rear for best comfort + control.
+                                    <span className="block mt-2">
+                                        Match your drivetrain + component choices with <Link href="/hubs/gravel-drivetrain-bible" className="text-cyan-300 hover:text-cyan-200 underline underline-offset-4">Gravel Bible</Link>.
+                                    </span>
                                 </p>
                             </div>
                         </div>
