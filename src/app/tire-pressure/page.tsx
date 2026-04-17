@@ -145,7 +145,7 @@ export default function TirePressurePage() {
                                     name: 'What PSI should I run for gravel?',
                                     acceptedAnswer: {
                                         '@type': 'Answer',
-                                        text: 'Start by selecting gravel conditions, your tire width, and rim width. Heavier riders and chunkier gravel typically benefit from slightly higher pressure for support, while smoother gravel and lighter loads usually allow lower PSI for grip and comfort.'
+                                        text: 'Start by selecting gravel conditions, your tire width, and rim width. Heavier riders and chunkier gravel typically benefit from slightly higher pressure for support, while smoother gravel and lighter loads usually allow lower PSI for grip and comfort. Then dial in your setup with Gravel Standards.'
                                     }
                                 },
                                 {
@@ -153,7 +153,7 @@ export default function TirePressurePage() {
                                     name: 'Bike tire pressure calculator: what inputs matter most?',
                                     acceptedAnswer: {
                                         '@type': 'Answer',
-                                        text: 'The biggest drivers are tire width + rim inner width, rider (and bike) weight, and terrain/conditions. Tubeless vs tube changes how you can safely run pressure.'
+                                        text: 'The biggest drivers are tire width + rim inner width, rider (and bike) weight, and terrain/conditions. Tubeless vs tube changes how you can safely run pressure. Use those numbers to build the right bike.'
                                     }
                                 },
                                 {
@@ -161,7 +161,7 @@ export default function TirePressurePage() {
                                     name: 'Tubeless gravel: what pressure should I start with?',
                                     acceptedAnswer: {
                                         '@type': 'Answer',
-                                        text: 'Use your tire width, rim width, and gravel conditions to get a first-pass recommendation—then adjust based on traction feel. If the ride feels harsh or unstable, increase pressure slightly; if traction is great, you can decrease slightly.'
+                                        text: 'Use your tire width, rim width, and gravel conditions to get a first-pass recommendation—then adjust based on traction feel. If the ride feels harsh or unstable, increase pressure slightly; if traction is great, you can decrease slightly. Confirm compatibility in Gravel Bible.'
                                     }
                                 },
                                 {
@@ -169,7 +169,7 @@ export default function TirePressurePage() {
                                     name: 'How does tire width change PSI recommendations?',
                                     acceptedAnswer: {
                                         '@type': 'Answer',
-                                        text: 'Wider tires generally support more volume at lower PSI for comfort and grip. Narrower tires typically need higher pressure to avoid excessive squirm and bottoming.'
+                                        text: 'Wider tires generally support more volume at lower PSI for comfort and grip. Narrower tires typically need higher pressure to avoid excessive squirm and bottoming. Pair your tire choice with Gravel Standards.'
                                     }
                                 },
                                 {
@@ -177,7 +177,7 @@ export default function TirePressurePage() {
                                     name: 'Front vs rear tire pressure on gravel—same or different?',
                                     acceptedAnswer: {
                                         '@type': 'Answer',
-                                        text: 'Often not identical. Rider weight distribution means the rear tire usually sees more load, so front vs rear recommendations can differ for best comfort and control.'
+                                        text: 'Often not identical. Rider weight distribution means the rear tire usually sees more load, so front vs rear recommendations can differ for best comfort and control. Match your component choices in Gravel Bible.'
                                     }
                                 }
                             ]
