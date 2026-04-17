@@ -132,6 +132,31 @@ export default function TirePressurePage() {
                     </div>
                 </section>
 
+                {/* Related tools (high-intent internal linking for CTR → builder flow) */}
+                <section className="max-w-3xl mx-auto mt-10 mb-8">
+                    <div className="rounded-3xl p-6 bg-stone-900/30 border border-white/10">
+                        <h3 className="text-lg font-semibold mb-3">Keep building your setup</h3>
+                        <p className="text-stone-400 mb-5">
+                            Pressure is one piece. Lock in wheel/tire compatibility and matching drivetrain choices next.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <Link
+                                href="/builder"
+                                className="flex-1 inline-flex items-center justify-center px-5 py-3 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/25 transition-all text-white font-semibold"
+                            >
+                                Build with your tire specs
+                            </Link>
+
+                            <Link
+                                href="/hubs/gravel-drivetrain-bible"
+                                className="flex-1 inline-flex items-center justify-center px-5 py-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 transition-all text-white font-semibold"
+                            >
+                                Match drivetrain (Gravel Bible)
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+
                 {/* JSON-LD (FAQPage) */}
                 <script
                     type="application/ld+json"
