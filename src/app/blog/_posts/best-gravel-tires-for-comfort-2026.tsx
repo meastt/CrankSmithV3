@@ -35,7 +35,7 @@ export const faqSchema = {
             "name": "Should comfort tires be wider in 2026?",
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Often yes. If your frame and wheel compatibility supports it, moving up to 47–50mm (or even 2.25") can significantly improve comfort on rough gravel while keeping you controlled."
+                "text": "Often yes. If your frame and wheel compatibility supports it, moving up to 47–50mm (or even 2.25 inch) can significantly improve comfort on rough gravel while keeping you controlled."
             },
         },
         {
