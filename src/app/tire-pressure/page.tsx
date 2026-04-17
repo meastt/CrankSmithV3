@@ -32,7 +32,143 @@ export default function TirePressurePage() {
                     </p>
                 </div>
 
+                {/* Next-step CTAs (for builder + drivetrain flow) */}
+                <section className="max-w-3xl mx-auto mb-10">
+                    <div className="rounded-3xl p-6 sm:p-8 bg-stone-900/60 border border-white/10 shadow-2xl">
+                        <h2 className="text-xl font-bold mb-2">Next step: build the right bike setup</h2>
+                        <p className="text-stone-400 mb-5">
+                            Use the calculator to set comfortable/fast pressure for your tire + terrain—then lock in compatible wheels and drivetrain choices.
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <Link
+                                href="/builder"
+                                className="flex-1 inline-flex items-center justify-center px-5 py-3 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/25 transition-all text-white font-semibold"
+                            >
+                                Build your bike
+                            </Link>
+
+                            <Link
+                                href="/hubs/gravel-drivetrain-bible"
+                                className="flex-1 inline-flex items-center justify-center px-5 py-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 transition-all text-white font-semibold"
+                            >
+                                Match drivetrain (Gravel Bible)
+                            </Link>
+
+                            <Link
+                                href="/hubs/gravel-standards-master"
+                                className="flex-1 inline-flex items-center justify-center px-5 py-3 rounded-xl bg-stone-800/60 hover:bg-stone-800/80 border border-white/10 transition-all text-white font-semibold"
+                            >
+                                Check standards
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+
                 <TirePressureCalculator />
+
+                {/* Crawlable intent + FAQ for CTR improvements */}
+                <section className="max-w-3xl mx-auto mt-12">
+                    <h2 className="text-2xl font-bold mb-3">Gravel tire pressure (what this calculator optimizes)</h2>
+                    <p className="text-stone-400 mb-6">
+                        Gravel riding blends comfort and control. This tool recommends front/rear PSI using your rider weight, tire width, rim (inner) width, terrain type, and whether you’re running tubeless.
+                        If you’re deciding your starting point, use it to dial in grip on rough sections while keeping efficiency on smoother lines.
+                    </p>
+
+                    <div className="rounded-3xl p-6 bg-stone-900/40 border border-white/10">
+                        <h3 className="text-lg font-semibold mb-4">Frequently asked questions</h3>
+
+                        <div className="space-y-4">
+                            <div>
+                                <h4 className="font-semibold">What PSI should I run for gravel?</h4>
+                                <p className="text-stone-400">
+                                    Start by selecting gravel conditions, your tire width, and rim width. Heavier riders and chunkier gravel typically benefit from slightly higher pressure for support, while smoother gravel and lighter loads usually allow lower PSI for grip and comfort.
+                                </p>
+                            </div>
+
+                            <div>
+                                <h4 className="font-semibold">Bike tire pressure calculator: what inputs matter most?</h4>
+                                <p className="text-stone-400">
+                                    The biggest drivers are tire width + rim inner width (how your tire supports), rider (and bike) weight (load), and terrain/conditions (surface firmness). Tubeless vs tube changes how you can safely run pressure.
+                                </p>
+                            </div>
+
+                            <div>
+                                <h4 className="font-semibold">Tubeless gravel: what pressure should I start with?</h4>
+                                <p className="text-stone-400">
+                                    Use your tire width, rim width, and gravel conditions to get a first-pass recommendation—then adjust based on traction feel. If you’re getting harsh impacts or losing stability, increase pressure a small amount; if traction is great and the ride feels harsh, you can decrease slightly.
+                                </p>
+                            </div>
+
+                            <div>
+                                <h4 className="font-semibold">How does tire width change PSI recommendations?</h4>
+                                <p className="text-stone-400">
+                                    Wider tires generally support more volume at lower PSI, improving comfort and grip on gravel. Narrower tires typically need higher pressure to avoid excessive squirm and bottoming.
+                                </p>
+                            </div>
+
+                            <div>
+                                <h4 className="font-semibold">Front vs rear tire pressure on gravel—same or different?</h4>
+                                <p className="text-stone-400">
+                                    Usually not identical. Rider weight distribution often means the rear tire sees more load, so recommended pressure can be slightly different front vs rear for best comfort + control.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* JSON-LD (FAQPage) */}
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify({
+                            '@context': 'https://schema.org',
+                            '@type': 'FAQPage',
+                            mainEntity: [
+                                {
+                                    '@type': 'Question',
+                                    name: 'What PSI should I run for gravel?',
+                                    acceptedAnswer: {
+                                        '@type': 'Answer',
+                                        text: 'Start by selecting gravel conditions, your tire width, and rim width. Heavier riders and chunkier gravel typically benefit from slightly higher pressure for support, while smoother gravel and lighter loads usually allow lower PSI for grip and comfort.'
+                                    }
+                                },
+                                {
+                                    '@type': 'Question',
+                                    name: 'Bike tire pressure calculator: what inputs matter most?',
+                                    acceptedAnswer: {
+                                        '@type': 'Answer',
+                                        text: 'The biggest drivers are tire width + rim inner width, rider (and bike) weight, and terrain/conditions. Tubeless vs tube changes how you can safely run pressure.'
+                                    }
+                                },
+                                {
+                                    '@type': 'Question',
+                                    name: 'Tubeless gravel: what pressure should I start with?',
+                                    acceptedAnswer: {
+                                        '@type': 'Answer',
+                                        text: 'Use your tire width, rim width, and gravel conditions to get a first-pass recommendation—then adjust based on traction feel. If the ride feels harsh or unstable, increase pressure slightly; if traction is great, you can decrease slightly.'
+                                    }
+                                },
+                                {
+                                    '@type': 'Question',
+                                    name: 'How does tire width change PSI recommendations?',
+                                    acceptedAnswer: {
+                                        '@type': 'Answer',
+                                        text: 'Wider tires generally support more volume at lower PSI for comfort and grip. Narrower tires typically need higher pressure to avoid excessive squirm and bottoming.'
+                                    }
+                                },
+                                {
+                                    '@type': 'Question',
+                                    name: 'Front vs rear tire pressure on gravel—same or different?',
+                                    acceptedAnswer: {
+                                        '@type': 'Answer',
+                                        text: 'Often not identical. Rider weight distribution means the rear tire usually sees more load, so front vs rear recommendations can differ for best comfort and control.'
+                                    }
+                                }
+                            ]
+                        })
+                    }}
+                />
             </main>
         </div>
     );
