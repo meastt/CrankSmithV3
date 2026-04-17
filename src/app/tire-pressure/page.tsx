@@ -69,6 +69,35 @@ export default function TirePressurePage() {
 
                 {/* Crawlable intent + FAQ for CTR improvements */}
                 <section className="max-w-3xl mx-auto mt-12">
+                    <h2 className="text-2xl font-bold mb-3">Find your PSI—then build the setup</h2>
+                    <p className="text-stone-400 mb-6">
+                        If you searched for a tire pressure calculator, start here: enter your tire + rim width, choose your terrain, and get a front/rear PSI starting point.
+                        Then validate compatibility and drivetrain choices so your pressure actually works with your wheels, tires, and gearing.
+                    </p>
+
+                    <div className="rounded-3xl p-6 bg-stone-900/40 border border-white/10 mb-8">
+                        <h3 className="text-lg font-semibold mb-3">Quick navigation (for builders)</h3>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <Link
+                                href="/builder"
+                                className="flex-1 inline-flex items-center justify-center px-5 py-3 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/25 transition-all text-white font-semibold"
+                            >
+                                Build your setup
+                            </Link>
+                            <Link
+                                href="/hubs/gravel-standards-master"
+                                className="flex-1 inline-flex items-center justify-center px-5 py-3 rounded-xl bg-stone-800/60 hover:bg-stone-800/80 border border-white/10 transition-all text-white font-semibold"
+                            >
+                                Match standards
+                            </Link>
+                            <Link
+                                href="/hubs/gravel-drivetrain-bible"
+                                className="flex-1 inline-flex items-center justify-center px-5 py-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 transition-all text-white font-semibold"
+                            >
+                                Tune drivetrain
+                            </Link>
+                        </div>
+                    </div>
                     <h2 className="text-2xl font-bold mb-3">Gravel tire pressure (what this calculator optimizes)</h2>
                     <p className="text-stone-400 mb-6">
                         Gravel riding blends comfort and control. This tool recommends front/rear PSI using your rider weight, tire width, rim (inner) width, terrain type, and whether you’re running tubeless.
