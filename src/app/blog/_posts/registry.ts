@@ -36,6 +36,11 @@ import Post700cVs650b, { metadata as meta700cVs650b, faqSchema as faq700cVs650b 
 import PostGravelRacingComparison, { metadata as metaGravelRacing, faqSchema as faqGravelRacing } from "./gravel-racing-unbound-vs-mid-south-vs-sbt-grvl-which-suits-you";
 import PostBudgetGroupsets, { metadata as metaBudgetGroupsets, faqSchema as faqBudgetGroupsets } from "./budget-gravel-groupsets-that-dont-suck-2026";
 
+// New buyer-intent / decision guides — Tires
+import PostGravelTiresHowToChoose, { metadata as metaGravelTiresHowToChoose, faqSchema as faqGravelTiresHowToChoose } from "./gravel-tires-2026-how-to-choose";
+import PostBestGravelRacingTires2026, { metadata as metaBestGravelRacingTires2026, faqSchema as faqBestGravelRacingTires2026 } from "./best-gravel-racing-tires-2026";
+import PostBestGravelTiresForComfort2026, { metadata as metaBestGravelTiresForComfort2026, faqSchema as faqBestGravelTiresForComfort2026 } from "./best-gravel-tires-for-comfort-2026";
+
 export type PostMetadata = {
     title: string;
     description: string;
@@ -200,6 +205,23 @@ export const posts: Record<string, PostEntry> = {
         metadata: metaBudgetGroupsets,
         faqSchema: faqBudgetGroupsets,
         Component: PostBudgetGroupsets,
+    },
+
+    // New — Tires decision + buyer intent
+    "gravel-tires-2026-how-to-choose": {
+        metadata: metaGravelTiresHowToChoose,
+        faqSchema: faqGravelTiresHowToChoose,
+        Component: PostGravelTiresHowToChoose,
+    },
+    "best-gravel-racing-tires-2026": {
+        metadata: metaBestGravelRacingTires2026,
+        faqSchema: faqBestGravelRacingTires2026,
+        Component: PostBestGravelRacingTires2026,
+    },
+    "best-gravel-tires-for-comfort-2026": {
+        metadata: metaBestGravelTiresForComfort2026,
+        faqSchema: faqBestGravelTiresForComfort2026,
+        Component: PostBestGravelTiresForComfort2026,
     },
 };
 
